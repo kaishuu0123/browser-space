@@ -36,12 +36,16 @@ jobs:
       - name: Build macOS
         if: ${{ matrix.os == 'macos-latest'}}
         run: |
+          mkdir -p ~/private_keys
+          echo "${{ secrets.APPLE_API_KEY_BASE64 }}" > ~/private_keys/AuthKey_${{ secrets.APPLE_API_KEY_ID }}.p8
+
           xattr -cr .
           yarn build:mac
         env:
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          # API Key 方式の環境変数
+          APPLE_API_KEY: ~/private_keys/AuthKey_${{ secrets.APPLE_API_KEY_ID }}.p8
+          APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
+          APPLE_API_KEY_ISSUER: ${{ secrets.APPLE_API_KEY_ISSUER }}
           NODE_OPTIONS: --max-old-space-size=4096
       - name: Build Linux
         if: ${{ matrix.os == 'ubuntu-latest'}}
