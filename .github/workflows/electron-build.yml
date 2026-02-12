@@ -48,7 +48,7 @@ jobs:
           # API Key 方式の環境変数
           APPLE_API_KEY: ~/private_keys/AuthKey_${{ secrets.APPLE_API_KEY_ID }}.p8
           APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
-          APPLE_API_KEY_ISSUER: ${{ secrets.APPLE_API_KEY_ISSUER }}
+          APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
           NODE_OPTIONS: --max-old-space-size=4096
       - name: Build Linux
         if: ${{ matrix.os == 'ubuntu-latest'}}
