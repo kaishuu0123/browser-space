@@ -1,0 +1,346 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; style-src 'unsafe-inline'; script-src 'self' 'unsafe-inline'"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        -webkit-user-select: none;
+        user-select: none;
+      }
+
+      html,
+      body {
+        width: 372px;
+        height: 52px;
+        overflow: hidden;
+        background: transparent;
+      }
+
+      body {
+        display: flex;
+        align-items: center;
+        padding: 8px 10px;
+        gap: 6px;
+        background: #292a2d;
+        border: 1px solid #5f6368;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      }
+
+      @media (prefers-color-scheme: light) {
+        body {
+          background: #ffffff;
+          border-color: #dadce0;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+      }
+
+      .input-wrap {
+        display: flex;
+        align-items: center;
+        flex: 1;
+        background: #3c4043;
+        border: 1px solid transparent;
+        border-radius: 4px;
+        padding: 0 8px;
+        height: 32px;
+        gap: 6px;
+        transition: border-color 0.1s;
+      }
+
+      .input-wrap:focus-within {
+        border-color: #8ab4f8;
+      }
+
+      @media (prefers-color-scheme: light) {
+        .input-wrap {
+          background: #f1f3f4;
+        }
+        .input-wrap:focus-within {
+          border-color: #1a73e8;
+          background: #fff;
+        }
+      }
+
+      #search-input {
+        flex: 1;
+        background: transparent;
+        border: none;
+        outline: none;
+        font-size: 13px;
+        color: #e8eaed;
+        caret-color: #8ab4f8;
+        -webkit-user-select: text;
+        user-select: text;
+      }
+
+      @media (prefers-color-scheme: light) {
+        #search-input {
+          color: #202124;
+          caret-color: #1a73e8;
+        }
+      }
+
+      #search-input::placeholder {
+        color: #9aa0a6;
+      }
+
+      #match-count {
+        font-size: 12px;
+        color: #9aa0a6;
+        white-space: nowrap;
+        min-width: 40px;
+        text-align: right;
+      }
+
+      .btn-case {
+        background: transparent;
+        border: none;
+        border-radius: 3px;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        color: #9aa0a6;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: -0.5px;
+        transition:
+          background 0.1s,
+          color 0.1s;
+      }
+
+      .btn-case:hover {
+        background: #5f6368;
+        color: #e8eaed;
+      }
+
+      .btn-case.active {
+        background: #8ab4f8;
+        color: #202124;
+      }
+
+      @media (prefers-color-scheme: light) {
+        .btn-case:hover {
+          background: #e8eaed;
+          color: #202124;
+        }
+        .btn-case.active {
+          background: #1a73e8;
+          color: #fff;
+        }
+      }
+
+      .divider {
+        width: 1px;
+        height: 20px;
+        background: #5f6368;
+        flex-shrink: 0;
+      }
+
+      @media (prefers-color-scheme: light) {
+        .divider {
+          background: #dadce0;
+        }
+      }
+
+      .btn-nav {
+        background: transparent;
+        border: none;
+        border-radius: 50%;
+        width: 28px;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        color: #bdc1c6;
+        transition:
+          background 0.1s,
+          color 0.1s;
+        flex-shrink: 0;
+      }
+
+      .btn-nav:hover {
+        background: #5f6368;
+        color: #e8eaed;
+      }
+
+      .btn-nav:disabled {
+        opacity: 0.35;
+        cursor: default;
+      }
+
+      .btn-nav:disabled:hover {
+        background: transparent;
+      }
+
+      @media (prefers-color-scheme: light) {
+        .btn-nav {
+          color: #5f6368;
+        }
+        .btn-nav:hover {
+          background: #f1f3f4;
+          color: #202124;
+        }
+      }
+
+      .btn-close {
+        background: transparent;
+        border: none;
+        border-radius: 50%;
+        width: 28px;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        color: #bdc1c6;
+        transition:
+          background 0.1s,
+          color 0.1s;
+        flex-shrink: 0;
+      }
+
+      .btn-close:hover {
+        background: #5f6368;
+        color: #e8eaed;
+      }
+
+      @media (prefers-color-scheme: light) {
+        .btn-close {
+          color: #5f6368;
+        }
+        .btn-close:hover {
+          background: #f1f3f4;
+          color: #202124;
+        }
+      }
+
+      svg {
+        width: 16px;
+        height: 16px;
+        fill: currentColor;
+        pointer-events: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="input-wrap">
+      <input
+        id="search-input"
+        type="text"
+        placeholder="Find in page..."
+        autocomplete="off"
+        spellcheck="false"
+      />
+      <span id="match-count"></span>
+      <button class="btn-case" id="btn-case" title="Match case (Alt+C)">Aa</button>
+    </div>
+
+    <div class="divider"></div>
+
+    <button class="btn-nav" id="btn-prev" title="Previous (Shift+Enter)">
+      <svg viewBox="0 0 24 24"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6z" /></svg>
+    </button>
+    <button class="btn-nav" id="btn-next" title="Next (Enter)">
+      <svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z" /></svg>
+    </button>
+
+    <button class="btn-close" id="btn-close" title="Close (Esc)">
+      <svg viewBox="0 0 24 24">
+        <path
+          d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
+        />
+      </svg>
+    </button>
+
+    <script>
+      const api = window.findbarApi
+      const input = document.getElementById('search-input')
+      const matchCount = document.getElementById('match-count')
+      const btnCase = document.getElementById('btn-case')
+      const btnPrev = document.getElementById('btn-prev')
+      const btnNext = document.getElementById('btn-next')
+      const btnClose = document.getElementById('btn-close')
+
+      let matchCaseEnabled = false
+      let currentMatches = { active: 0, total: 0 }
+
+      function updateMatchCount(matches) {
+        currentMatches = matches
+        if (!input.value) {
+          matchCount.textContent = ''
+          btnPrev.disabled = true
+          btnNext.disabled = true
+          return
+        }
+        if (matches.total === 0) {
+          matchCount.textContent = '0/0'
+          btnPrev.disabled = true
+          btnNext.disabled = true
+        } else {
+          matchCount.textContent = `${matches.active}/${matches.total}`
+          matchCount.style.color = ''
+          btnPrev.disabled = false
+          btnNext.disabled = false
+        }
+      }
+
+      // IPCイベント
+      api.onMatches(updateMatchCount)
+
+      api.onFocusInput(() => {
+        input.focus()
+        input.select()
+      })
+
+      api.onRestore((state) => {
+        input.value = state.text
+        matchCaseEnabled = state.matchCase
+        btnCase.classList.toggle('active', matchCaseEnabled)
+        updateMatchCount(state.matches)
+      })
+
+      // 入力イベント
+      input.addEventListener('input', () => {
+        if (!input.value) {
+          updateMatchCount({ active: 0, total: 0 })
+        }
+        api.inputChange(input.value)
+      })
+
+      // ボタン
+      btnPrev.addEventListener('click', () => api.previous())
+      btnNext.addEventListener('click', () => api.next())
+      btnClose.addEventListener('click', () => api.close())
+
+      btnCase.addEventListener('click', () => {
+        matchCaseEnabled = !matchCaseEnabled
+        btnCase.classList.toggle('active', matchCaseEnabled)
+        api.matchCase(matchCaseEnabled)
+      })
+
+      // Alt+C でmatch case切り替え
+      document.addEventListener('keydown', (e) => {
+        if (e.altKey && e.key.toLowerCase() === 'c') {
+          e.preventDefault()
+          btnCase.click()
+        }
+      })
+
+      // 初期フォーカス
+      input.focus()
+    </script>
+  </body>
+</html>
