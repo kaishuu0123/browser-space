@@ -8,6 +8,9 @@ on:
 jobs:
   release:
     runs-on: ${{ matrix.os }}
+    # リリースの作成とファイルのアップロード
+    permissions:
+      contents: write
 
     strategy:
       matrix:
