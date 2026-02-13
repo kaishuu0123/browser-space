@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react'
 import { Profile } from '../../../shared/types'
 import { useProfileOperations } from '../hooks/useProfile'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs'
+import { Label } from './ui/label'
+import { Switch } from './ui/switch'
 import { Button } from './ui/button'
 import { ProfileForm } from './ProfileForm'
 import { SortableProfileList } from './SortableProfileList'
@@ -16,7 +19,7 @@ interface SettingsModalProps {
 export function SettingsModal({
   open,
   onClose,
-  onProfilesChange
+  onProfilesChange,
 }: SettingsModalProps): React.ReactElement {
   const [profiles, setProfiles] = useState<Profile[]>([])
   const { createProfile, updateProfile, deleteProfile, getDataPath, reorderProfiles } =
@@ -24,17 +27,29 @@ export function SettingsModal({
   const [showForm, setShowForm] = useState(false)
   const [editingProfile, setEditingProfile] = useState<Profile | null>(null)
   const [clearDataProfile, setClearDataProfile] = useState<Profile | null>(null)
+  const [launchOnStartup, setLaunchOnStartup] = useState(false)
 
   // Load profiles when modal opens
   useEffect(() => {
     if (open) {
       loadProfiles()
+      loadLaunchOnStartup()
     }
   }, [open])
 
   const loadProfiles = async () => {
     const allProfiles = await window.profileApi.getAll()
     setProfiles(allProfiles)
+  }
+
+  const loadLaunchOnStartup = async () => {
+    const enabled = await window.settingsApi.getLaunchOnStartup()
+    setLaunchOnStartup(enabled)
+  }
+
+  const handleLaunchOnStartupChange = async (checked: boolean) => {
+    setLaunchOnStartup(checked)
+    await window.settingsApi.setLaunchOnStartup(checked)
   }
 
   const handleCreateClick = () => {
@@ -130,47 +145,72 @@ export function SettingsModal({
   return (
     <>
       <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>
-            {showForm ? (editingProfile ? 'Edit Profile' : 'Create Profile') : 'Manage Profiles'}
-          </DialogTitle>
-        </DialogHeader>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Settings</DialogTitle>
+          </DialogHeader>
 
-        {showForm ? (
-          <ProfileForm
-            profile={editingProfile || undefined}
-            onSubmit={handleFormSubmit}
-            onCancel={handleFormCancel}
-          />
-        ) : (
-          <div className="space-y-4">
-            {/* Create Button */}
-            <Button onClick={handleCreateClick} className="w-full">
-              <span className="codicon codicon-add mr-2" />
-              Create New Profile
-            </Button>
+          <Tabs defaultValue="general" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="general">General</TabsTrigger>
+              <TabsTrigger value="profiles">Manage Profiles</TabsTrigger>
+            </TabsList>
 
-            {/* Profile List with D&D */}
-            <SortableProfileList
-              profiles={profiles}
-              onReorder={handleReorder}
-              onEdit={handleEditClick}
-              onDelete={handleDeleteClick}
-              onShowDataPath={handleShowDataPath}
-              onClearData={handleClearDataClick}
-            />
-          </div>
-        )}
-      </DialogContent>
-    </Dialog>
+            {/* General Tab */}
+            <TabsContent value="general" className="space-y-4 py-4">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="launch-on-startup">Launch on startup</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Automatically start Browser Space when you log in
+                  </p>
+                </div>
+                <Switch
+                  id="launch-on-startup"
+                  checked={launchOnStartup}
+                  onCheckedChange={handleLaunchOnStartupChange}
+                />
+              </div>
+            </TabsContent>
 
-    <ClearDataDialog
-      profile={clearDataProfile}
-      open={clearDataProfile !== null}
-      onClose={() => setClearDataProfile(null)}
-      onClear={handleClearData}
-    />
+            {/* Manage Profiles Tab */}
+            <TabsContent value="profiles" className="space-y-4">
+              {showForm ? (
+                <ProfileForm
+                  profile={editingProfile || undefined}
+                  onSubmit={handleFormSubmit}
+                  onCancel={handleFormCancel}
+                />
+              ) : (
+                <div className="space-y-4">
+                  {/* Create Button */}
+                  <Button onClick={handleCreateClick} className="w-full">
+                    <span className="codicon codicon-add mr-2" />
+                    Create New Profile
+                  </Button>
+
+                  {/* Profile List with D&D */}
+                  <SortableProfileList
+                    profiles={profiles}
+                    onReorder={handleReorder}
+                    onEdit={handleEditClick}
+                    onDelete={handleDeleteClick}
+                    onShowDataPath={handleShowDataPath}
+                    onClearData={handleClearDataClick}
+                  />
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
+        </DialogContent>
+      </Dialog>
+
+      <ClearDataDialog
+        profile={clearDataProfile}
+        open={clearDataProfile !== null}
+        onClose={() => setClearDataProfile(null)}
+        onClear={handleClearData}
+      />
     </>
   )
 }

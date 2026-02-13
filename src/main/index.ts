@@ -62,15 +62,29 @@ function createWindow(): void {
   })
 
   const updateLayout = () => {
-    updateRendererBounds()
-    const activeProfileId = getActiveProfileId()
-    if (activeProfileId) {
-      updateBrowserViewBounds(activeProfileId, mainWindow, getSidebarWidth())
-      setTimeout(() => {
-        if (getActiveProfileId() === activeProfileId) {
-          updateBrowserViewBounds(activeProfileId, mainWindow, getSidebarWidth())
-        }
-      }, 100)
+    const isSettingsModalOpen = global.__isSettingsModalOpen ?? false
+    const bounds = mainWindow.getContentBounds()
+    const sidebarWidth = getSidebarWidth()
+
+    // rendererView のサイズ調整（Settings Modal開いていたら全画面）
+    rendererView.setBounds({
+      x: 0,
+      y: 0,
+      width: isSettingsModalOpen ? bounds.width : sidebarWidth,
+      height: bounds.height,
+    })
+
+    // Settings Modal開いていない場合のみBrowserViewを更新
+    if (!isSettingsModalOpen) {
+      const activeProfileId = getActiveProfileId()
+      if (activeProfileId) {
+        updateBrowserViewBounds(activeProfileId, mainWindow, sidebarWidth)
+        setTimeout(() => {
+          if (getActiveProfileId() === activeProfileId) {
+            updateBrowserViewBounds(activeProfileId, mainWindow, sidebarWidth)
+          }
+        }, 100)
+      }
     }
     rendererView.webContents.send('window-resized')
   }
