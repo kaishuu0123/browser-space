@@ -5,6 +5,7 @@ import { setupIpcHandlers } from './ipcHandlers'
 import { updateBrowserViewBounds, repaintBrowserView } from './browserViewManager'
 import { getActiveProfileId, getSidebarCollapsed } from './profileManager'
 import { FindbarWindow } from './findbar/FindbarWindow'
+import { applyWindowState, trackWindowState } from './windowStateManager'
 import icon from '../../resources/icon.png?asset'
 
 app.setName('Browser Space')
@@ -24,6 +25,12 @@ function createWindow(): void {
   })
 
   mainWindow.setIcon(path.join(__dirname, '../../resources/icon.png'))
+
+  // ウィンドウの位置・サイズを復元
+  applyWindowState(mainWindow)
+
+  // ウィンドウの状態変更を追跡して自動保存
+  trackWindowState(mainWindow)
 
   const rendererView = new WebContentsView({
     webPreferences: {
