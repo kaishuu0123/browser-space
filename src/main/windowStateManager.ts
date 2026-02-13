@@ -41,15 +41,12 @@ export function applyWindowState(window: BaseWindow): void {
   const state = getWindowState()
 
   // サイズを設定
-  window.setBounds({
-    x: state.x,
-    y: state.y,
-    width: state.width,
-    height: state.height,
-  })
+  window.setSize(state.width, state.height)
 
-  // 位置が保存されていない場合（初回起動時）は中央表示
-  if (state.x === undefined || state.y === undefined) {
+  // 位置が保存されている場合のみ適用
+  if (state.x !== undefined && state.y !== undefined) {
+    window.setPosition(state.x, state.y)
+  } else {
     window.center()
   }
 
