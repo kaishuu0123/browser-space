@@ -125,7 +125,7 @@ function createWindow(): void {
 }
 
 app.whenReady().then(() => {
-  app.setAppUserModelId('me.saino.browser-space')
+  app.setAppUserModelId('Browser Space')
 
   setupIpcHandlers()
   FindbarWindow.setupIpc()

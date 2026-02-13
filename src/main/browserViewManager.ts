@@ -1,4 +1,4 @@
-import { WebContentsView, BaseWindow, session, app } from 'electron'
+import { WebContentsView, BaseWindow, session, app, shell } from 'electron'
 import { getProfileById } from './profileManager'
 import { showNotificationPermissionDialog } from './notificationManager'
 import { FindbarWindow } from './findbar/FindbarWindow'
@@ -79,12 +79,12 @@ export function getOrCreateBrowserView(profileId: string, mainWindow: BaseWindow
       (function() {
         const OriginalNotification = window.Notification;
         const profileName = ${JSON.stringify(profile.name)};
-        
+
         window.Notification = function(title, options) {
           const newTitle = '[' + profileName + '] ' + title;
           return new OriginalNotification(newTitle, options);
         };
-        
+
         window.Notification.permission = OriginalNotification.permission;
         window.Notification.requestPermission = OriginalNotification.requestPermission.bind(OriginalNotification);
         window.Notification.prototype = OriginalNotification.prototype;
@@ -115,6 +115,11 @@ export function getOrCreateBrowserView(profileId: string, mainWindow: BaseWindow
   profileSession.webRequest.onBeforeSendHeaders((details, callback) => {
     details.requestHeaders['Accept-Language'] = language
     callback({ requestHeaders: details.requestHeaders })
+  })
+
+  view.webContents.setWindowOpenHandler((details) => {
+    shell.openExternal(details.url)
+    return { action: 'deny' }
   })
 
   // Load the home URL
