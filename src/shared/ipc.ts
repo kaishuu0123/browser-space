@@ -21,6 +21,8 @@ export const IPC_CHANNELS = {
   SETTINGS_SET_SIDEBAR_COLLAPSED: 'settings:setSidebarCollapsed',
   SETTINGS_MODAL_OPEN: 'settings:modalOpen',
   SETTINGS_MODAL_CLOSE: 'settings:modalClose',
+  SETTINGS_GET_LAUNCH_ON_STARTUP: 'settings:getLaunchOnStartup',
+  SETTINGS_SET_LAUNCH_ON_STARTUP: 'settings:setLaunchOnStartup',
 
   // Profile data path
   PROFILE_GET_DATA_PATH: 'profile:getDataPath',
@@ -79,9 +81,9 @@ export interface ProfileAPI {
   clearData: (
     profileId: string,
     options: {
-      cookies?: boolean // Cookie と他のサイトデータ
-      cache?: boolean // キャッシュされた画像とファイル
-      appData?: boolean // ホストされているアプリデータ (IndexedDB, WebSQL, LocalStorage)
+      cookies?: boolean
+      cache?: boolean
+      appData?: boolean
     }
   ) => Promise<void>
 }
@@ -96,6 +98,10 @@ export interface SettingsAPI {
   // Notify main process that settings modal opened/closed
   notifyModalOpen: () => Promise<void>
   notifyModalClose: () => Promise<void>
+
+  // Launch on startup
+  getLaunchOnStartup: () => Promise<boolean>
+  setLaunchOnStartup: (enabled: boolean) => Promise<void>
 }
 
 // Icon API for custom icon upload

@@ -27,7 +27,11 @@
     "@electron-toolkit/preload": "^3.0.2",
     "@electron-toolkit/utils": "^4.0.0",
     "@radix-ui/react-dialog": "^1.1.15",
+    "@radix-ui/react-label": "^2.1.8",
+    "@radix-ui/react-switch": "^1.2.6",
+    "@radix-ui/react-tabs": "^1.1.13",
     "@vscode/codicons": "^0.0.44",
+    "class-variance-authority": "^0.7.1",
     "electron-store": "^8.2.0",
     "uuid": "^11.0.3"
   },

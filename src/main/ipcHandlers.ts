@@ -9,10 +9,14 @@ import {
   reorderProfiles,
   getActiveProfileId,
   setActiveProfileId,
-  getSidebarCollapsed,
-  setSidebarCollapsed,
   getProfileDataPath,
 } from './profileManager'
+import {
+  getSidebarCollapsed,
+  setSidebarCollapsed,
+  getLaunchOnStartup,
+  setLaunchOnStartup,
+} from './settingsManager'
 import {
   showBrowserView,
   removeBrowserView,
@@ -125,21 +129,32 @@ export function setupIpcHandlers(): void {
 
   // Settings: Modal open (expand rendererView to full window)
   ipcMain.handle(IPC_CHANNELS.SETTINGS_MODAL_OPEN, async () => {
+    global.__isSettingsModalOpen = true
     const mainWindow = getMainWindow()
     const rendererView = global.__rendererView
     if (rendererView && mainWindow) {
       const bounds = mainWindow.getContentBounds()
       rendererView.setBounds({ x: 0, y: 0, width: bounds.width, height: bounds.height })
     }
+    // Hide all BrowserViews while settings modal is open
+    if (mainWindow) {
+      hideAllBrowserViews(mainWindow)
+    }
   })
 
   // Settings: Modal close (shrink rendererView back to sidebar width)
   ipcMain.handle(IPC_CHANNELS.SETTINGS_MODAL_CLOSE, async () => {
+    global.__isSettingsModalOpen = false
     const mainWindow = getMainWindow()
     const rendererView = global.__rendererView
     if (rendererView && mainWindow) {
       const bounds = mainWindow.getContentBounds()
       rendererView.setBounds({ x: 0, y: 0, width: getSidebarWidth(), height: bounds.height })
+    }
+    // Restore active BrowserView
+    const activeProfileId = getActiveProfileId()
+    if (mainWindow && activeProfileId) {
+      showBrowserView(activeProfileId, mainWindow, getSidebarWidth())
     }
   })
 
@@ -164,6 +179,16 @@ export function setupIpcHandlers(): void {
       const bounds = mainWindow.getContentBounds()
       rendererView.setBounds({ x: 0, y: 0, width: getSidebarWidth(), height: bounds.height })
     }
+  })
+
+  // Settings: Get launch on startup
+  ipcMain.handle(IPC_CHANNELS.SETTINGS_GET_LAUNCH_ON_STARTUP, async () => {
+    return getLaunchOnStartup()
+  })
+
+  // Settings: Set launch on startup
+  ipcMain.handle(IPC_CHANNELS.SETTINGS_SET_LAUNCH_ON_STARTUP, async (_, enabled: boolean) => {
+    setLaunchOnStartup(enabled)
   })
 
   // Profile: Get data path

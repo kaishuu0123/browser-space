@@ -36,6 +36,9 @@ const settingsApi: SettingsAPI = {
     ipcRenderer.invoke(IPC_CHANNELS.SETTINGS_SET_SIDEBAR_COLLAPSED, collapsed),
   notifyModalOpen: () => ipcRenderer.invoke(IPC_CHANNELS.SETTINGS_MODAL_OPEN),
   notifyModalClose: () => ipcRenderer.invoke(IPC_CHANNELS.SETTINGS_MODAL_CLOSE),
+  getLaunchOnStartup: () => ipcRenderer.invoke(IPC_CHANNELS.SETTINGS_GET_LAUNCH_ON_STARTUP),
+  setLaunchOnStartup: (enabled: boolean) =>
+    ipcRenderer.invoke(IPC_CHANNELS.SETTINGS_SET_LAUNCH_ON_STARTUP, enabled),
 }
 
 // Icon API
