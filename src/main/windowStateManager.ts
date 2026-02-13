@@ -40,24 +40,22 @@ export function saveWindowState(window: BaseWindow): void {
 export function applyWindowState(window: BaseWindow): void {
   const state = getWindowState()
 
-  if (state.isMaximized) {
-    window.maximize()
+  // サイズを設定
+  window.setBounds({
+    x: state.x,
+    y: state.y,
+    width: state.width,
+    height: state.height,
+  })
+
+  // 位置が保存されていない場合（初回起動時）は中央表示
+  if (state.x === undefined || state.y === undefined) {
+    window.center()
   }
 
-  // 位置が保存されている場合のみ適用（初回起動時は中央表示）
-  if (state.x !== undefined && state.y !== undefined) {
-    window.setBounds({
-      x: state.x,
-      y: state.y,
-      width: state.width,
-      height: state.height,
-    })
-  } else {
-    window.setBounds({
-      width: state.width,
-      height: state.height,
-    })
-    window.center()
+  // 最大化状態を復元
+  if (state.isMaximized) {
+    window.maximize()
   }
 }
 
