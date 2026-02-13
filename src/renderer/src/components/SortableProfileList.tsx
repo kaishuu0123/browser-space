@@ -6,14 +6,14 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
-  DragEndEvent
+  DragEndEvent,
 } from '@dnd-kit/core'
 import {
   arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
   useSortable,
-  verticalListSortingStrategy
+  verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { Profile } from '../../../shared/types'
@@ -32,10 +32,10 @@ function SortableProfileItem({
   onEdit,
   onDelete,
   onShowDataPath,
-  onClearData
+  onClearData,
 }: SortableProfileItemProps): React.ReactElement {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
-    id: profile.id
+    id: profile.id,
   })
   const [customIconPath, setCustomIconPath] = useState<string | null>(null)
 
@@ -48,7 +48,7 @@ function SortableProfileItem({
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.5 : 1
+    opacity: isDragging ? 0.5 : 1,
   }
 
   return (
@@ -76,7 +76,7 @@ function SortableProfileItem({
         />
       ) : (
         <span
-          className={`codicon codicon-${profile.icon || 'circle-large-outline'} text-2xl flex-shrink-0`}
+          className={`codicon codicon-${profile.icon || 'circle-large-outline'} !text-2xl flex-shrink-0`}
           style={{ color: profile.iconColor }}
         />
       )}
@@ -97,12 +97,7 @@ function SortableProfileItem({
         >
           <span className="codicon codicon-folder" />
         </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => onClearData(profile)}
-          title="Clear data"
-        >
+        <Button variant="ghost" size="sm" onClick={() => onClearData(profile)} title="Clear data">
           <span className="codicon codicon-clear-all" />
         </Button>
         <Button variant="ghost" size="sm" onClick={() => onEdit(profile)} title="Edit">
@@ -131,12 +126,12 @@ export function SortableProfileList({
   onEdit,
   onDelete,
   onShowDataPath,
-  onClearData
+  onClearData,
 }: SortableProfileListProps): React.ReactElement {
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates
+      coordinateGetter: sortableKeyboardCoordinates,
     })
   )
 

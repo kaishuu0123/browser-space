@@ -12,7 +12,7 @@ export function ProfileItem({
   profile,
   isActive,
   onClick,
-  collapsed
+  collapsed,
 }: ProfileItemProps): React.ReactElement {
   const [customIconPath, setCustomIconPath] = useState<string | null>(null)
 
@@ -26,7 +26,7 @@ export function ProfileItem({
     <button
       onClick={onClick}
       className={`
-        w-full flex items-center ${collapsed ? 'justify-center px-2' : 'gap-3 px-3'} py-2.5 
+        w-full flex items-center ${collapsed ? 'justify-center px-2' : 'gap-3 px-3'} py-2.5
         hover:bg-gray-100 transition-colors
         ${isActive ? 'bg-blue-50 border-l-2 border-blue-500' : 'border-l-2 border-transparent'}
       `}
@@ -41,15 +41,13 @@ export function ProfileItem({
         />
       ) : (
         <span
-          className={`codicon codicon-${profile.icon || 'circle-large-outline'} text-xl`}
+          className={`codicon codicon-${profile.icon || 'circle-large-outline'} !text-2xl`}
           style={{ color: profile.iconColor }}
         />
       )}
 
       {/* Profile Name (hidden when collapsed) */}
-      {!collapsed && (
-        <span className="text-sm font-medium text-gray-700 truncate">{profile.name}</span>
-      )}
+      {!collapsed && <span className="font-medium text-gray-700 truncate">{profile.name}</span>}
     </button>
   )
 }
