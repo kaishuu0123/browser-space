@@ -1,6 +1,6 @@
 {
   "name": "browser-space",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "productName": "Browser Space",
   "description": "A multi-account browser session manager. Switch between isolated Gmail, Slack, and web accounts with named workspaces.",
   "main": "./out/main/index.js",
