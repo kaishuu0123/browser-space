@@ -32,6 +32,7 @@
     "@radix-ui/react-tabs": "^1.1.13",
     "@vscode/codicons": "^0.0.44",
     "class-variance-authority": "^0.7.1",
+    "electron-context-menu": "^4.1.1",
     "electron-store": "^8.2.0",
     "uuid": "^11.0.3"
   },

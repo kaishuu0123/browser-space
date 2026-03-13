@@ -6,6 +6,7 @@ import { updateBrowserViewBounds, repaintBrowserView } from './browserViewManage
 import { getActiveProfileId, getSidebarCollapsed } from './profileManager'
 import { FindbarWindow } from './findbar/FindbarWindow'
 import { applyWindowState, trackWindowState } from './windowStateManager'
+import { applyContextMenu } from './contextMenu'
 import icon from '../../resources/icon.png?asset'
 
 app.setName('Browser Space')
@@ -40,6 +41,7 @@ function createWindow(): void {
   })
 
   rendererView.setBackgroundColor('#00000000')
+  applyContextMenu(rendererView)
 
   mainWindow.contentView.addChildView(rendererView)
 
