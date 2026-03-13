@@ -2,6 +2,7 @@ import { WebContentsView, BaseWindow, session, app, shell } from 'electron'
 import { getProfileById } from './profileManager'
 import { showNotificationPermissionDialog } from './notificationManager'
 import { FindbarWindow } from './findbar/FindbarWindow'
+import { applyContextMenu } from './contextMenu'
 
 // Map to store WebContentsViews by profile ID
 const browserViews = new Map<string, WebContentsView>()
@@ -95,6 +96,9 @@ export function getOrCreateBrowserView(profileId: string, mainWindow: BaseWindow
         console.error('Failed to inject notification interceptor:', err)
       })
   })
+
+  // Setup context menu
+  applyContextMenu(view)
 
   // Setup findbar
   const findbar = FindbarWindow.from(mainWindow, view.webContents)
