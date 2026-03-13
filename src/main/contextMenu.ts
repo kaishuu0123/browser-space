@@ -1,6 +1,11 @@
 import { app } from 'electron'
 import type { WebContentsView } from 'electron'
-import contextMenu from 'electron-context-menu'
+import contextMenuModule from 'electron-context-menu'
+
+// electron-context-menu is ESM; handle both default and module.default
+const contextMenu =
+  (contextMenuModule as unknown as { default: typeof contextMenuModule }).default ??
+  contextMenuModule
 
 function getJapaneseLabels(): import('electron-context-menu').Labels {
   return {
