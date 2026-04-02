@@ -1,3 +1,5 @@
+import pkg from 'electron-updater'
+const { autoUpdater } = pkg
 import { app, shell, BaseWindow, WebContentsView, Menu } from 'electron'
 import path, { join } from 'path'
 import { is } from '@electron-toolkit/utils'
@@ -10,6 +12,24 @@ import { applyContextMenu } from './contextMenu'
 import icon from '../../resources/icon.png?asset'
 
 app.setName('Browser Space')
+
+export function initAutoUpdater(rendererView: WebContentsView): void {
+  // 開発環境では動かさない
+  if (!app.isPackaged) return
+
+  autoUpdater.autoDownload = true
+  autoUpdater.autoInstallOnAppQuit = true
+
+  autoUpdater.on('update-downloaded', (info) => {
+    rendererView.webContents.send('update-downloaded', info)
+  })
+
+  autoUpdater.on('error', (err) => {
+    console.error('AutoUpdater error:', err)
+  })
+
+  autoUpdater.checkForUpdates()
+}
 
 // Remove default menu (avoids BaseWindow compatibility issues)
 app.on('ready', () => {
@@ -139,6 +159,9 @@ app.whenReady().then(() => {
   setupIpcHandlers()
   FindbarWindow.setupIpc()
   createWindow()
+
+  initAutoUpdater(global.__rendererView as WebContentsView)
+
   app.on('activate', () => {
     if (BaseWindow.getAllWindows().length === 0) createWindow()
   })

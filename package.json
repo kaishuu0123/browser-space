@@ -34,6 +34,7 @@
     "class-variance-authority": "^0.7.1",
     "electron-context-menu": "^4.1.1",
     "electron-store": "^8.2.0",
+    "electron-updater": "^6.3.9",
     "uuid": "^11.0.3"
   },
   "devDependencies": {

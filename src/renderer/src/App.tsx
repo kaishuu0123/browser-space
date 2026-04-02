@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useProfiles, useActiveProfile, useSidebarCollapsed } from './hooks/useProfile'
 import { Sidebar } from './components/Sidebar'
 import { SettingsModal } from './components/SettingsModal'
+import { Button } from './components/ui/button'
 
 function App(): React.ReactElement {
   const { profiles, loading: profilesLoading, refreshProfiles } = useProfiles()
@@ -9,6 +10,13 @@ function App(): React.ReactElement {
   const { collapsed, setCollapsed } = useSidebarCollapsed()
   const [showSettings, setShowSettings] = useState(false)
   const [, forceUpdate] = useState({})
+  const [updateInfo, setUpdateInfo] = useState<{ version: string } | null>(null)
+
+  useEffect(() => {
+    window.electron.ipcRenderer.on('update-downloaded', (_event, info) => {
+      setUpdateInfo(info)
+    })
+  }, [])
 
   // Window resize
   useEffect(() => {
@@ -55,6 +63,18 @@ function App(): React.ReactElement {
 
   return (
     <>
+      {updateInfo && (
+        <div className="fixed bottom-4 right-4 z-50 bg-white border border-gray-200 text-gray-900 p-3 rounded-lg shadow-md flex gap-3 items-center">
+          <span className="text-sm">アップデート v{updateInfo.version} が利用可能です</span>
+          <Button size="sm" onClick={() => window.updaterApi.installUpdate()}>
+            再起動して更新
+          </Button>
+          <Button size="sm" variant="ghost" onClick={() => setUpdateInfo(null)}>
+            後で
+          </Button>
+        </div>
+      )}
+
       <Sidebar
         profiles={profiles}
         activeProfileId={activeProfileId}

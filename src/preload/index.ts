@@ -47,6 +47,13 @@ const iconApi: IconAPI = {
   getPath: (filename: string) => ipcRenderer.invoke(IPC_CHANNELS.ICON_GET_PATH, filename),
 }
 
+// Updater API
+const updaterApi = {
+  installUpdate: (): void => {
+    ipcRenderer.send('install-update')
+  }
+}
+
 // Use `contextBridge` APIs to expose Electron APIs to
 // renderer only if context isolation is enabled, otherwise
 // just add to the DOM global.
@@ -56,6 +63,7 @@ if (process.contextIsolated) {
     contextBridge.exposeInMainWorld('profileApi', profileApi)
     contextBridge.exposeInMainWorld('settingsApi', settingsApi)
     contextBridge.exposeInMainWorld('iconApi', iconApi)
+    contextBridge.exposeInMainWorld('updaterApi', updaterApi)
   } catch (error) {
     console.error(error)
   }
@@ -68,4 +76,6 @@ if (process.contextIsolated) {
   window.settingsApi = settingsApi
   // @ts-expect-error (define in dts)
   window.iconApi = iconApi
+  // @ts-expect-error (define in dts)
+  window.updaterApi = updaterApi
 }

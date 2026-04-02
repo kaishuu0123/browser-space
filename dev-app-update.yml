@@ -1,0 +1,4 @@
+provider: github
+owner: kaishuu0123
+repo: browser-space
+updaterCacheDirName: browser-space-updater
