@@ -1,4 +1,6 @@
 import { ipcMain, BaseWindow } from 'electron'
+import pkg from 'electron-updater'
+const { autoUpdater } = pkg
 import { IPC_CHANNELS } from '../shared/ipc'
 import {
   getAllProfiles,
@@ -213,4 +215,9 @@ export function setupIpcHandlers(): void {
       await clearProfileData(profileId, options)
     }
   )
+
+  // Auto updater: quit and install
+  ipcMain.on('install-update', () => {
+    autoUpdater.quitAndInstall()
+  })
 }

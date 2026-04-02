@@ -8,5 +8,8 @@ declare global {
     settingsApi: SettingsAPI
     iconApi: IconAPI
     searchApi: SearchAPI
+    updaterApi: {
+      installUpdate: () => void
+    }
   }
 }
