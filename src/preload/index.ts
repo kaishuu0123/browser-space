@@ -51,6 +51,12 @@ const iconApi: IconAPI = {
 const updaterApi = {
   installUpdate: (): void => {
     ipcRenderer.send('install-update')
+  },
+  getAppVersion: (): string => {
+    return ipcRenderer.sendSync('get-app-version')
+  },
+  checkForUpdates: (): void => {
+    ipcRenderer.send('check-for-updates-now')
   }
 }
 
