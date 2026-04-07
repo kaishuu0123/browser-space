@@ -52,5 +52,12 @@ export default defineConfig({
       },
     },
     plugins: [react()],
+    build: {
+      rollupOptions: {
+        input: {
+          index: resolve('src/renderer/index.html'),
+        },
+      },
+    },
   },
 })

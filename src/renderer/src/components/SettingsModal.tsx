@@ -9,7 +9,7 @@ import { Button } from './ui/button'
 import { ProfileForm } from './ProfileForm'
 import { SortableProfileList } from './SortableProfileList'
 import { ClearDataDialog } from './ClearDataDialog'
-import appIcon from '../assets/icon.png'
+import appIcon from '../../../../resources/icon.png'
 
 type UpdateStatus = 'checking' | 'up-to-date' | 'available' | 'downloaded' | 'error'
 
