@@ -10,6 +10,8 @@ declare global {
     searchApi: SearchAPI
     updaterApi: {
       installUpdate: () => void
+      getAppVersion: () => string
+      checkForUpdates: () => void
     }
   }
 }

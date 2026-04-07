@@ -20,12 +20,25 @@ export function initAutoUpdater(rendererView: WebContentsView): void {
   autoUpdater.autoDownload = true
   autoUpdater.autoInstallOnAppQuit = true
 
+  autoUpdater.on('checking-for-update', () => {
+    rendererView.webContents.send('update-checking')
+  })
+
+  autoUpdater.on('update-available', (info) => {
+    rendererView.webContents.send('update-available', info)
+  })
+
+  autoUpdater.on('update-not-available', () => {
+    rendererView.webContents.send('update-not-available')
+  })
+
   autoUpdater.on('update-downloaded', (info) => {
     rendererView.webContents.send('update-downloaded', info)
   })
 
   autoUpdater.on('error', (err) => {
     console.error('AutoUpdater error:', err)
+    rendererView.webContents.send('update-error', err.message)
   })
 
   autoUpdater.checkForUpdates()

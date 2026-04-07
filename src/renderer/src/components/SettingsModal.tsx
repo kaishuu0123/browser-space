@@ -9,6 +9,98 @@ import { Button } from './ui/button'
 import { ProfileForm } from './ProfileForm'
 import { SortableProfileList } from './SortableProfileList'
 import { ClearDataDialog } from './ClearDataDialog'
+import appIcon from '../../../../resources/icon.png'
+
+type UpdateStatus = 'checking' | 'up-to-date' | 'available' | 'downloaded' | 'error'
+
+function AboutTabContent(): React.ReactElement {
+  const [version] = useState(() => window.updaterApi.getAppVersion())
+  const [updateStatus, setUpdateStatus] = useState<UpdateStatus>('checking')
+  const [latestVersion, setLatestVersion] = useState('')
+  const [isDevError, setIsDevError] = useState(false)
+
+  useEffect(() => {
+    window.updaterApi.checkForUpdates()
+
+    const onChecking = () => setUpdateStatus('checking')
+    const onNotAvailable = () => setUpdateStatus('up-to-date')
+    const onAvailable = (_e, info: { version: string }) => {
+      setUpdateStatus('available')
+      setLatestVersion(info.version)
+    }
+    const onDownloaded = (_e, info: { version: string }) => {
+      setUpdateStatus('downloaded')
+      setLatestVersion(info.version)
+    }
+    const onError = (_e, msg: string) => {
+      setIsDevError(msg === 'dev')
+      setUpdateStatus('error')
+    }
+
+    window.electron.ipcRenderer.on('update-checking', onChecking)
+    window.electron.ipcRenderer.on('update-not-available', onNotAvailable)
+    window.electron.ipcRenderer.on('update-available', onAvailable)
+    window.electron.ipcRenderer.on('update-downloaded', onDownloaded)
+    window.electron.ipcRenderer.on('update-error', onError)
+
+    return () => {
+      window.electron.ipcRenderer.removeListener('update-checking', onChecking)
+      window.electron.ipcRenderer.removeListener('update-not-available', onNotAvailable)
+      window.electron.ipcRenderer.removeListener('update-available', onAvailable)
+      window.electron.ipcRenderer.removeListener('update-downloaded', onDownloaded)
+      window.electron.ipcRenderer.removeListener('update-error', onError)
+    }
+  }, [])
+
+  const renderUpdateStatus = () => {
+    switch (updateStatus) {
+      case 'checking':
+        return (
+          <div className="flex items-center gap-2 text-sm text-gray-500">
+            <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+            </svg>
+            <span>Checking for updates...</span>
+          </div>
+        )
+      case 'up-to-date':
+        return <p className="text-sm text-green-600">✓ Up to date</p>
+      case 'available':
+        return (
+          <p className="text-sm text-blue-600">
+            ↑ v{latestVersion} available (downloading...)
+          </p>
+        )
+      case 'downloaded':
+        return (
+          <div className="flex items-center gap-2">
+            <p className="text-sm text-green-600">✓ v{latestVersion} ready to install</p>
+            <Button size="sm" onClick={() => window.updaterApi.installUpdate()}>
+              Restart and update
+            </Button>
+          </div>
+        )
+      case 'error':
+        return (
+          <p className="text-sm text-gray-400">
+            {isDevError ? '— Not available in development' : '✗ Failed to check for updates'}
+          </p>
+        )
+    }
+  }
+
+  return (
+    <div className="py-6 flex flex-col items-center gap-4">
+      <img src={appIcon} className="w-20 h-20 rounded-2xl" alt="Browser Space" />
+      <div className="text-center">
+        <h2 className="text-xl font-semibold">Browser Space</h2>
+        <p className="text-sm text-gray-500 mt-1">Version {version}</p>
+      </div>
+      <div className="mt-2">{renderUpdateStatus()}</div>
+    </div>
+  )
+}
 
 interface SettingsModalProps {
   open: boolean
@@ -151,9 +243,10 @@ export function SettingsModal({
           </DialogHeader>
 
           <Tabs defaultValue="general" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="general">General</TabsTrigger>
               <TabsTrigger value="profiles">Manage Profiles</TabsTrigger>
+              <TabsTrigger value="about">About</TabsTrigger>
             </TabsList>
 
             {/* General Tab */}
@@ -200,6 +293,11 @@ export function SettingsModal({
                   />
                 </div>
               )}
+            </TabsContent>
+
+            {/* About Tab */}
+            <TabsContent value="about">
+              <AboutTabContent />
             </TabsContent>
           </Tabs>
         </DialogContent>
