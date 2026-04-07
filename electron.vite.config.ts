@@ -53,6 +53,7 @@ export default defineConfig({
     },
     plugins: [react()],
     build: {
+      assetsInlineLimit: 0,
       rollupOptions: {
         input: {
           index: resolve('src/renderer/index.html'),
