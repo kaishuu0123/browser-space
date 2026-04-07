@@ -10,6 +10,7 @@ interface SidebarProps {
   onReloadClick: () => void
   collapsed: boolean
   onToggleCollapse: () => void
+  hasUpdate?: boolean
 }
 
 export function Sidebar({
@@ -20,6 +21,7 @@ export function Sidebar({
   onReloadClick,
   collapsed,
   onToggleCollapse,
+  hasUpdate = false,
 }: SidebarProps): React.ReactElement {
   return (
     <div
@@ -74,9 +76,14 @@ export function Sidebar({
             <button
               onClick={onSettingsClick}
               className="w-full p-2 hover:bg-gray-100 rounded transition-colors"
-              title="Settings"
+              title={hasUpdate ? 'Settings (Update ready)' : 'Settings'}
             >
-              <span className="codicon codicon-settings-gear text-xl text-gray-600" />
+              <span className="relative inline-block">
+                <span className="codicon codicon-settings-gear text-xl text-gray-600" />
+                {hasUpdate && (
+                  <span className="absolute -top-1 -right-1 w-2 h-2 bg-blue-500 rounded-full" />
+                )}
+              </span>
             </button>
           </div>
         ) : (
@@ -85,8 +92,16 @@ export function Sidebar({
             className="w-full flex items-center gap-2 px-2 py-1.5 hover:bg-gray-100 rounded transition-colors text-sm text-gray-600"
             title="Settings"
           >
-            <span className="codicon codicon-settings-gear text-lg" />
+            <span className="relative">
+              <span className="codicon codicon-settings-gear text-lg" />
+              {hasUpdate && (
+                <span className="absolute -top-1 -right-1 w-2 h-2 bg-blue-500 rounded-full" />
+              )}
+            </span>
             <span>Settings</span>
+            {hasUpdate && (
+              <span className="ml-auto text-xs text-blue-500 font-medium">Update ready</span>
+            )}
           </button>
         )}
       </div>
