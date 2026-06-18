@@ -1,13 +1,15 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useProfiles, useActiveProfile, useSidebarCollapsed } from './hooks/useProfile'
 import { Sidebar } from './components/Sidebar'
 import { SettingsModal } from './components/SettingsModal'
+import { CrashedView } from './components/CrashedView'
 
 function App(): React.ReactElement {
   const { profiles, loading: profilesLoading, refreshProfiles } = useProfiles()
   const { activeProfileId, setActive } = useActiveProfile()
   const { collapsed, setCollapsed } = useSidebarCollapsed()
   const [showSettings, setShowSettings] = useState(false)
+  const [crashedProfileIds, setCrashedProfileIds] = useState<Set<string>>(new Set())
   const [, forceUpdate] = useState({})
   const [updateInfo, setUpdateInfo] = useState<{ version: string } | null>(null)
 
@@ -15,6 +17,14 @@ function App(): React.ReactElement {
     window.electron.ipcRenderer.on('update-downloaded', (_event, info) => {
       setUpdateInfo(info)
     })
+  }, [])
+
+  // Listen for view crash
+  useEffect(() => {
+    const cleanup = window.profileApi.onViewCrashed((profileId) => {
+      setCrashedProfileIds((prev) => new Set(prev).add(profileId))
+    })
+    return cleanup
   }, [])
 
   // Window resize
@@ -29,25 +39,34 @@ function App(): React.ReactElement {
     }
   }, [])
 
-  // Hide profileView and expand rendererView when settings open
+  const isActiveCrashed = activeProfileId !== null && crashedProfileIds.has(activeProfileId)
+
+  // Hide profileView and expand rendererView when settings open OR active profile crashed
   useEffect(() => {
-    if (showSettings) {
+    if (showSettings || isActiveCrashed) {
       window.settingsApi.notifyModalOpen()
       if (activeProfileId) window.profileApi.switch(null)
     } else {
       window.settingsApi.notifyModalClose()
       if (activeProfileId) window.profileApi.switch(activeProfileId)
     }
-  }, [showSettings, activeProfileId])
+  }, [showSettings, activeProfileId, isActiveCrashed])
 
   const handleProfileClick = (profileId: string) => {
     window.profileApi.switch(profileId)
     setActive(profileId)
   }
 
-  const handleReloadClick = () => {
-    window.profileApi.reload()
-  }
+  const handleReloadClick = useCallback(async () => {
+    if (activeProfileId) {
+      await window.profileApi.reload()
+      setCrashedProfileIds((prev) => {
+        const next = new Set(prev)
+        next.delete(activeProfileId)
+        return next
+      })
+    }
+  }, [activeProfileId])
 
   if (profilesLoading) {
     return (
@@ -71,7 +90,10 @@ function App(): React.ReactElement {
         collapsed={collapsed}
         onToggleCollapse={() => setCollapsed(!collapsed)}
         hasUpdate={updateInfo !== null}
+        crashedProfileIds={crashedProfileIds}
       />
+
+      {isActiveCrashed && <CrashedView onReload={handleReloadClick} />}
 
       <SettingsModal
         open={showSettings}

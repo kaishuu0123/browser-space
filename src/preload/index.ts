@@ -27,6 +27,13 @@ const profileApi: ProfileAPI = {
       appData?: boolean
     }
   ) => ipcRenderer.invoke(IPC_CHANNELS.PROFILE_CLEAR_DATA, profileId, options),
+  onViewCrashed: (callback: (profileId: string) => void) => {
+    const subscription = (_event: any, profileId: string) => callback(profileId)
+    ipcRenderer.on(IPC_CHANNELS.PROFILE_VIEW_CRASHED, subscription)
+    return () => {
+      ipcRenderer.removeListener(IPC_CHANNELS.PROFILE_VIEW_CRASHED, subscription)
+    }
+  },
 }
 
 // Settings API

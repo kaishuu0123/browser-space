@@ -3,6 +3,7 @@ import { getProfileById } from './profileManager'
 import { showNotificationPermissionDialog } from './notificationManager'
 import { FindbarWindow } from './findbar/FindbarWindow'
 import { applyContextMenu } from './contextMenu'
+import { IPC_CHANNELS } from '../shared/ipc'
 
 // Map to store WebContentsViews by profile ID
 const browserViews = new Map<string, WebContentsView>()
@@ -70,6 +71,23 @@ export function getOrCreateBrowserView(profileId: string, mainWindow: BaseWindow
       contextIsolation: true,
       sandbox: true,
     },
+  })
+
+  // Handle crash
+  view.webContents.on('render-process-gone', (_event, details) => {
+    console.error(`[Profile:${profileId}] Render process gone:`, details.reason)
+    if (details.reason !== 'killed' && details.reason !== 'clean-exit') {
+      const rendererView = global.__rendererView as WebContentsView | undefined
+      rendererView?.webContents.send(IPC_CHANNELS.PROFILE_VIEW_CRASHED, profileId)
+    }
+  })
+
+  // Handle unresponsive
+  view.webContents.on('unresponsive', () => {
+    console.warn(`[Profile:${profileId}] View became unresponsive`)
+    // Optionally notify renderer as well
+    const rendererView = global.__rendererView as WebContentsView | undefined
+    rendererView?.webContents.send(IPC_CHANNELS.PROFILE_VIEW_CRASHED, profileId)
   })
 
   // Intercept notifications to add profile name
