@@ -7,13 +7,15 @@ interface ProfileListProps {
   activeProfileId: string | null
   onProfileClick: (profileId: string) => void
   collapsed: boolean
+  crashedProfileIds?: Set<string>
 }
 
 export function ProfileList({
   profiles,
   activeProfileId,
   onProfileClick,
-  collapsed
+  collapsed,
+  crashedProfileIds = new Set()
 }: ProfileListProps): React.ReactElement {
   if (profiles.length === 0) {
     return (
@@ -42,6 +44,7 @@ export function ProfileList({
           isActive={profile.id === activeProfileId}
           onClick={() => onProfileClick(profile.id)}
           collapsed={collapsed}
+          isCrashed={crashedProfileIds.has(profile.id)}
         />
       ))}
     </div>

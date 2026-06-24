@@ -166,19 +166,33 @@ function createWindow(): void {
   global.__rendererView = rendererView
 }
 
-app.whenReady().then(() => {
-  app.setAppUserModelId('Browser Space')
+const gotTheLock = app.requestSingleInstanceLock()
 
-  setupIpcHandlers()
-  FindbarWindow.setupIpc()
-  createWindow()
-
-  initAutoUpdater(global.__rendererView as WebContentsView)
-
-  app.on('activate', () => {
-    if (BaseWindow.getAllWindows().length === 0) createWindow()
+if (!gotTheLock) {
+  app.quit()
+} else {
+  app.on('second-instance', () => {
+    const mainWindow = global.__mainWindow as BaseWindow | undefined
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) mainWindow.restore()
+      mainWindow.focus()
+    }
   })
-})
+
+  app.whenReady().then(() => {
+    app.setAppUserModelId('Browser Space')
+
+    setupIpcHandlers()
+    FindbarWindow.setupIpc()
+    createWindow()
+
+    initAutoUpdater(global.__rendererView as WebContentsView)
+
+    app.on('activate', () => {
+      if (BaseWindow.getAllWindows().length === 0) createWindow()
+    })
+  })
+}
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {

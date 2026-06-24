@@ -37,6 +37,9 @@ export const IPC_CHANNELS = {
   // Clear profile data
   PROFILE_CLEAR_DATA: 'profile:clearData',
 
+  // View crashed
+  PROFILE_VIEW_CRASHED: 'profile:view-crashed',
+
   // Page search
   SEARCH_IN_PAGE: 'search:inPage',
   SEARCH_STOP: 'search:stop',
@@ -86,6 +89,9 @@ export interface ProfileAPI {
       appData?: boolean
     }
   ) => Promise<void>
+
+  // Listen for view crash
+  onViewCrashed: (callback: (profileId: string) => void) => () => void
 }
 
 export interface SettingsAPI {

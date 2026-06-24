@@ -125,8 +125,16 @@ export function setupIpcHandlers(): void {
   ipcMain.handle(IPC_CHANNELS.PROFILE_RELOAD, async () => {
     const activeProfileId = getActiveProfileId()
     if (!activeProfileId) return
+    const mainWindow = getMainWindow()
+    if (!mainWindow) return
+
     const view = getBrowserView(activeProfileId)
-    view?.webContents.reload()
+    if (view && !view.webContents.isDestroyed() && !view.webContents.isCrashed()) {
+      view.webContents.reload()
+    } else {
+      // If view is crashed or destroyed, recreate it
+      recreateBrowserView(activeProfileId, mainWindow, getSidebarWidth())
+    }
   })
 
   // Settings: Modal open (expand rendererView to full window)

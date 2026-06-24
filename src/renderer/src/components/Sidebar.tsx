@@ -11,6 +11,7 @@ interface SidebarProps {
   collapsed: boolean
   onToggleCollapse: () => void
   hasUpdate?: boolean
+  crashedProfileIds?: Set<string>
 }
 
 export function Sidebar({
@@ -22,6 +23,7 @@ export function Sidebar({
   collapsed,
   onToggleCollapse,
   hasUpdate = false,
+  crashedProfileIds = new Set(),
 }: SidebarProps): React.ReactElement {
   return (
     <div
@@ -60,6 +62,7 @@ export function Sidebar({
         activeProfileId={activeProfileId}
         onProfileClick={onProfileClick}
         collapsed={collapsed}
+        crashedProfileIds={crashedProfileIds}
       />
 
       {/* Bottom buttons */}
