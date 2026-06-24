@@ -28,13 +28,7 @@ jobs:
 
       - name: Set Dev Version and Name
         run: |
-          node -e "
-            const fs = require('fs');
-            const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-            pkg.version = \`\${pkg.version}-dev.\${process.env.GITHUB_RUN_NUMBER}\`;
-            pkg.productName = \`\${pkg.productName} (Dev)\`;
-            fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));
-          "
+          node scripts/update-version-for-dev.js
 
       - name: Build Windows
         if: ${{ matrix.os == 'windows-latest'}}
