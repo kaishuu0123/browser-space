@@ -27,6 +27,7 @@ jobs:
           cache: 'yarn'
 
       - name: Validate version match
+        shell: bash
         run: |
           PACKAGE_VERSION=$(node -p "require('./package.json').version")
           TAG_VERSION=${GITHUB_REF#refs/tags/v}
