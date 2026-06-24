@@ -1,0 +1,79 @@
+name: Dev Build
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build for ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v6
+
+      - name: Install Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Set Dev Version and Name
+        run: |
+          node -e "
+            const fs = require('fs');
+            const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+            pkg.version = \`\${pkg.version}-dev.\${process.env.GITHUB_RUN_NUMBER}\`;
+            pkg.productName = \`\${pkg.productName} (Dev)\`;
+            fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));
+          "
+
+      - name: Build Windows
+        if: ${{ matrix.os == 'windows-latest'}}
+        run: yarn build:win
+
+      - name: Import Apple installer signing certificate
+        if: ${{ matrix.os == 'macos-latest'}}
+        uses: Apple-Actions/import-codesign-certs@v6
+        with:
+          p12-file-base64: ${{ secrets.APPLE_DEV_ID_APP }}
+          p12-password: ${{ secrets.APPLE_DEV_ID_APP_PASS }}
+
+      - name: Build macOS
+        if: ${{ matrix.os == 'macos-latest'}}
+        run: |
+          mkdir -p ~/private_keys
+          echo "${{ secrets.APPLE_API_KEY_BASE64 }}" > ~/private_keys/AuthKey_${{ secrets.APPLE_API_KEY_ID }}.p8
+          xattr -cr .
+          yarn build:mac
+        env:
+          APPLE_API_KEY: ~/private_keys/AuthKey_${{ secrets.APPLE_API_KEY_ID }}.p8
+          APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
+          APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
+          NODE_OPTIONS: --max-old-space-size=4096
+
+      - name: Build Linux
+        if: ${{ matrix.os == 'ubuntu-latest'}}
+        run: |
+          sudo snap install snapcraft --classic
+          yarn build:linux
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-space-${{ matrix.os }}
+          path: |
+            dist/*.zip
+            dist/*.dmg
+            dist/*.exe
+            dist/*.snap
+            dist/*.AppImage
+          retention-days: 7

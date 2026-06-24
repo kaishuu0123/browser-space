@@ -11,7 +11,7 @@ import { applyWindowState, trackWindowState } from './windowStateManager'
 import { applyContextMenu } from './contextMenu'
 import icon from '../../resources/icon.png?asset'
 
-app.setName('Browser Space')
+app.setName(app.name)
 
 export function initAutoUpdater(rendererView: WebContentsView): void {
   // 開発環境では動かさない
@@ -180,7 +180,7 @@ if (!gotTheLock) {
   })
 
   app.whenReady().then(() => {
-    app.setAppUserModelId('Browser Space')
+    app.setAppUserModelId(app.name)
 
     setupIpcHandlers()
     FindbarWindow.setupIpc()
