@@ -28,7 +28,7 @@ const profileApi: ProfileAPI = {
     }
   ) => ipcRenderer.invoke(IPC_CHANNELS.PROFILE_CLEAR_DATA, profileId, options),
   onViewCrashed: (callback: (profileId: string) => void) => {
-    const subscription = (_event: any, profileId: string) => callback(profileId)
+    const subscription = (_event: unknown, profileId: string) => callback(profileId)
     ipcRenderer.on(IPC_CHANNELS.PROFILE_VIEW_CRASHED, subscription)
     return () => {
       ipcRenderer.removeListener(IPC_CHANNELS.PROFILE_VIEW_CRASHED, subscription)
@@ -64,7 +64,7 @@ const updaterApi = {
   },
   checkForUpdates: (): void => {
     ipcRenderer.send('check-for-updates-now')
-  }
+  },
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to
