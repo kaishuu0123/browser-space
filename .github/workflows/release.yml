@@ -24,8 +24,21 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: 24
+          cache: 'yarn'
+
+      - name: Validate version match
+        run: |
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+          TAG_VERSION=${GITHUB_REF#refs/tags/v}
+          if [ "$PACKAGE_VERSION" != "$TAG_VERSION" ]; then
+            echo "Error: Version mismatch between tag and package.json!"
+            echo "package.json version: $PACKAGE_VERSION"
+            echo "Git tag version: $TAG_VERSION"
+            exit 1
+          fi
+
       - name: yarn install
-        run: yarn install
+        run: yarn install --frozen-lockfile
       - name: Build Windows
         if: ${{ matrix.os == 'windows-latest'}}
         run: |
