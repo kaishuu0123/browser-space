@@ -20,7 +20,6 @@ export async function clearProfileData(
     | 'indexdb'
     | 'localstorage'
     | 'shadercache'
-    | 'websql'
     | 'serviceworkers'
     | 'cachestorage'
   > = []
@@ -35,9 +34,9 @@ export async function clearProfileData(
     storages.push('cachestorage', 'shadercache')
   }
 
-  // ホストされているアプリデータ (IndexedDB, WebSQL, LocalStorage, Service Workers)
+  // ホストされているアプリデータ (IndexedDB, LocalStorage, Service Workers)
   if (options.appData) {
-    storages.push('indexdb', 'websql', 'localstorage', 'serviceworkers', 'filesystem')
+    storages.push('indexdb', 'localstorage', 'serviceworkers', 'filesystem')
   }
 
   // Clear storage data

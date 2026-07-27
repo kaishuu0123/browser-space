@@ -60,10 +60,10 @@ function createWindow(): void {
 
   mainWindow.setIcon(path.join(__dirname, '../../resources/icon.png'))
 
-  // ウィンドウの位置・サイズを復元
+  // ウィンドウの位置・サイズを復元（画面外チェック含む）
   applyWindowState(mainWindow)
 
-  // ウィンドウの状態変更を追跡して自動保存
+  // ウィンドウの状態変更を追跡して自動保存（画面切断時の補正含む）
   trackWindowState(mainWindow)
 
   const rendererView = new WebContentsView({
