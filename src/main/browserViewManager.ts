@@ -243,11 +243,18 @@ export function updateBrowserViewBounds(
 }
 
 // Force repaint WebContentsView
+// invalidate() alone is not enough when the window comes back from an inactive state
+// (the view stays blank until its bounds change), so nudge the bounds by 1px and restore them.
 export function repaintBrowserView(activeProfileId: string | null): void {
   if (!activeProfileId) return
 
   const view = browserViews.get(activeProfileId)
-  if (!view) return
+  if (!view || view.webContents.isDestroyed()) return
 
+  const bounds = view.getBounds()
+  if (bounds.width > 1 && bounds.height > 0) {
+    view.setBounds({ ...bounds, width: bounds.width - 1 })
+    view.setBounds(bounds)
+  }
   view.webContents.invalidate()
 }
