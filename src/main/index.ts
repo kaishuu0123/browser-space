@@ -22,7 +22,7 @@ function buildMacMenu(): void {
   Menu.setApplicationMenu(
     Menu.buildFromTemplate([
       {
-        label: app.name,
+        label: 'Browser Space',
         submenu: [
           { label: 'About Browser Space', click: () => sendToRenderer('menu-about') },
           {
