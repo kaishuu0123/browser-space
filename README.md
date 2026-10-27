@@ -25,13 +25,13 @@ A multi-account browser session manager. Switch between isolated Gmail, Slack, a
 #### Install
 
 ```bash
-yarn
+pnpm install
 ```
 
 #### Development
 
 ```bash
-yarn dev
+pnpm dev
 ```
 
 #### Build
@@ -51,7 +51,7 @@ sudo apt-get update
 sudo apt-get install -y wine wine32 wine64
 
 # Build for Windows
-yarn build:win
+pnpm build:win
 ```
 
 The Windows installer will be created in `dist/` directory:
@@ -60,7 +60,7 @@ The Windows installer will be created in `dist/` directory:
 ##### macOS Build
 
 ```bash
-yarn build:mac
+pnpm build:mac
 ```
 
 Requirements: macOS system required for proper code signing
@@ -68,7 +68,7 @@ Requirements: macOS system required for proper code signing
 ##### Linux Build
 
 ```bash
-yarn build:linux
+pnpm build:linux
 ```
 
 Outputs:
@@ -94,7 +94,7 @@ dist/
 - **Build Tool:** electron-vite
 - **UI:** React + TypeScript
 - **Styling:** Tailwind CSS
-- **Package Manager:** yarn
+- **Package Manager:** pnpm
 - **Node.js:** 24 LTS
 
 ## License

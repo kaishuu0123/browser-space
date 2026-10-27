@@ -46,13 +46,13 @@ code browser-space
 
 Once the container is running:
 ```bash
-yarn install
+pnpm install
 ```
 
 ### 3. Run Development Server
 
 ```bash
-yarn dev
+pnpm dev
 ```
 
 This will start the Electron app in development mode with hot reload.
@@ -113,20 +113,20 @@ The `resources/icon.png.placeholder` needs to be replaced with an actual PNG ico
 
 ```bash
 # Build for Windows
-yarn build:win
+pnpm build:win
 
 # Build for macOS
-yarn build:mac
+pnpm build:mac
 
 # Build for Linux
-yarn build:linux
+pnpm build:linux
 ```
 
 ## Troubleshooting
 
 If you encounter issues:
 1. Make sure you're using Node.js 24 LTS
-2. Delete `node_modules` and `yarn.lock`, then run `yarn install` again
+2. Delete `node_modules` and `pnpm-lock.yaml`, then run `pnpm install` again
 3. Check that all TypeScript types are properly installed
 
 ## Tech Stack Reference

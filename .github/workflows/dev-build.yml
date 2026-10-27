@@ -17,14 +17,17 @@ jobs:
       - name: Check out Git repository
         uses: actions/checkout@v7
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Install Node.js
         uses: actions/setup-node@v6
         with:
           node-version: 24
-          cache: "yarn"
+          cache: "pnpm"
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Set Dev Version and Name
         run: |
@@ -32,7 +35,7 @@ jobs:
 
       - name: Build Windows
         if: ${{ matrix.os == 'windows-latest'}}
-        run: yarn build:win
+        run: pnpm build:win
 
       - name: Import Apple installer signing certificate
         if: ${{ matrix.os == 'macos-latest'}}
@@ -47,7 +50,7 @@ jobs:
           mkdir -p ~/private_keys
           echo "${{ secrets.APPLE_API_KEY_BASE64 }}" > ~/private_keys/AuthKey_${{ secrets.APPLE_API_KEY_ID }}.p8
           xattr -cr .
-          yarn build:mac
+          pnpm build:mac
         env:
           APPLE_API_KEY: ~/private_keys/AuthKey_${{ secrets.APPLE_API_KEY_ID }}.p8
           APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
@@ -58,7 +61,7 @@ jobs:
         if: ${{ matrix.os == 'ubuntu-latest'}}
         run: |
           sudo snap install snapcraft --classic
-          yarn build:linux
+          pnpm build:linux
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v7
