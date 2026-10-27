@@ -139,16 +139,19 @@ function createWindow(): void {
   mainWindow.on('enter-full-screen', updateLayout)
   mainWindow.on('leave-full-screen', updateLayout)
 
-  mainWindow.on('restore', () => {
-    updateRendererBounds()
-    const activeProfileId = getActiveProfileId()
-    if (activeProfileId) {
-      updateBrowserViewBounds(activeProfileId, mainWindow, getSidebarWidth())
-      repaintBrowserView(activeProfileId)
+  // Re-apply bounds and force a repaint. Without this the content area can stay blank
+  // (only the sidebar visible) after the window was inactive, until a sidebar item is clicked.
+  const refreshViews = () => {
+    updateLayout()
+    if (!(global.__isSettingsModalOpen ?? false)) {
+      repaintBrowserView(getActiveProfileId())
     }
     rendererView.webContents.invalidate()
-    rendererView.webContents.send('window-resized')
-  })
+  }
+
+  mainWindow.on('restore', refreshViews)
+  mainWindow.on('show', refreshViews)
+  mainWindow.on('focus', refreshViews)
 
   rendererView.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url)
