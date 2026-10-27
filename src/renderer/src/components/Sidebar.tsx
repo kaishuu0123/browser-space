@@ -11,6 +11,9 @@ interface SidebarProps {
   collapsed: boolean
   onToggleCollapse: () => void
   hasUpdate?: boolean
+  updateVersion?: string
+  onInstallUpdate?: () => void
+  onDismissUpdate?: () => void
   crashedProfileIds?: Set<string>
 }
 
@@ -23,6 +26,9 @@ export function Sidebar({
   collapsed,
   onToggleCollapse,
   hasUpdate = false,
+  updateVersion,
+  onInstallUpdate,
+  onDismissUpdate,
   crashedProfileIds = new Set(),
 }: SidebarProps): React.ReactElement {
   return (
@@ -69,6 +75,37 @@ export function Sidebar({
 
       {/* Bottom buttons */}
       <div className={`border-t border-gray-200 shrink-0 ${collapsed ? 'p-2' : 'p-3'}`}>
+        {updateVersion &&
+          (collapsed ? (
+            <button
+              type="button"
+              onClick={onInstallUpdate}
+              className="w-full p-2 mb-1 hover:bg-blue-50 rounded transition-colors"
+              title={`Update v${updateVersion} ready. Click to restart and update`}
+            >
+              <span className="codicon codicon-arrow-circle-up text-xl text-blue-500" />
+            </button>
+          ) : (
+            <div className="mb-2 rounded-md border border-blue-200 bg-blue-50 p-2 text-xs text-blue-700">
+              <p className="font-medium">Update v{updateVersion} ready</p>
+              <div className="mt-1.5 flex gap-1">
+                <button
+                  type="button"
+                  onClick={onInstallUpdate}
+                  className="rounded bg-blue-500 px-2 py-1 text-white hover:bg-blue-600 transition-colors"
+                >
+                  Restart and update
+                </button>
+                <button
+                  type="button"
+                  onClick={onDismissUpdate}
+                  className="rounded px-2 py-1 hover:bg-blue-100 transition-colors"
+                >
+                  Later
+                </button>
+              </div>
+            </div>
+          ))}
         {collapsed ? (
           <div className="flex flex-col gap-1">
             <button

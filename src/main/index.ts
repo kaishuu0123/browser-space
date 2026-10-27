@@ -1,7 +1,3 @@
-import pkg from 'electron-updater'
-
-const { autoUpdater } = pkg
-
 import path, { join } from 'node:path'
 import { is } from '@electron-toolkit/utils'
 import { app, BaseWindow, Menu, shell, WebContentsView } from 'electron'
@@ -11,39 +7,9 @@ import { applyContextMenu } from './contextMenu'
 import { FindbarWindow } from './findbar/FindbarWindow'
 import { setupIpcHandlers } from './ipcHandlers'
 import { getActiveProfileId, getSidebarCollapsed } from './profileManager'
+import { initAutoUpdater } from './updater'
 
 app.setName(app.name)
-
-export function initAutoUpdater(rendererView: WebContentsView): void {
-  // 開発環境では動かさない
-  if (!app.isPackaged) return
-
-  autoUpdater.autoDownload = true
-  autoUpdater.autoInstallOnAppQuit = true
-
-  autoUpdater.on('checking-for-update', () => {
-    rendererView.webContents.send('update-checking')
-  })
-
-  autoUpdater.on('update-available', (info) => {
-    rendererView.webContents.send('update-available', info)
-  })
-
-  autoUpdater.on('update-not-available', () => {
-    rendererView.webContents.send('update-not-available')
-  })
-
-  autoUpdater.on('update-downloaded', (info) => {
-    rendererView.webContents.send('update-downloaded', info)
-  })
-
-  autoUpdater.on('error', (err) => {
-    console.error('AutoUpdater error:', err)
-    rendererView.webContents.send('update-error', err.message)
-  })
-
-  autoUpdater.checkForUpdates()
-}
 
 // Remove default menu (avoids BaseWindow compatibility issues)
 app.on('ready', () => {
@@ -188,7 +154,7 @@ if (!gotTheLock) {
     FindbarWindow.setupIpc()
     createWindow()
 
-    initAutoUpdater(global.__rendererView as WebContentsView)
+    initAutoUpdater(() => (global.__rendererView as WebContentsView | undefined)?.webContents)
 
     app.on('activate', () => {
       if (BaseWindow.getAllWindows().length === 0) createWindow()

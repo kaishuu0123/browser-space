@@ -1,7 +1,7 @@
 import type React from 'react'
 import { useEffect, useState } from 'react'
 import appIcon from '../../../../resources/icon.png'
-import type { Profile } from '../../../shared/types'
+import type { Profile, UpdateState } from '../../../shared/types'
 import { useProfileOperations } from '../hooks/useProfile'
 import { ClearDataDialog } from './ClearDataDialog'
 import { ProfileForm } from './ProfileForm'
@@ -12,49 +12,39 @@ import { Label } from './ui/label'
 import { Switch } from './ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs'
 
-type UpdateStatus = 'checking' | 'up-to-date' | 'available' | 'downloaded' | 'error'
-
-function AboutTabContent(): React.ReactElement {
+function AboutTabContent({ updateState }: { updateState: UpdateState }): React.ReactElement {
   const [version] = useState(() => window.updaterApi.getAppVersion())
-  const [updateStatus, setUpdateStatus] = useState<UpdateStatus>('checking')
-  const [latestVersion, setLatestVersion] = useState('')
-  const [isDevError, setIsDevError] = useState(false)
+  const [copied, setCopied] = useState(false)
 
+  // 開くたびに確認する(確認中・DL中・DL済みなら main 側で何もしない)
   useEffect(() => {
     window.updaterApi.checkForUpdates()
-
-    const onChecking = () => setUpdateStatus('checking')
-    const onNotAvailable = () => setUpdateStatus('up-to-date')
-    const onAvailable = (_e, info: { version: string }) => {
-      setUpdateStatus('available')
-      setLatestVersion(info.version)
-    }
-    const onDownloaded = (_e, info: { version: string }) => {
-      setUpdateStatus('downloaded')
-      setLatestVersion(info.version)
-    }
-    const onError = (_e, msg: string) => {
-      setIsDevError(msg === 'dev')
-      setUpdateStatus('error')
-    }
-
-    window.electron.ipcRenderer.on('update-checking', onChecking)
-    window.electron.ipcRenderer.on('update-not-available', onNotAvailable)
-    window.electron.ipcRenderer.on('update-available', onAvailable)
-    window.electron.ipcRenderer.on('update-downloaded', onDownloaded)
-    window.electron.ipcRenderer.on('update-error', onError)
-
-    return () => {
-      window.electron.ipcRenderer.removeListener('update-checking', onChecking)
-      window.electron.ipcRenderer.removeListener('update-not-available', onNotAvailable)
-      window.electron.ipcRenderer.removeListener('update-available', onAvailable)
-      window.electron.ipcRenderer.removeListener('update-downloaded', onDownloaded)
-      window.electron.ipcRenderer.removeListener('update-error', onError)
-    }
   }, [])
 
+  const copyError = async () => {
+    try {
+      await navigator.clipboard.writeText(updateState.error ?? '')
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      // clipboard unavailable
+    }
+  }
+
+  const checkAgainButton = (
+    <button
+      type="button"
+      onClick={() => window.updaterApi.checkForUpdates()}
+      title="Check for updates"
+      className="cursor-pointer text-gray-400 hover:text-gray-600"
+    >
+      <span aria-hidden="true" className="codicon codicon-refresh" />
+    </button>
+  )
+
   const renderUpdateStatus = () => {
-    switch (updateStatus) {
+    switch (updateState.status) {
+      case 'idle':
       case 'checking':
         return (
           <div className="flex items-center gap-2 text-sm text-gray-500">
@@ -82,25 +72,48 @@ function AboutTabContent(): React.ReactElement {
           </div>
         )
       case 'up-to-date':
-        return <p className="text-sm text-green-600">✓ Up to date</p>
+        return (
+          <div className="flex items-center gap-2">
+            <p className="text-sm text-green-600">✓ Up to date</p>
+            {checkAgainButton}
+          </div>
+        )
       case 'available':
         return (
-          <p className="text-sm text-blue-600">↑ v{latestVersion} available (downloading...)</p>
+          <p className="text-sm text-blue-600">
+            ↑ v{updateState.version} available (downloading...)
+          </p>
         )
       case 'downloaded':
         return (
           <div className="flex items-center gap-2">
-            <p className="text-sm text-green-600">✓ v{latestVersion} ready to install</p>
+            <p className="text-sm text-green-600">✓ v{updateState.version} ready to install</p>
             <Button size="sm" onClick={() => window.updaterApi.installUpdate()}>
               Restart and update
             </Button>
           </div>
         )
       case 'error':
+        if (updateState.error === 'dev') {
+          return <p className="text-sm text-gray-400">— Not available in development</p>
+        }
         return (
-          <p className="text-sm text-gray-400">
-            {isDevError ? '— Not available in development' : '✗ Failed to check for updates'}
-          </p>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={copyError}
+              title={`${updateState.error}\n\nClick to copy error details`}
+              className="inline-flex cursor-pointer items-center gap-1.5 text-sm text-gray-400 hover:text-gray-600"
+            >
+              <span>✗ Failed to check for updates</span>
+              <span
+                aria-hidden="true"
+                className={`codicon ${copied ? 'codicon-check text-green-600' : 'codicon-copy'}`}
+              />
+              {copied && <span className="text-green-600">Copied</span>}
+            </button>
+            {checkAgainButton}
+          </div>
         )
     }
   }
@@ -121,12 +134,14 @@ interface SettingsModalProps {
   open: boolean
   onClose: () => void
   onProfilesChange: () => void
+  updateState: UpdateState
 }
 
 export function SettingsModal({
   open,
   onClose,
   onProfilesChange,
+  updateState,
 }: SettingsModalProps): React.ReactElement {
   const [profiles, setProfiles] = useState<Profile[]>([])
   const { createProfile, updateProfile, deleteProfile, getDataPath, reorderProfiles } =
@@ -313,7 +328,7 @@ export function SettingsModal({
 
             {/* About Tab */}
             <TabsContent value="about">
-              <AboutTabContent />
+              <AboutTabContent updateState={updateState} />
             </TabsContent>
           </Tabs>
         </DialogContent>

@@ -1,8 +1,4 @@
-import { app, type BaseWindow, ipcMain, type WebContentsView } from 'electron'
-import pkg from 'electron-updater'
-
-const { autoUpdater } = pkg
-
+import { app, type BaseWindow, ipcMain } from 'electron'
 import { IPC_CHANNELS } from '../shared/ipc'
 import {
   getBrowserView,
@@ -226,23 +222,8 @@ export function setupIpcHandlers(): void {
     }
   )
 
-  // Auto updater: quit and install
-  ipcMain.on('install-update', () => {
-    autoUpdater.quitAndInstall()
-  })
-
   // App version (synchronous)
   ipcMain.on('get-app-version', (event) => {
     event.returnValue = app.getVersion()
-  })
-
-  // Trigger update check from renderer (e.g. About tab)
-  ipcMain.on('check-for-updates-now', () => {
-    const rendererView = global.__rendererView as WebContentsView
-    if (!app.isPackaged) {
-      rendererView?.webContents.send('update-error', 'dev')
-      return
-    }
-    autoUpdater.checkForUpdates()
   })
 }
