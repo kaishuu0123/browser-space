@@ -545,10 +545,11 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps): 
     <form onSubmit={handleSubmit} className="space-y-4">
       {/* Profile Name */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="profile-name" className="block text-sm font-medium text-gray-700 mb-1">
           Profile Name <span className="text-red-500">*</span>
         </label>
         <Input
+          id="profile-name"
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
@@ -559,10 +560,11 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps): 
 
       {/* Home URL */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="profile-home-url" className="block text-sm font-medium text-gray-700 mb-1">
           Home URL <span className="text-red-500">*</span>
         </label>
         <Input
+          id="profile-home-url"
           type="url"
           value={homeUrl}
           onChange={(e) => setHomeUrl(e.target.value)}
@@ -573,8 +575,11 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps): 
 
       {/* Language */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Language</label>
+        <label htmlFor="profile-language" className="block text-sm font-medium text-gray-700 mb-1">
+          Language
+        </label>
         <select
+          id="profile-language"
           value={language}
           onChange={(e) => setLanguage(e.target.value)}
           className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
@@ -590,7 +595,7 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps): 
 
       {/* Notification Settings */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Notifications</label>
+        <span className="block text-sm font-medium text-gray-700 mb-2">Notifications</span>
         <div className="space-y-2">
           <label className="flex items-center gap-2 cursor-pointer">
             <input
@@ -651,7 +656,7 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps): 
 
       {/* Icon Type Selection */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Icon Type</label>
+        <span className="block text-sm font-medium text-gray-700 mb-2">Icon Type</span>
         <div className="flex gap-2 mb-3">
           <Button
             type="button"
@@ -749,7 +754,7 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps): 
 
       {/* Color Picker */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Color</label>
+        <span className="block text-sm font-medium text-gray-700 mb-2">Color</span>
         <div className="flex gap-2 items-center mb-2">
           {PRESET_COLORS.map((color) => (
             <button

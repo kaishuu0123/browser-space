@@ -17,7 +17,7 @@ function getSystemLocale(): string {
 export function getOrCreateBrowserView(profileId: string, mainWindow: BaseWindow): WebContentsView {
   // Check if WebContentsView already exists
   if (browserViews.has(profileId)) {
-    return browserViews.get(profileId)!
+    return browserViews.get(profileId) as WebContentsView
   }
 
   // Get profile data

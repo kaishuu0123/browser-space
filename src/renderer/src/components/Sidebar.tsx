@@ -37,6 +37,7 @@ export function Sidebar({
         <div className="flex gap-1">
           {!collapsed && (
             <button
+              type="button"
               onClick={onReloadClick}
               className="p-1.5 hover:bg-gray-100 rounded transition-colors"
               title="Reload"
@@ -45,6 +46,7 @@ export function Sidebar({
             </button>
           )}
           <button
+            type="button"
             onClick={onToggleCollapse}
             className="p-1.5 hover:bg-gray-100 rounded transition-colors"
             title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
@@ -70,6 +72,7 @@ export function Sidebar({
         {collapsed ? (
           <div className="flex flex-col gap-1">
             <button
+              type="button"
               onClick={onReloadClick}
               className="w-full p-2 hover:bg-gray-100 rounded transition-colors"
               title="Reload"
@@ -77,6 +80,7 @@ export function Sidebar({
               <span className="codicon codicon-refresh text-xl text-gray-600" />
             </button>
             <button
+              type="button"
               onClick={onSettingsClick}
               className="w-full p-2 hover:bg-gray-100 rounded transition-colors"
               title={hasUpdate ? 'Settings (Update ready)' : 'Settings'}
@@ -91,6 +95,7 @@ export function Sidebar({
           </div>
         ) : (
           <button
+            type="button"
             onClick={onSettingsClick}
             className="w-full flex items-center gap-2 px-2 py-1.5 hover:bg-gray-100 rounded transition-colors text-sm text-gray-600"
             title="Settings"

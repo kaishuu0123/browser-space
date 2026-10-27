@@ -27,6 +27,7 @@ export function ProfileItem({
 
   return (
     <button
+      type="button"
       onClick={onClick}
       className={`
         w-full flex items-center ${collapsed ? 'justify-center px-2' : 'gap-3 px-3'} py-2.5

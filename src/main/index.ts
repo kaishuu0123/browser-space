@@ -2,9 +2,9 @@ import pkg from 'electron-updater'
 
 const { autoUpdater } = pkg
 
+import path, { join } from 'node:path'
 import { is } from '@electron-toolkit/utils'
 import { app, BaseWindow, Menu, shell, WebContentsView } from 'electron'
-import path, { join } from 'path'
 import icon from '../../resources/icon.png?asset'
 import { repaintBrowserView, updateBrowserViewBounds } from './browserViewManager'
 import { applyContextMenu } from './contextMenu'
@@ -155,8 +155,8 @@ function createWindow(): void {
     return { action: 'deny' }
   })
 
-  if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-    rendererView.webContents.loadURL(process.env['ELECTRON_RENDERER_URL'])
+  if (is.dev && process.env.ELECTRON_RENDERER_URL) {
+    rendererView.webContents.loadURL(process.env.ELECTRON_RENDERER_URL)
   } else {
     rendererView.webContents.loadFile(join(__dirname, '../renderer/index.html'))
   }

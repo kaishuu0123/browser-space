@@ -1,5 +1,5 @@
+import path from 'node:path'
 import { type BaseWindow, BrowserWindow, ipcMain, type WebContents } from 'electron'
-import path from 'path'
 
 // electron-vite のビルド出力構造:
 //   out/main/index.js        ← __dirname = out/main
