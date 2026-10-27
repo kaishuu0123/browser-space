@@ -1,6 +1,6 @@
+import { promises as fs } from 'node:fs'
+import { join } from 'node:path'
 import { app } from 'electron'
-import { promises as fs } from 'fs'
-import { join } from 'path'
 import { v4 as uuidv4 } from 'uuid'
 
 // Get icons directory path

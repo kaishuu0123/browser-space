@@ -53,7 +53,6 @@ export function SearchBar({ onClose }: SearchBarProps): React.ReactElement {
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
-      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       e.shiftKey ? handlePrev() : handleNext()
     }
     if (e.key === 'Escape') {
@@ -80,6 +79,7 @@ export function SearchBar({ onClose }: SearchBarProps): React.ReactElement {
       <div className="flex items-center justify-between mt-1">
         <div className="flex gap-1">
           <button
+            type="button"
             onClick={handlePrev}
             disabled={matchInfo.total === 0}
             className="p-0.5 rounded hover:bg-gray-100 disabled:opacity-30"
@@ -88,6 +88,7 @@ export function SearchBar({ onClose }: SearchBarProps): React.ReactElement {
             <span className="codicon codicon-chevron-up text-xs" />
           </button>
           <button
+            type="button"
             onClick={handleNext}
             disabled={matchInfo.total === 0}
             className="p-0.5 rounded hover:bg-gray-100 disabled:opacity-30"
@@ -97,6 +98,7 @@ export function SearchBar({ onClose }: SearchBarProps): React.ReactElement {
           </button>
         </div>
         <button
+          type="button"
           onClick={handleClose}
           className="p-0.5 rounded hover:bg-gray-100 text-gray-500"
           title="Close (Esc)"

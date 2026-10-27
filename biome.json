@@ -30,28 +30,7 @@
   "linter": {
     "enabled": true,
     "rules": {
-      "preset": "recommended",
-      "a11y": {
-        "noLabelWithoutControl": "warn",
-        "noSvgWithoutTitle": "warn",
-        "useButtonType": "warn",
-        "useHtmlLang": "warn"
-      },
-      "complexity": {
-        "useLiteralKeys": "warn"
-      },
-      "correctness": {
-        "noUnusedVariables": "warn",
-        "useExhaustiveDependencies": "warn"
-      },
-      "style": {
-        "noNonNullAssertion": "warn",
-        "useImportType": "warn",
-        "useNodejsImportProtocol": "warn"
-      },
-      "suspicious": {
-        "noUnknownAtRules": "off"
-      }
+      "preset": "recommended"
     }
   },
   "assist": {

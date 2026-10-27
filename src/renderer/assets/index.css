@@ -1,3 +1,4 @@
+/* biome-ignore-all lint/suspicious/noUnknownAtRules: Tailwind CSS v3 directives (@tailwind); Biome has no Tailwind v3 at-rule support (tailwindDirectives only covers v4 syntax) */
 /* Import Codicons first */
 @import "@vscode/codicons/dist/codicon.css";
 
