@@ -7,7 +7,6 @@ import { setupIpcHandlers } from './ipcHandlers'
 import { updateBrowserViewBounds, repaintBrowserView } from './browserViewManager'
 import { getActiveProfileId, getSidebarCollapsed } from './profileManager'
 import { FindbarWindow } from './findbar/FindbarWindow'
-import { applyWindowState, trackWindowState } from './windowStateManager'
 import { applyContextMenu } from './contextMenu'
 import icon from '../../resources/icon.png?asset'
 
@@ -50,7 +49,11 @@ app.on('ready', () => {
 })
 
 function createWindow(): void {
+  // Position, size and maximized state are persisted and restored by Electron itself,
+  // which also keeps the window on a connected display when monitors change.
   const mainWindow = new BaseWindow({
+    name: 'main-window',
+    windowStatePersistence: true,
     width: 1200,
     height: 800,
     show: false,
@@ -59,12 +62,6 @@ function createWindow(): void {
   })
 
   mainWindow.setIcon(path.join(__dirname, '../../resources/icon.png'))
-
-  // ウィンドウの位置・サイズを復元（画面外チェック含む）
-  applyWindowState(mainWindow)
-
-  // ウィンドウの状態変更を追跡して自動保存（画面切断時の補正含む）
-  trackWindowState(mainWindow)
 
   const rendererView = new WebContentsView({
     webPreferences: {
