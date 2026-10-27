@@ -7,8 +7,9 @@
   "author": "kaishuu0123",
   "license": "MIT",
   "scripts": {
-    "format": "prettier --write .",
-    "lint": "eslint . --ext .js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix",
+    "format": "biome format --write .",
+    "lint": "biome lint .",
+    "biome:check": "biome check .",
     "typecheck:node": "tsc --noEmit -p tsconfig.node.json --composite false",
     "typecheck:web": "tsc --noEmit -p tsconfig.web.json --composite false",
     "typecheck": "npm run typecheck:node && npm run typecheck:web",
@@ -38,10 +39,8 @@
     "uuid": "^11.0.3"
   },
   "devDependencies": {
-    "@electron-toolkit/eslint-config": "^1.0.2",
-    "@electron-toolkit/eslint-config-ts": "^3.1.0",
+    "@biomejs/biome": "2.6.3",
     "@electron-toolkit/tsconfig": "^2.0.0",
-    "@eslint/js": "^9.17.0",
     "@types/node": "^24",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
@@ -52,19 +51,13 @@
     "electron": "^45.0.0",
     "electron-builder": "26.15.3",
     "electron-vite": "5.0.0",
-    "eslint": "^9.17.0",
-    "eslint-plugin-react": "^7.37.2",
-    "eslint-plugin-react-hooks": "^5.1.0",
-    "eslint-plugin-react-refresh": "^0.4.16",
     "globals": "^15.14.0",
     "postcss": "^8.4.49",
-    "prettier": "^3.4.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "tailwind-merge": "^3.4.0",
     "tailwindcss": "^3.4.17",
     "typescript": "^5.7.2",
-    "typescript-eslint": "^8.18.2",
     "vite": "^7.1.10"
   }
 }
