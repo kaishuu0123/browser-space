@@ -1,7 +1,7 @@
 import type React from 'react'
 import { useCallback, useEffect, useState } from 'react'
 import { CrashedView } from './components/CrashedView'
-import { SettingsModal } from './components/SettingsModal'
+import { SettingsModal, type SettingsTab } from './components/SettingsModal'
 import { Sidebar } from './components/Sidebar'
 import { useActiveProfile, useProfiles, useSidebarCollapsed } from './hooks/useProfile'
 import { useUpdateState } from './hooks/useUpdateState'
@@ -11,6 +11,24 @@ function App(): React.ReactElement {
   const { activeProfileId, setActive } = useActiveProfile()
   const { collapsed, setCollapsed } = useSidebarCollapsed()
   const [showSettings, setShowSettings] = useState(false)
+  const [settingsTab, setSettingsTab] = useState<{ name: SettingsTab }>({ name: 'general' })
+
+  const openSettings = useCallback((name: SettingsTab) => {
+    setSettingsTab({ name })
+    setShowSettings(true)
+  }, [])
+
+  // Application menu (macOS) -> About / Check for Updates (Settings の About タブ)
+  useEffect(() => {
+    const removeAbout = window.electron.ipcRenderer.on('menu-about', () => openSettings('about'))
+    const removeCheckForUpdates = window.electron.ipcRenderer.on('menu-check-for-updates', () =>
+      openSettings('about')
+    )
+    return () => {
+      removeAbout()
+      removeCheckForUpdates()
+    }
+  }, [openSettings])
   const [crashedProfileIds, setCrashedProfileIds] = useState<Set<string>>(new Set())
   const [, forceUpdate] = useState({})
   const updateState = useUpdateState()
@@ -82,7 +100,7 @@ function App(): React.ReactElement {
         profiles={profiles}
         activeProfileId={activeProfileId}
         onProfileClick={handleProfileClick}
-        onSettingsClick={() => setShowSettings(true)}
+        onSettingsClick={() => openSettings('general')}
         onReloadClick={handleReloadClick}
         collapsed={collapsed}
         onToggleCollapse={() => setCollapsed(!collapsed)}
@@ -104,6 +122,7 @@ function App(): React.ReactElement {
         onClose={() => setShowSettings(false)}
         onProfilesChange={refreshProfiles}
         updateState={updateState}
+        initialTab={settingsTab}
       />
     </>
   )

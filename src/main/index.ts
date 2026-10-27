@@ -11,9 +11,45 @@ import { initAutoUpdater } from './updater'
 
 app.setName(app.name)
 
+function sendToRenderer(channel: string): void {
+  const rendererView = global.__rendererView as WebContentsView | undefined
+  rendererView?.webContents.send(channel)
+}
+
+// macOS はメニューを消せずネイティブの About パネルが出るので、
+// アプリ内の Settings > About に統一した最小限のアプリメニューを使う
+function buildMacMenu(): void {
+  Menu.setApplicationMenu(
+    Menu.buildFromTemplate([
+      {
+        label: app.name,
+        submenu: [
+          { label: 'About Browser Space', click: () => sendToRenderer('menu-about') },
+          {
+            label: 'Check for Updates…',
+            click: () => sendToRenderer('menu-check-for-updates'),
+          },
+          { type: 'separator' },
+          { role: 'services' },
+          { type: 'separator' },
+          { role: 'hide' },
+          { role: 'hideOthers' },
+          { role: 'unhide' },
+          { type: 'separator' },
+          { role: 'quit' },
+        ],
+      },
+    ])
+  )
+}
+
 // Remove default menu (avoids BaseWindow compatibility issues)
 app.on('ready', () => {
-  Menu.setApplicationMenu(null)
+  if (process.platform === 'darwin') {
+    buildMacMenu()
+  } else {
+    Menu.setApplicationMenu(null)
+  }
 })
 
 function createWindow(): void {
