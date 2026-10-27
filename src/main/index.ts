@@ -1,14 +1,16 @@
 import pkg from 'electron-updater'
+
 const { autoUpdater } = pkg
-import { app, shell, BaseWindow, WebContentsView, Menu } from 'electron'
-import path, { join } from 'path'
+
 import { is } from '@electron-toolkit/utils'
-import { setupIpcHandlers } from './ipcHandlers'
-import { updateBrowserViewBounds, repaintBrowserView } from './browserViewManager'
-import { getActiveProfileId, getSidebarCollapsed } from './profileManager'
-import { FindbarWindow } from './findbar/FindbarWindow'
-import { applyContextMenu } from './contextMenu'
+import { app, BaseWindow, Menu, shell, WebContentsView } from 'electron'
+import path, { join } from 'path'
 import icon from '../../resources/icon.png?asset'
+import { repaintBrowserView, updateBrowserViewBounds } from './browserViewManager'
+import { applyContextMenu } from './contextMenu'
+import { FindbarWindow } from './findbar/FindbarWindow'
+import { setupIpcHandlers } from './ipcHandlers'
+import { getActiveProfileId, getSidebarCollapsed } from './profileManager'
 
 app.setName(app.name)
 

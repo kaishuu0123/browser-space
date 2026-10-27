@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useCallback } from 'react'
-import { useProfiles, useActiveProfile, useSidebarCollapsed } from './hooks/useProfile'
-import { Sidebar } from './components/Sidebar'
-import { SettingsModal } from './components/SettingsModal'
+import type React from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { CrashedView } from './components/CrashedView'
+import { SettingsModal } from './components/SettingsModal'
+import { Sidebar } from './components/Sidebar'
+import { useActiveProfile, useProfiles, useSidebarCollapsed } from './hooks/useProfile'
 
 function App(): React.ReactElement {
   const { profiles, loading: profilesLoading, refreshProfiles } = useProfiles()

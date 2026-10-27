@@ -1,7 +1,7 @@
-import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
-import { IPC_CHANNELS, ProfileAPI, SettingsAPI, IconAPI } from '../shared/ipc'
-import { Profile } from '../shared/types'
+import { contextBridge, ipcRenderer } from 'electron'
+import { type IconAPI, IPC_CHANNELS, type ProfileAPI, type SettingsAPI } from '../shared/ipc'
+import type { Profile } from '../shared/types'
 
 // Profile API
 const profileApi: ProfileAPI = {

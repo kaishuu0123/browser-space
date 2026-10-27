@@ -1,4 +1,4 @@
-import { BrowserWindow, BaseWindow, dialog } from 'electron'
+import { type BaseWindow, type BrowserWindow, dialog } from 'electron'
 import { getProfileById, updateProfile } from './profileManager'
 
 interface NotificationPermissionRequest {

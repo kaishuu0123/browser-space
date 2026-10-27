@@ -1,15 +1,16 @@
-import React, { useState, useEffect } from 'react'
-import { Profile } from '../../../shared/types'
+import type React from 'react'
+import { useEffect, useState } from 'react'
+import appIcon from '../../../../resources/icon.png'
+import type { Profile } from '../../../shared/types'
 import { useProfileOperations } from '../hooks/useProfile'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs'
-import { Label } from './ui/label'
-import { Switch } from './ui/switch'
-import { Button } from './ui/button'
+import { ClearDataDialog } from './ClearDataDialog'
 import { ProfileForm } from './ProfileForm'
 import { SortableProfileList } from './SortableProfileList'
-import { ClearDataDialog } from './ClearDataDialog'
-import appIcon from '../../../../resources/icon.png'
+import { Button } from './ui/button'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog'
+import { Label } from './ui/label'
+import { Switch } from './ui/switch'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs'
 
 type UpdateStatus = 'checking' | 'up-to-date' | 'available' | 'downloaded' | 'error'
 
@@ -58,8 +59,19 @@ function AboutTabContent(): React.ReactElement {
         return (
           <div className="flex items-center gap-2 text-sm text-gray-500">
             <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              />
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+              />
             </svg>
             <span>Checking for updates...</span>
           </div>
@@ -68,9 +80,7 @@ function AboutTabContent(): React.ReactElement {
         return <p className="text-sm text-green-600">✓ Up to date</p>
       case 'available':
         return (
-          <p className="text-sm text-blue-600">
-            ↑ v{latestVersion} available (downloading...)
-          </p>
+          <p className="text-sm text-blue-600">↑ v{latestVersion} available (downloading...)</p>
         )
       case 'downloaded':
         return (

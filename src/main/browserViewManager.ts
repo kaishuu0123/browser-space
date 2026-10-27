@@ -1,9 +1,9 @@
-import { WebContentsView, BaseWindow, session, app, shell } from 'electron'
-import { getProfileById } from './profileManager'
-import { showNotificationPermissionDialog } from './notificationManager'
-import { FindbarWindow } from './findbar/FindbarWindow'
-import { applyContextMenu } from './contextMenu'
+import { app, type BaseWindow, session, shell, WebContentsView } from 'electron'
 import { IPC_CHANNELS } from '../shared/ipc'
+import { applyContextMenu } from './contextMenu'
+import { FindbarWindow } from './findbar/FindbarWindow'
+import { showNotificationPermissionDialog } from './notificationManager'
+import { getProfileById } from './profileManager'
 
 // Map to store WebContentsViews by profile ID
 const browserViews = new Map<string, WebContentsView>()

@@ -1,8 +1,7 @@
-import { resolve } from 'path'
-import { defineConfig, externalizeDepsPlugin } from 'electron-vite'
 import react from '@vitejs/plugin-react'
+import { defineConfig, externalizeDepsPlugin } from 'electron-vite'
 import fs from 'fs'
-import path from 'path'
+import path, { resolve } from 'path'
 import type { Plugin } from 'vite'
 
 // findbar.html を out/main/ にコピーするカスタムプラグイン

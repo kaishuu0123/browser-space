@@ -1,9 +1,8 @@
-import { v4 as uuidv4 } from 'uuid'
-import store from './store'
-import { Profile } from '../shared/types'
-
 import { app } from 'electron'
 import path from 'path'
+import { v4 as uuidv4 } from 'uuid'
+import type { Profile } from '../shared/types'
+import store from './store'
 
 // Get all profiles
 export function getAllProfiles(): Profile[] {

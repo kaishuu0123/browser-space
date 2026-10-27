@@ -1,4 +1,4 @@
-import { BrowserWindow, BaseWindow, WebContents, ipcMain } from 'electron'
+import { type BaseWindow, BrowserWindow, ipcMain, type WebContents } from 'electron'
 import path from 'path'
 
 // electron-vite のビルド出力構造:

@@ -1,5 +1,5 @@
-import React from 'react'
-import { Profile } from '../../../shared/types'
+import type React from 'react'
+import type { Profile } from '../../../shared/types'
 import { ProfileItem } from './ProfileItem'
 
 interface ProfileListProps {
@@ -15,7 +15,7 @@ export function ProfileList({
   activeProfileId,
   onProfileClick,
   collapsed,
-  crashedProfileIds = new Set()
+  crashedProfileIds = new Set(),
 }: ProfileListProps): React.ReactElement {
   if (profiles.length === 0) {
     return (

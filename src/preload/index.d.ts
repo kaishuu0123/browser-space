@@ -1,5 +1,5 @@
 import { ElectronAPI } from '@electron-toolkit/preload'
-import { ProfileAPI, SettingsAPI, IconAPI, SearchAPI } from '../shared/ipc'
+import { IconAPI, ProfileAPI, SearchAPI, SettingsAPI } from '../shared/ipc'
 
 declare global {
   interface Window {

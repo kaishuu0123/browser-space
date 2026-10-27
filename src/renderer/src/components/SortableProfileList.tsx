@@ -1,12 +1,11 @@
-import React, { useState, useEffect } from 'react'
 import {
-  DndContext,
   closestCenter,
+  DndContext,
+  type DragEndEvent,
   KeyboardSensor,
   PointerSensor,
   useSensor,
   useSensors,
-  DragEndEvent,
 } from '@dnd-kit/core'
 import {
   arrayMove,
@@ -16,7 +15,9 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { Profile } from '../../../shared/types'
+import type React from 'react'
+import { useEffect, useState } from 'react'
+import type { Profile } from '../../../shared/types'
 import { Button } from './ui/button'
 
 interface SortableProfileItemProps {

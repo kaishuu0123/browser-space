@@ -63,9 +63,9 @@ export function createProfile(
   const profile: Profile = {
     // ...
     notificationPermissions: {
-      'mail.google.com': 'granted',  // Gmail用プロファイルなら事前許可
-      'calendar.google.com': 'granted'
-    }
+      'mail.google.com': 'granted', // Gmail用プロファイルなら事前許可
+      'calendar.google.com': 'granted',
+    },
   }
   // ...
 }
@@ -80,10 +80,13 @@ export function createProfile(
 const [notificationDomains, setNotificationDomains] = useState<string[]>([])
 
 // プロファイル作成時に変換
-const notificationPermissions = notificationDomains.reduce((acc, domain) => {
-  acc[domain] = 'granted'
-  return acc
-}, {} as Record<string, 'granted' | 'denied' | 'default'>)
+const notificationPermissions = notificationDomains.reduce(
+  (acc, domain) => {
+    acc[domain] = 'granted'
+    return acc
+  },
+  {} as Record<string, 'granted' | 'denied' | 'default'>
+)
 ```
 
 ### 方法3: 既存プロファイルに手動追加
@@ -94,8 +97,8 @@ const notificationPermissions = notificationDomains.reduce((acc, domain) => {
 await window.profileApi.update(profileId, {
   notificationPermissions: {
     ...existingPermissions,
-    'new-domain.com': 'granted'
-  }
+    'new-domain.com': 'granted',
+  },
 })
 ```
 

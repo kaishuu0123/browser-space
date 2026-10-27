@@ -7,6 +7,7 @@ This is the initial project skeleton for **Browser Space**, a multi-account brow
 ## What's Included
 
 ### Configuration Files
+
 - ✅ devcontainer setup (Node.js 24 LTS)
 - ✅ TypeScript configuration
 - ✅ Biome (lint + format)
@@ -15,6 +16,7 @@ This is the initial project skeleton for **Browser Space**, a multi-account brow
 - ✅ electron-builder
 
 ### Project Structure
+
 ```
 browser-space/
 ├── .devcontainer/          # Dev container configuration
@@ -60,11 +62,13 @@ This will start the Electron app in development mode with hot reload.
 According to the requirements, you'll need to implement:
 
 #### Phase 1: Core Architecture
+
 - [ ] Multiple WebView management with session isolation
 - [ ] Profile data structure and persistence
 - [ ] Basic sidebar UI (collapsible)
 
 #### Phase 2: Profile Management
+
 - [ ] Settings screen with profile list
 - [ ] Profile creation/editing/deletion
 - [ ] Icon selection (Codicon integration)
@@ -72,12 +76,14 @@ According to the requirements, you'll need to implement:
 - [ ] Drag & drop reordering
 
 #### Phase 3: WebView Integration
+
 - [ ] Profile switching
 - [ ] Session isolation per profile
 - [ ] Favicon auto-fetch
 - [ ] Notification permission management
 
 #### Phase 4: Polish
+
 - [ ] Data path display
 - [ ] Memory optimization (suspend mode)
 - [ ] Background notification settings
@@ -86,9 +92,11 @@ According to the requirements, you'll need to implement:
 ## Important Notes
 
 ### Icon File
+
 The `resources/icon.png.placeholder` needs to be replaced with an actual PNG icon (512x512 or 1024x1024 recommended).
 
 ### Notification Permissions
+
 **CRITICAL**: Notification permissions must be handled properly:
 - Show permission dialog (like Chrome)
 - User must explicitly approve
@@ -96,6 +104,7 @@ The `resources/icon.png.placeholder` needs to be replaced with an actual PNG ico
 - Store permission state per profile
 
 ### Memory Management
+
 - Implement suspend mode for inactive profiles
 - Target: 300-400MB total memory usage
 - Option for background notifications per profile

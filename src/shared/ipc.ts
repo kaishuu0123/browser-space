@@ -1,4 +1,4 @@
-import { Profile } from './types'
+import type { Profile } from './types'
 
 // IPC channel names
 export const IPC_CHANNELS = {

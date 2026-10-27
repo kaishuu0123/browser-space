@@ -1,5 +1,5 @@
-import { app } from 'electron'
 import type { WebContentsView } from 'electron'
+import { app } from 'electron'
 import contextMenuModule from 'electron-context-menu'
 
 // electron-context-menu is ESM; handle both default and module.default

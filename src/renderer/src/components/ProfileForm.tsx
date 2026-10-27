@@ -1,5 +1,6 @@
-import React, { useState, useRef } from 'react'
-import { Profile } from '../../../shared/types'
+import type React from 'react'
+import { useRef, useState } from 'react'
+import type { Profile } from '../../../shared/types'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
 
@@ -17,7 +18,7 @@ const PRESET_ICONS = [
   'briefcase',
   'book',
   'calendar',
-  'database'
+  'database',
 ]
 
 // Comprehensive list of Codicons from @vscode/codicons
@@ -446,10 +447,19 @@ const ALL_ICONS = [
   'x',
   'zap',
   'zoom-in',
-  'zoom-out'
+  'zoom-out',
 ]
 
-const PRESET_COLORS = ['#EA4335', '#4285F4', '#FBBC04', '#34A853', '#9334E9', '#EC4899', '#F97316', '#06B6D4']
+const PRESET_COLORS = [
+  '#EA4335',
+  '#4285F4',
+  '#FBBC04',
+  '#34A853',
+  '#9334E9',
+  '#EC4899',
+  '#F97316',
+  '#06B6D4',
+]
 
 const LANGUAGES = [
   { value: '', label: 'System Default' },
@@ -466,13 +476,15 @@ const LANGUAGES = [
   { value: 'pt-BR', label: 'Português (Brasil)' },
   { value: 'ru-RU', label: 'Русский' },
   { value: 'ar-SA', label: 'العربية' },
-  { value: 'hi-IN', label: 'हिन्दी' }
+  { value: 'hi-IN', label: 'हिन्दी' },
 ]
 
 export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps): React.ReactElement {
   const [name, setName] = useState(profile?.name || '')
   const [homeUrl, setHomeUrl] = useState(profile?.homeUrl || '')
-  const [iconType, setIconType] = useState<'preset' | 'custom'>(profile?.icon === 'custom' ? 'custom' : 'preset')
+  const [iconType, setIconType] = useState<'preset' | 'custom'>(
+    profile?.icon === 'custom' ? 'custom' : 'preset'
+  )
   const [icon, setIcon] = useState(profile?.icon || 'account')
   const [iconColor, setIconColor] = useState(profile?.iconColor || '#3B82F6')
   const [customIconFilename, setCustomIconFilename] = useState(profile?.customIconPath || '')
@@ -493,7 +505,7 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps): 
     reader.onload = async (event) => {
       const base64 = event.target?.result as string
       setCustomIconPreview(base64)
-      
+
       try {
         const filename = await window.iconApi.upload(base64)
         setCustomIconFilename(filename)
@@ -523,7 +535,7 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps): 
       customIconPath: iconType === 'custom' ? customIconFilename : undefined,
       language: language || undefined,
       notificationMode,
-      notificationPermissions: profile?.notificationPermissions || {}
+      notificationPermissions: profile?.notificationPermissions || {},
     })
   }
 
@@ -536,7 +548,13 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps): 
         <label className="block text-sm font-medium text-gray-700 mb-1">
           Profile Name <span className="text-red-500">*</span>
         </label>
-        <Input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g., Work Gmail" required />
+        <Input
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="e.g., Work Gmail"
+          required
+        />
       </div>
 
       {/* Home URL */}
@@ -544,7 +562,13 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps): 
         <label className="block text-sm font-medium text-gray-700 mb-1">
           Home URL <span className="text-red-500">*</span>
         </label>
-        <Input type="url" value={homeUrl} onChange={(e) => setHomeUrl(e.target.value)} placeholder="https://gmail.com" required />
+        <Input
+          type="url"
+          value={homeUrl}
+          onChange={(e) => setHomeUrl(e.target.value)}
+          placeholder="https://gmail.com"
+          required
+        />
       </div>
 
       {/* Language */}
@@ -556,7 +580,9 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps): 
           className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
         >
           {LANGUAGES.map((lang) => (
-            <option key={lang.value} value={lang.value}>{lang.label}</option>
+            <option key={lang.value} value={lang.value}>
+              {lang.label}
+            </option>
           ))}
         </select>
         <p className="text-xs text-gray-500 mt-1">Browser language for this profile.</p>
@@ -572,12 +598,16 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps): 
               name="notificationMode"
               value="allow-all"
               checked={notificationMode === 'allow-all'}
-              onChange={(e) => setNotificationMode(e.target.value as 'allow-all' | 'ask' | 'deny-all')}
+              onChange={(e) =>
+                setNotificationMode(e.target.value as 'allow-all' | 'ask' | 'deny-all')
+              }
               className="w-4 h-4 text-blue-600"
             />
             <div>
               <p className="text-sm font-medium">Allow all</p>
-              <p className="text-xs text-gray-500">Automatically allow notifications from all websites</p>
+              <p className="text-xs text-gray-500">
+                Automatically allow notifications from all websites
+              </p>
             </div>
           </label>
           <label className="flex items-center gap-2 cursor-pointer">
@@ -586,12 +616,18 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps): 
               name="notificationMode"
               value="ask"
               checked={notificationMode === 'ask'}
-              onChange={(e) => setNotificationMode(e.target.value as 'allow-all' | 'ask' | 'deny-all')}
+              onChange={(e) =>
+                setNotificationMode(e.target.value as 'allow-all' | 'ask' | 'deny-all')
+              }
               className="w-4 h-4 text-blue-600"
             />
             <div>
-              <p className="text-sm font-medium">Ask when a site wants to show notifications (recommended)</p>
-              <p className="text-xs text-gray-500">You'll see a dialog when websites request permission</p>
+              <p className="text-sm font-medium">
+                Ask when a site wants to show notifications (recommended)
+              </p>
+              <p className="text-xs text-gray-500">
+                You'll see a dialog when websites request permission
+              </p>
             </div>
           </label>
           <label className="flex items-center gap-2 cursor-pointer">
@@ -600,7 +636,9 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps): 
               name="notificationMode"
               value="deny-all"
               checked={notificationMode === 'deny-all'}
-              onChange={(e) => setNotificationMode(e.target.value as 'allow-all' | 'ask' | 'deny-all')}
+              onChange={(e) =>
+                setNotificationMode(e.target.value as 'allow-all' | 'ask' | 'deny-all')
+              }
               className="w-4 h-4 text-blue-600"
             />
             <div>
@@ -615,10 +653,20 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps): 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">Icon Type</label>
         <div className="flex gap-2 mb-3">
-          <Button type="button" variant={iconType === 'preset' ? 'default' : 'outline'} size="sm" onClick={() => setIconType('preset')}>
+          <Button
+            type="button"
+            variant={iconType === 'preset' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setIconType('preset')}
+          >
             Preset Icons
           </Button>
-          <Button type="button" variant={iconType === 'custom' ? 'default' : 'outline'} size="sm" onClick={() => setIconType('custom')}>
+          <Button
+            type="button"
+            variant={iconType === 'custom' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setIconType('custom')}
+          >
             Custom Upload
           </Button>
         </div>
@@ -632,34 +680,64 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps): 
                   type="button"
                   onClick={() => setIcon(iconName)}
                   className={`w-12 h-12 flex items-center justify-center rounded border-2 transition-colors ${
-                    icon === iconName ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
+                    icon === iconName
+                      ? 'border-blue-500 bg-blue-50'
+                      : 'border-gray-200 hover:border-gray-300'
                   }`}
                   title={iconName}
                 >
-                  <span className={`codicon codicon-${iconName} text-2xl`} style={{ color: iconColor }} />
+                  <span
+                    className={`codicon codicon-${iconName} text-2xl`}
+                    style={{ color: iconColor }}
+                  />
                 </button>
               ))}
             </div>
-            <Button type="button" variant="ghost" size="sm" onClick={() => setShowAllIcons(!showAllIcons)}>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowAllIcons(!showAllIcons)}
+            >
               {showAllIcons ? 'Show Less' : `Show All Icons (${ALL_ICONS.length})`}
             </Button>
           </>
         ) : (
           <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-            <input ref={fileInputRef} type="file" accept="image/*" onChange={handleIconUpload} className="hidden" />
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleIconUpload}
+              className="hidden"
+            />
             {customIconPreview || customIconFilename ? (
               <div className="space-y-2">
                 {customIconPreview && (
-                  <img src={customIconPreview} alt="Custom icon" className="w-16 h-16 mx-auto rounded" />
+                  <img
+                    src={customIconPreview}
+                    alt="Custom icon"
+                    className="w-16 h-16 mx-auto rounded"
+                  />
                 )}
-                <Button type="button" variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => fileInputRef.current?.click()}
+                >
                   Change Icon
                 </Button>
               </div>
             ) : (
               <div>
                 <span className="codicon codicon-cloud-upload text-4xl text-gray-400 block mb-2" />
-                <Button type="button" variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => fileInputRef.current?.click()}
+                >
                   Upload Icon
                 </Button>
                 <p className="text-xs text-gray-500 mt-2">PNG, JPG (Recommended: 64x64px)</p>
@@ -713,7 +791,9 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps): 
 
       {/* Buttons */}
       <div className="flex gap-2 justify-end pt-4">
-        <Button type="button" variant="outline" onClick={onCancel}>Cancel</Button>
+        <Button type="button" variant="outline" onClick={onCancel}>
+          Cancel
+        </Button>
         <Button type="submit">{profile ? 'Update' : 'Create'} Profile</Button>
       </div>
     </form>

@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from 'react'
-import { Profile } from '../../../shared/types'
+import { useCallback, useEffect, useState } from 'react'
+import type { Profile } from '../../../shared/types'
 
 // Hook to get all profiles
 export function useProfiles() {
@@ -147,6 +147,6 @@ export function useProfileOperations() {
     updateProfile,
     deleteProfile,
     reorderProfiles,
-    getDataPath
+    getDataPath,
   }
 }
