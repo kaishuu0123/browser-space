@@ -15,7 +15,7 @@ jobs:
 
     steps:
       - name: Check out Git repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Install Node.js
         uses: actions/setup-node@v6
@@ -36,7 +36,7 @@ jobs:
 
       - name: Import Apple installer signing certificate
         if: ${{ matrix.os == 'macos-latest'}}
-        uses: Apple-Actions/import-codesign-certs@v6
+        uses: Apple-Actions/import-codesign-certs@v7
         with:
           p12-file-base64: ${{ secrets.APPLE_DEV_ID_APP }}
           p12-password: ${{ secrets.APPLE_DEV_ID_APP_PASS }}
@@ -61,7 +61,7 @@ jobs:
           yarn build:linux
 
       - name: Upload Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: browser-space-${{ matrix.os }}
           path: |

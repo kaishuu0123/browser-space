@@ -1,7 +1,7 @@
 import { electronAPI } from '@electron-toolkit/preload'
 import { contextBridge, ipcRenderer } from 'electron'
 import { type IconAPI, IPC_CHANNELS, type ProfileAPI, type SettingsAPI } from '../shared/ipc'
-import type { Profile } from '../shared/types'
+import type { Profile, UpdateState } from '../shared/types'
 
 // Profile API
 const profileApi: ProfileAPI = {
@@ -61,6 +61,9 @@ const updaterApi = {
   },
   getAppVersion: (): string => {
     return ipcRenderer.sendSync('get-app-version')
+  },
+  getUpdateState: (): Promise<UpdateState> => {
+    return ipcRenderer.invoke('get-update-state')
   },
   checkForUpdates: (): void => {
     ipcRenderer.send('check-for-updates-now')

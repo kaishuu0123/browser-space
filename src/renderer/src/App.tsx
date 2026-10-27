@@ -4,6 +4,7 @@ import { CrashedView } from './components/CrashedView'
 import { SettingsModal } from './components/SettingsModal'
 import { Sidebar } from './components/Sidebar'
 import { useActiveProfile, useProfiles, useSidebarCollapsed } from './hooks/useProfile'
+import { useUpdateState } from './hooks/useUpdateState'
 
 function App(): React.ReactElement {
   const { profiles, loading: profilesLoading, refreshProfiles } = useProfiles()
@@ -12,13 +13,8 @@ function App(): React.ReactElement {
   const [showSettings, setShowSettings] = useState(false)
   const [crashedProfileIds, setCrashedProfileIds] = useState<Set<string>>(new Set())
   const [, forceUpdate] = useState({})
-  const [updateInfo, setUpdateInfo] = useState<{ version: string } | null>(null)
-
-  useEffect(() => {
-    window.electron.ipcRenderer.on('update-downloaded', (_event, info) => {
-      setUpdateInfo(info)
-    })
-  }, [])
+  const updateState = useUpdateState()
+  const [dismissedUpdateVersion, setDismissedUpdateVersion] = useState<string | undefined>()
 
   // Listen for view crash
   useEffect(() => {
@@ -90,7 +86,14 @@ function App(): React.ReactElement {
         onReloadClick={handleReloadClick}
         collapsed={collapsed}
         onToggleCollapse={() => setCollapsed(!collapsed)}
-        hasUpdate={updateInfo !== null}
+        hasUpdate={updateState.status === 'downloaded'}
+        updateVersion={
+          updateState.status === 'downloaded' && updateState.version !== dismissedUpdateVersion
+            ? updateState.version
+            : undefined
+        }
+        onInstallUpdate={() => window.updaterApi.installUpdate()}
+        onDismissUpdate={() => setDismissedUpdateVersion(updateState.version)}
         crashedProfileIds={crashedProfileIds}
       />
 
@@ -100,6 +103,7 @@ function App(): React.ReactElement {
         open={showSettings}
         onClose={() => setShowSettings(false)}
         onProfilesChange={refreshProfiles}
+        updateState={updateState}
       />
     </>
   )
