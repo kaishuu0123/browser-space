@@ -31,7 +31,10 @@ mac:
   target:
     - target: dmg
       arch:
-        - x64
+        - universal
+    # electron-updater (MacUpdater) は zip がないと更新できない
+    - target: zip
+      arch:
         - universal
 dmg:
   artifactName: ${name}-${version}.${ext}
