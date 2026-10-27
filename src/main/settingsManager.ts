@@ -33,7 +33,6 @@ export function getLaunchOnStartup(): boolean {
 export function setLaunchOnStartup(enabled: boolean): void {
   app.setLoginItemSettings({
     openAtLogin: enabled,
-    openAsHidden: false, // macOSでバックグラウンド起動しない
   })
   store.set('launchOnStartup', enabled)
 }
