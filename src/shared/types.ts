@@ -32,5 +32,5 @@ export interface AppSettings {
 export const defaultSettings: AppSettings = {
   sidebarCollapsed: false,
   profiles: [],
-  activeProfileId: null
+  activeProfileId: null,
 }

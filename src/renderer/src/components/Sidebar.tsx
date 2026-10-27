@@ -1,5 +1,5 @@
-import React from 'react'
-import { Profile } from '../../../shared/types'
+import type React from 'react'
+import type { Profile } from '../../../shared/types'
 import { ProfileList } from './ProfileList'
 
 interface SidebarProps {

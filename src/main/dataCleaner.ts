@@ -42,7 +42,7 @@ export async function clearProfileData(
   // Clear storage data
   if (storages.length > 0) {
     await profileSession.clearStorageData({
-      storages
+      storages,
     })
   }
 

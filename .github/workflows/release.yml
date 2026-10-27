@@ -3,7 +3,7 @@ name: Electron App Build/release
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
 
 jobs:
   release:
@@ -24,7 +24,7 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: 24
-          cache: 'yarn'
+          cache: "yarn"
 
       - name: Validate version match
         shell: bash

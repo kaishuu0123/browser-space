@@ -1,7 +1,8 @@
-import React, { useState } from 'react'
-import { Profile } from '../../../shared/types'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog'
+import type React from 'react'
+import { useState } from 'react'
+import type { Profile } from '../../../shared/types'
 import { Button } from './ui/button'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog'
 
 interface ClearDataDialogProps {
   profile: Profile | null
@@ -21,7 +22,7 @@ export function ClearDataDialog({
   profile,
   open,
   onClose,
-  onClear
+  onClear,
 }: ClearDataDialogProps): React.ReactElement {
   const [cookies, setCookies] = useState(true)
   const [cache, setCache] = useState(true)
@@ -49,7 +50,7 @@ export function ClearDataDialog({
       await onClear(profile.id, {
         cookies,
         cache,
-        appData
+        appData,
       })
       alert('Data cleared successfully!')
       onClose()
@@ -114,9 +115,7 @@ export function ClearDataDialog({
                 />
                 <div>
                   <p className="font-medium text-sm">Cached images and files</p>
-                  <p className="text-xs text-gray-500">
-                    Helps sites load faster on repeat visits
-                  </p>
+                  <p className="text-xs text-gray-500">Helps sites load faster on repeat visits</p>
                 </div>
               </label>
 
@@ -148,12 +147,7 @@ export function ClearDataDialog({
               <Button type="button" variant="outline" onClick={handleClose} disabled={clearing}>
                 Cancel
               </Button>
-              <Button
-                type="button"
-                variant="destructive"
-                onClick={handleClear}
-                disabled={clearing}
-              >
+              <Button type="button" variant="destructive" onClick={handleClear} disabled={clearing}>
                 {clearing ? 'Clearing...' : 'Clear Data'}
               </Button>
             </div>

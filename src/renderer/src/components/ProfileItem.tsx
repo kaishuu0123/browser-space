@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react'
-import { Profile } from '../../../shared/types'
+import type React from 'react'
+import { useEffect, useState } from 'react'
+import type { Profile } from '../../../shared/types'
 
 interface ProfileItemProps {
   profile: Profile
@@ -60,9 +61,7 @@ export function ProfileItem({
           {profile.name}
         </span>
       )}
-      {isCrashed && !collapsed && (
-        <span className="codicon codicon-warning text-red-500 ml-auto" />
-      )}
+      {isCrashed && !collapsed && <span className="codicon codicon-warning text-red-500 ml-auto" />}
     </button>
   )
 }

@@ -2,7 +2,7 @@ name: Dev Build
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   workflow_dispatch:
 
 jobs:
@@ -21,7 +21,7 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: 24
-          cache: 'yarn'
+          cache: "yarn"
 
       - name: Install dependencies
         run: yarn install --frozen-lockfile

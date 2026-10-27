@@ -1,34 +1,36 @@
-import { ipcMain, BaseWindow, WebContentsView, app } from 'electron'
+import { app, type BaseWindow, ipcMain, type WebContentsView } from 'electron'
 import pkg from 'electron-updater'
+
 const { autoUpdater } = pkg
+
 import { IPC_CHANNELS } from '../shared/ipc'
 import {
+  getBrowserView,
+  hideAllBrowserViews,
+  recreateBrowserView,
+  removeBrowserView,
+  showBrowserView,
+  updateBrowserViewBounds,
+} from './browserViewManager'
+import { type ClearDataOptions, clearProfileData } from './dataCleaner'
+import { getCustomIconPath, saveCustomIcon } from './iconManager'
+import {
+  createProfile,
+  deleteProfile,
+  getActiveProfileId,
   getAllProfiles,
   getProfileById,
-  createProfile,
-  updateProfile,
-  deleteProfile,
-  reorderProfiles,
-  getActiveProfileId,
-  setActiveProfileId,
   getProfileDataPath,
+  reorderProfiles,
+  setActiveProfileId,
+  updateProfile,
 } from './profileManager'
 import {
-  getSidebarCollapsed,
-  setSidebarCollapsed,
   getLaunchOnStartup,
+  getSidebarCollapsed,
   setLaunchOnStartup,
+  setSidebarCollapsed,
 } from './settingsManager'
-import {
-  showBrowserView,
-  removeBrowserView,
-  updateBrowserViewBounds,
-  recreateBrowserView,
-  hideAllBrowserViews,
-  getBrowserView,
-} from './browserViewManager'
-import { saveCustomIcon, getCustomIconPath } from './iconManager'
-import { clearProfileData, ClearDataOptions } from './dataCleaner'
 
 const SIDEBAR_WIDTH_EXPANDED = 256 // w-64 in Tailwind
 const SIDEBAR_WIDTH_COLLAPSED = 64 // w-16 in Tailwind
