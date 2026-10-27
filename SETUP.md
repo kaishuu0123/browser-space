@@ -9,7 +9,7 @@ This is the initial project skeleton for **Browser Space**, a multi-account brow
 ### Configuration Files
 - ✅ devcontainer setup (Node.js 24 LTS)
 - ✅ TypeScript configuration
-- ✅ ESLint + Prettier
+- ✅ Biome (lint + format)
 - ✅ Tailwind CSS
 - ✅ electron-vite
 - ✅ electron-builder
