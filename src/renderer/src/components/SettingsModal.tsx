@@ -130,11 +130,15 @@ function AboutTabContent({ updateState }: { updateState: UpdateState }): React.R
   )
 }
 
+export type SettingsTab = 'general' | 'profiles' | 'about'
+
 interface SettingsModalProps {
   open: boolean
   onClose: () => void
   onProfilesChange: () => void
   updateState: UpdateState
+  // 開いたときに選択するタブ。同じタブを再指定できるよう、毎回新しいオブジェクトを渡す
+  initialTab: { name: SettingsTab }
 }
 
 export function SettingsModal({
@@ -142,6 +146,7 @@ export function SettingsModal({
   onClose,
   onProfilesChange,
   updateState,
+  initialTab,
 }: SettingsModalProps): React.ReactElement {
   const [profiles, setProfiles] = useState<Profile[]>([])
   const { createProfile, updateProfile, deleteProfile, getDataPath, reorderProfiles } =
@@ -150,6 +155,11 @@ export function SettingsModal({
   const [editingProfile, setEditingProfile] = useState<Profile | null>(null)
   const [clearDataProfile, setClearDataProfile] = useState<Profile | null>(null)
   const [launchOnStartup, setLaunchOnStartup] = useState(false)
+  const [tab, setTab] = useState<string>(initialTab.name)
+
+  useEffect(() => {
+    if (open) setTab(initialTab.name)
+  }, [open, initialTab])
 
   // Load profiles when modal opens
   // biome-ignore lint/correctness/useExhaustiveDependencies: loadProfiles/loadLaunchOnStartup are re-created every render; deps intentionally left as [open] so the effect only runs when the modal opens (existing behavior preserved)
@@ -273,7 +283,7 @@ export function SettingsModal({
             <DialogTitle>Settings</DialogTitle>
           </DialogHeader>
 
-          <Tabs defaultValue="general" className="w-full">
+          <Tabs value={tab} onValueChange={setTab} className="w-full">
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="general">General</TabsTrigger>
               <TabsTrigger value="profiles">Manage Profiles</TabsTrigger>
