@@ -50,10 +50,17 @@ function getActiveTab(profileId: string): Tab | undefined {
   return entry?.tabs.find((tab) => tab.id === entry.activeTabId)
 }
 
+// A page that closed itself (window.close()) is destroyed together with its contents, and the
+// view's webContents is then undefined
+function isAlive(view: WebContentsView): boolean {
+  const contents = view.webContents as WebContents | undefined
+  return !!contents && !contents.isDestroyed()
+}
+
 // Navigation state of the active tab of a profile (null if it has no live tab)
 export function getNavigationState(profileId: string): NavigationState | null {
   const view = getActiveTab(profileId)?.view
-  if (!view || view.webContents.isDestroyed()) return null
+  if (!view || !isAlive(view)) return null
 
   const { webContents } = view
   return {
@@ -82,7 +89,7 @@ export function getTabsState(profileId: string): TabsState | null {
     profileId,
     activeTabId: entry.activeTabId,
     tabs: entry.tabs.map(({ id, view, crashed }) => {
-      const alive = !view.webContents.isDestroyed()
+      const alive = isAlive(view)
       return {
         id,
         title: alive ? view.webContents.getTitle() : '',
@@ -186,6 +193,15 @@ function createTab(
 
   const tabId = nextTabId++
 
+  // The page can close itself (window.close(), e.g. a login popup that is done), which destroys
+  // its contents; drop the tab with it. Tabs closed on purpose are already off the list by the
+  // time their contents is destroyed, so this does nothing for them.
+  const contentsId = view.webContents.id
+  view.webContents.on('destroyed', () => {
+    FindbarWindow.destroyForId(contentsId)
+    closeTab(profileId, tabId, mainWindow)
+  })
+
   // Keep the tab bar (and the toolbar, while this tab is the one being shown) in sync
   const syncState = () => {
     if (getActiveProfileId() !== profileId) return
@@ -276,23 +292,8 @@ function createTab(
       return { action: 'deny' }
     }
 
-    // window.open() with a target name or window features (OAuth popups etc.) needs a real
-    // window that keeps window.opener, on the same session so the login carries over
-    if (details.disposition === 'new-window') {
-      return {
-        action: 'allow',
-        outlivesOpener: false,
-        overrideBrowserWindowOptions: {
-          webPreferences: {
-            session: view.webContents.session,
-            contextIsolation: true,
-            sandbox: true,
-          },
-        },
-      }
-    }
-
-    // target=_blank links and plain window.open(url) open as a new tab of this profile.
+    // Every window.open() and target=_blank link opens as a new tab of this profile (popups
+    // with a size or a name too), on the same session so the login carries over.
     // The tab's contents is handed back so window.open() returns a window instead of null;
     // pages like Gmail's "Show original" take null for a blocked popup and warn about it.
     return {
@@ -493,17 +494,9 @@ export function hideAllBrowserViews(mainWindow: BaseWindow): void {
 export function removeBrowserView(profileId: string, mainWindow: BaseWindow): void {
   const entry = profileTabs.get(profileId)
   if (entry) {
-    const contentView = mainWindow.contentView
-    for (const { view } of entry.tabs) {
-      // Destroy findbar if exists
-      FindbarWindow.destroyForContents(view.webContents)
-
-      if (contentView.children.includes(view)) {
-        contentView.removeChildView(view)
-      }
-      view.webContents.close()
-    }
+    // Off the list first, so closing the contents does not look like a page closing itself
     profileTabs.delete(profileId)
+    for (const tab of entry.tabs) destroyTab(tab, mainWindow)
   }
   // Session handlers capture profile settings (e.g. language), so set them up again next time
   initializedSessions.delete(profileId)
@@ -513,16 +506,15 @@ export function removeBrowserView(profileId: string, mainWindow: BaseWindow): vo
 // The views and their findbars hold the old window as parent, so they must be
 // recreated against the new window (e.g. macOS reopen from the Dock).
 export function destroyAllBrowserViews(): void {
-  profileTabs.forEach(({ tabs }) => {
-    for (const { view } of tabs) {
-      FindbarWindow.destroyForContents(view.webContents)
-      if (!view.webContents.isDestroyed()) {
-        view.webContents.close()
-      }
-    }
-  })
+  const all = [...profileTabs.values()].flatMap(({ tabs }) => tabs)
+  // Off the list first, so closing the contents does not look like a page closing itself
   profileTabs.clear()
   initializedSessions.clear()
+  for (const { view } of all) {
+    if (!isAlive(view)) continue
+    FindbarWindow.destroyForContents(view.webContents)
+    view.webContents.close()
+  }
 }
 
 // Recreate WebContentsView (e.g., when language settings change)
@@ -551,7 +543,7 @@ export function repaintBrowserView(activeProfileId: string | null): void {
   if (!activeProfileId) return
 
   const view = getBrowserView(activeProfileId)
-  if (!view || view.webContents.isDestroyed()) return
+  if (!view || !isAlive(view)) return
 
   const bounds = view.getBounds()
   if (bounds.width > 1 && bounds.height > 0) {
@@ -563,13 +555,13 @@ export function repaintBrowserView(activeProfileId: string | null): void {
 
 // Remove a tab's view from the window and destroy it
 function destroyTab(tab: Tab, mainWindow: BaseWindow): void {
-  FindbarWindow.destroyForContents(tab.view.webContents)
+  // A page that closed itself is already destroyed (and its findbar with it)
+  const alive = isAlive(tab.view)
+  if (alive) FindbarWindow.destroyForContents(tab.view.webContents)
   if (mainWindow.contentView.children.includes(tab.view)) {
     mainWindow.contentView.removeChildView(tab.view)
   }
-  if (!tab.view.webContents.isDestroyed()) {
-    tab.view.webContents.close()
-  }
+  if (alive) tab.view.webContents.close()
 }
 
 // Reload the active tab. A crashed tab is replaced by a fresh one at the same position.

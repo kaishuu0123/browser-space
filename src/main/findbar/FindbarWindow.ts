@@ -247,7 +247,12 @@ export class FindbarWindow {
   }
 
   static destroyForContents(findableContents: WebContents): void {
-    const instance = FindbarWindow.instances.get(findableContents.id)
+    FindbarWindow.destroyForId(findableContents.id)
+  }
+
+  // For contents that are already destroyed (their id has to be remembered beforehand)
+  static destroyForId(contentsId: number): void {
+    const instance = FindbarWindow.instances.get(contentsId)
     if (instance) {
       instance.destroy()
     }
