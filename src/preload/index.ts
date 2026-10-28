@@ -41,6 +41,13 @@ const profileApi: ProfileAPI = {
       ipcRenderer.removeListener(IPC_CHANNELS.PROFILE_VIEW_CRASHED, subscription)
     }
   },
+  onActivated: (callback: (profileId: string) => void) => {
+    const subscription = (_event: unknown, profileId: string) => callback(profileId)
+    ipcRenderer.on(IPC_CHANNELS.PROFILE_ACTIVATED, subscription)
+    return () => {
+      ipcRenderer.removeListener(IPC_CHANNELS.PROFILE_ACTIVATED, subscription)
+    }
+  },
 }
 
 // Navigation API

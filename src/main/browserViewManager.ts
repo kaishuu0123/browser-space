@@ -14,7 +14,7 @@ import { applyContextMenu } from './contextMenu'
 import { FindbarWindow } from './findbar/FindbarWindow'
 import { getContentViewBounds } from './layout'
 import { showNotificationPermissionDialog } from './notificationManager'
-import { getActiveProfileId, getProfileById } from './profileManager'
+import { getActiveProfileId, getProfileById, setActiveProfileId } from './profileManager'
 
 interface Tab {
   id: number
@@ -399,6 +399,13 @@ function openTab(
   entry.tabs.splice(insertAt, 0, tab)
 
   if (options.activate) {
+    // A tab opened by a profile that is not on screen (a notification click, for example) would
+    // open where nobody can see it, so bring that profile to the front
+    if (getActiveProfileId() !== profileId && !(global.__isSettingsModalOpen ?? false)) {
+      setActiveProfileId(profileId)
+      const rendererView = global.__rendererView as WebContentsView | undefined
+      rendererView?.webContents.send(IPC_CHANNELS.PROFILE_ACTIVATED, profileId)
+    }
     setActiveTab(profileId, tab.id, mainWindow)
   } else if (getActiveProfileId() === profileId) {
     sendTabsState(profileId)

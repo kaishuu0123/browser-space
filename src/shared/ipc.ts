@@ -41,6 +41,7 @@ export const IPC_CHANNELS = {
 
   // View crashed
   PROFILE_VIEW_CRASHED: 'profile:view-crashed',
+  PROFILE_ACTIVATED: 'profile:activated',
 
   // Navigation (toolbar)
   NAVIGATION_STATE: 'navigation:state', // main -> renderer
@@ -109,6 +110,9 @@ export interface ProfileAPI {
 
   // Listen for view crash
   onViewCrashed: (callback: (profileId: string) => void) => () => void
+
+  // The main process switched to another profile (e.g. a notification was clicked)
+  onActivated: (callback: (profileId: string) => void) => () => void
 }
 
 // Navigation API for the toolbar (operates on the active page)

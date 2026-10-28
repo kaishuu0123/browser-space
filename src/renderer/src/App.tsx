@@ -23,7 +23,7 @@ import { useUpdateState } from './hooks/useUpdateState'
 
 function App(): React.ReactElement {
   const { profiles, loading: profilesLoading, refreshProfiles } = useProfiles()
-  const { activeProfileId, setActive } = useActiveProfile()
+  const { activeProfileId, setActive, refreshActiveProfile } = useActiveProfile()
   const { collapsed, setCollapsed } = useSidebarCollapsed()
   const { width: expandedWidth, setWidth: setSidebarWidth } = useSidebarWidth()
   const sidebarWidth = collapsed ? SIDEBAR_WIDTH_COLLAPSED : expandedWidth
@@ -52,6 +52,13 @@ function App(): React.ReactElement {
   const navigationState = useNavigationState()
   const tabsState = useTabsState()
   const [dismissedUpdateVersion, setDismissedUpdateVersion] = useState<string | undefined>()
+
+  // The main process can switch profiles by itself (a notification click opened a tab)
+  useEffect(() => {
+    return window.profileApi.onActivated(() => {
+      refreshActiveProfile()
+    })
+  }, [refreshActiveProfile])
 
   // Listen for view crash
   useEffect(() => {
