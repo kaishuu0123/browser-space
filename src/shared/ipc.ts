@@ -1,4 +1,4 @@
-import type { Profile } from './types'
+import type { NavigationState, Profile, TabsState } from './types'
 
 // IPC channel names
 export const IPC_CHANNELS = {
@@ -39,6 +39,21 @@ export const IPC_CHANNELS = {
 
   // View crashed
   PROFILE_VIEW_CRASHED: 'profile:view-crashed',
+
+  // Navigation (toolbar)
+  NAVIGATION_STATE: 'navigation:state', // main -> renderer
+  NAVIGATION_GET_STATE: 'navigation:getState',
+  NAVIGATION_BACK: 'navigation:back',
+  NAVIGATION_FORWARD: 'navigation:forward',
+  NAVIGATION_NAVIGATE: 'navigation:navigate',
+  NAVIGATION_FOCUS_URL: 'navigation:focusUrl', // main -> renderer (Ctrl/Cmd+L)
+
+  // Tabs
+  TABS_STATE: 'tabs:state', // main -> renderer
+  TABS_GET_STATE: 'tabs:getState',
+  TABS_ACTIVATE: 'tabs:activate',
+  TABS_CLOSE: 'tabs:close',
+  TABS_NEW: 'tabs:new',
 
   // Page search
   SEARCH_IN_PAGE: 'search:inPage',
@@ -92,6 +107,28 @@ export interface ProfileAPI {
 
   // Listen for view crash
   onViewCrashed: (callback: (profileId: string) => void) => () => void
+}
+
+// Navigation API for the toolbar (operates on the active page)
+export interface NavigationAPI {
+  getState: () => Promise<NavigationState | null>
+  goBack: () => Promise<void>
+  goForward: () => Promise<void>
+  // Navigate to a URL or search text typed in the address bar
+  navigate: (input: string) => Promise<void>
+  onState: (callback: (state: NavigationState | null) => void) => () => void
+  // Focus the address bar (keyboard shortcut handled by the main process)
+  onFocusUrl: (callback: () => void) => () => void
+}
+
+// Tabs API for the tab bar (operates on the active profile)
+export interface TabsAPI {
+  getState: () => Promise<TabsState | null>
+  activate: (tabId: number) => Promise<void>
+  close: (tabId: number) => Promise<void>
+  // Open a new tab with the profile's home URL
+  create: () => Promise<void>
+  onState: (callback: (state: TabsState | null) => void) => () => void
 }
 
 export interface SettingsAPI {

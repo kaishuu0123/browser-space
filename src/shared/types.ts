@@ -41,3 +41,29 @@ export type UpdateState = {
   // 'dev' は開発環境(未パッケージ)で確認できないことを表す
   error?: string
 }
+
+// Navigation state of the active page, shown in the toolbar
+export interface NavigationState {
+  profileId: string
+  url: string
+  title: string
+  canGoBack: boolean
+  canGoForward: boolean
+  loading: boolean
+}
+
+// A tab as shown in the tab bar
+export interface TabInfo {
+  id: number
+  title: string
+  url: string
+  loading: boolean
+  crashed: boolean
+}
+
+// Tabs of the active profile
+export interface TabsState {
+  profileId: string
+  activeTabId: number
+  tabs: TabInfo[]
+}

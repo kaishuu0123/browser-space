@@ -1,7 +1,14 @@
 import { electronAPI } from '@electron-toolkit/preload'
 import { contextBridge, ipcRenderer } from 'electron'
-import { type IconAPI, IPC_CHANNELS, type ProfileAPI, type SettingsAPI } from '../shared/ipc'
-import type { Profile, UpdateState } from '../shared/types'
+import {
+  type IconAPI,
+  IPC_CHANNELS,
+  type NavigationAPI,
+  type ProfileAPI,
+  type SettingsAPI,
+  type TabsAPI,
+} from '../shared/ipc'
+import type { NavigationState, Profile, TabsState, UpdateState } from '../shared/types'
 
 // Profile API
 const profileApi: ProfileAPI = {
@@ -32,6 +39,43 @@ const profileApi: ProfileAPI = {
     ipcRenderer.on(IPC_CHANNELS.PROFILE_VIEW_CRASHED, subscription)
     return () => {
       ipcRenderer.removeListener(IPC_CHANNELS.PROFILE_VIEW_CRASHED, subscription)
+    }
+  },
+}
+
+// Navigation API
+const navigationApi: NavigationAPI = {
+  getState: () => ipcRenderer.invoke(IPC_CHANNELS.NAVIGATION_GET_STATE),
+  goBack: () => ipcRenderer.invoke(IPC_CHANNELS.NAVIGATION_BACK),
+  goForward: () => ipcRenderer.invoke(IPC_CHANNELS.NAVIGATION_FORWARD),
+  navigate: (input: string) => ipcRenderer.invoke(IPC_CHANNELS.NAVIGATION_NAVIGATE, input),
+  onState: (callback: (state: NavigationState | null) => void) => {
+    const subscription = (_event: unknown, state: NavigationState | null) => callback(state)
+    ipcRenderer.on(IPC_CHANNELS.NAVIGATION_STATE, subscription)
+    return () => {
+      ipcRenderer.removeListener(IPC_CHANNELS.NAVIGATION_STATE, subscription)
+    }
+  },
+  onFocusUrl: (callback: () => void) => {
+    const subscription = () => callback()
+    ipcRenderer.on(IPC_CHANNELS.NAVIGATION_FOCUS_URL, subscription)
+    return () => {
+      ipcRenderer.removeListener(IPC_CHANNELS.NAVIGATION_FOCUS_URL, subscription)
+    }
+  },
+}
+
+// Tabs API
+const tabsApi: TabsAPI = {
+  getState: () => ipcRenderer.invoke(IPC_CHANNELS.TABS_GET_STATE),
+  activate: (tabId: number) => ipcRenderer.invoke(IPC_CHANNELS.TABS_ACTIVATE, tabId),
+  close: (tabId: number) => ipcRenderer.invoke(IPC_CHANNELS.TABS_CLOSE, tabId),
+  create: () => ipcRenderer.invoke(IPC_CHANNELS.TABS_NEW),
+  onState: (callback: (state: TabsState | null) => void) => {
+    const subscription = (_event: unknown, state: TabsState | null) => callback(state)
+    ipcRenderer.on(IPC_CHANNELS.TABS_STATE, subscription)
+    return () => {
+      ipcRenderer.removeListener(IPC_CHANNELS.TABS_STATE, subscription)
     }
   },
 }
@@ -77,6 +121,8 @@ if (process.contextIsolated) {
   try {
     contextBridge.exposeInMainWorld('electron', electronAPI)
     contextBridge.exposeInMainWorld('profileApi', profileApi)
+    contextBridge.exposeInMainWorld('navigationApi', navigationApi)
+    contextBridge.exposeInMainWorld('tabsApi', tabsApi)
     contextBridge.exposeInMainWorld('settingsApi', settingsApi)
     contextBridge.exposeInMainWorld('iconApi', iconApi)
     contextBridge.exposeInMainWorld('updaterApi', updaterApi)
@@ -88,6 +134,10 @@ if (process.contextIsolated) {
   window.electron = electronAPI
   // @ts-expect-error (define in dts)
   window.profileApi = profileApi
+  // @ts-expect-error (define in dts)
+  window.navigationApi = navigationApi
+  // @ts-expect-error (define in dts)
+  window.tabsApi = tabsApi
   // @ts-expect-error (define in dts)
   window.settingsApi = settingsApi
   // @ts-expect-error (define in dts)

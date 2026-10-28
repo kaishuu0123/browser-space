@@ -1,9 +1,14 @@
 import type React from 'react'
 import { useCallback, useEffect, useState } from 'react'
+import { TAB_BAR_HEIGHT, TOOLBAR_HEIGHT } from '../../shared/layout'
 import { CrashedView } from './components/CrashedView'
 import { SettingsModal, type SettingsTab } from './components/SettingsModal'
 import { Sidebar } from './components/Sidebar'
+import { TabBar } from './components/TabBar'
+import { Toolbar } from './components/Toolbar'
+import { useNavigationState } from './hooks/useNavigationState'
 import { useActiveProfile, useProfiles, useSidebarCollapsed } from './hooks/useProfile'
+import { useTabsState } from './hooks/useTabsState'
 import { useUpdateState } from './hooks/useUpdateState'
 
 function App(): React.ReactElement {
@@ -32,6 +37,8 @@ function App(): React.ReactElement {
   const [crashedProfileIds, setCrashedProfileIds] = useState<Set<string>>(new Set())
   const [, forceUpdate] = useState({})
   const updateState = useUpdateState()
+  const navigationState = useNavigationState()
+  const tabsState = useTabsState()
   const [dismissedUpdateVersion, setDismissedUpdateVersion] = useState<string | undefined>()
 
   // Listen for view crash
@@ -54,18 +61,33 @@ function App(): React.ReactElement {
     }
   }, [])
 
-  const isActiveCrashed = activeProfileId !== null && crashedProfileIds.has(activeProfileId)
+  // A crash only affects one tab: the main process hides that tab's view and the error screen
+  // takes its place, while the tab bar and toolbar stay usable
+  const isActiveCrashed = tabsState?.tabs.some(
+    (tab) => tab.id === tabsState.activeTabId && tab.crashed
+  )
 
-  // Hide profileView and expand rendererView when settings open OR active profile crashed
+  // The profile no longer has a crashed tab (reloaded or closed): clear its sidebar mark
   useEffect(() => {
-    if (showSettings || isActiveCrashed) {
+    if (!tabsState || tabsState.tabs.some((tab) => tab.crashed)) return
+    setCrashedProfileIds((prev) => {
+      if (!prev.has(tabsState.profileId)) return prev
+      const next = new Set(prev)
+      next.delete(tabsState.profileId)
+      return next
+    })
+  }, [tabsState])
+
+  // Hide profileView and expand rendererView when settings open
+  useEffect(() => {
+    if (showSettings) {
       window.settingsApi.notifyModalOpen()
       if (activeProfileId) window.profileApi.switch(null)
     } else {
       window.settingsApi.notifyModalClose()
       if (activeProfileId) window.profileApi.switch(activeProfileId)
     }
-  }, [showSettings, activeProfileId, isActiveCrashed])
+  }, [showSettings, activeProfileId])
 
   const handleProfileClick = (profileId: string) => {
     window.profileApi.switch(profileId)
@@ -75,11 +97,6 @@ function App(): React.ReactElement {
   const handleReloadClick = useCallback(async () => {
     if (activeProfileId) {
       await window.profileApi.reload()
-      setCrashedProfileIds((prev) => {
-        const next = new Set(prev)
-        next.delete(activeProfileId)
-        return next
-      })
     }
   }, [activeProfileId])
 
@@ -115,7 +132,25 @@ function App(): React.ReactElement {
         crashedProfileIds={crashedProfileIds}
       />
 
-      {isActiveCrashed && <CrashedView onReload={handleReloadClick} />}
+      {activeProfileId && !showSettings && (
+        <>
+          <TabBar state={tabsState} left={collapsed ? 64 : 256} />
+          <Toolbar
+            state={navigationState}
+            left={collapsed ? 64 : 256}
+            onReload={handleReloadClick}
+          />
+        </>
+      )}
+
+      {isActiveCrashed && !showSettings && (
+        <div
+          className="fixed right-0 bottom-0 transition-all duration-200"
+          style={{ left: collapsed ? 64 : 256, top: TAB_BAR_HEIGHT + TOOLBAR_HEIGHT }}
+        >
+          <CrashedView onReload={handleReloadClick} />
+        </div>
+      )}
 
       <SettingsModal
         open={showSettings}

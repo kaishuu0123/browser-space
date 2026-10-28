@@ -2,11 +2,17 @@ import path, { join } from 'node:path'
 import { is } from '@electron-toolkit/utils'
 import { app, BaseWindow, Menu, shell, WebContentsView } from 'electron'
 import icon from '../../resources/icon.png?asset'
-import { repaintBrowserView, updateBrowserViewBounds } from './browserViewManager'
+import {
+  destroyAllBrowserViews,
+  handleBrowserShortcut,
+  repaintBrowserView,
+  updateBrowserViewBounds,
+} from './browserViewManager'
 import { applyContextMenu } from './contextMenu'
 import { FindbarWindow } from './findbar/FindbarWindow'
 import { setupIpcHandlers } from './ipcHandlers'
-import { getActiveProfileId, getSidebarCollapsed } from './profileManager'
+import { layoutRendererView } from './layout'
+import { getActiveProfileId } from './profileManager'
 import { initAutoUpdater } from './updater'
 
 app.setName(app.name)
@@ -79,21 +85,17 @@ function createWindow(): void {
 
   mainWindow.contentView.addChildView(rendererView)
 
-  const getSidebarWidth = () => (getSidebarCollapsed() ? 64 : 256)
-
-  const updateRendererBounds = () => {
-    const bounds = mainWindow.getContentBounds()
-    // rendererView covers only the sidebar area
-    rendererView.setBounds({ x: 0, y: 0, width: getSidebarWidth(), height: bounds.height })
-  }
-
   rendererView.webContents.on('did-finish-load', () => {
-    updateRendererBounds()
+    layoutRendererView(mainWindow, rendererView)
     mainWindow.show()
   })
 
   // F12: DevTools (renderer view)
   rendererView.webContents.on('before-input-event', (event, input) => {
+    if (handleBrowserShortcut(input)) {
+      event.preventDefault()
+      return
+    }
     if (input.key === 'F12' && input.type === 'keyDown') {
       event.preventDefault()
       if (rendererView.webContents.isDevToolsOpened()) {
@@ -106,25 +108,18 @@ function createWindow(): void {
 
   const updateLayout = () => {
     const isSettingsModalOpen = global.__isSettingsModalOpen ?? false
-    const bounds = mainWindow.getContentBounds()
-    const sidebarWidth = getSidebarWidth()
 
-    // rendererView のサイズ調整（Settings Modal開いていたら全画面）
-    rendererView.setBounds({
-      x: 0,
-      y: 0,
-      width: isSettingsModalOpen ? bounds.width : sidebarWidth,
-      height: bounds.height,
-    })
+    // rendererView は常に全画面（BrowserView の背面）
+    layoutRendererView(mainWindow, rendererView)
 
     // Settings Modal開いていない場合のみBrowserViewを更新
     if (!isSettingsModalOpen) {
       const activeProfileId = getActiveProfileId()
       if (activeProfileId) {
-        updateBrowserViewBounds(activeProfileId, mainWindow, sidebarWidth)
+        updateBrowserViewBounds(activeProfileId, mainWindow)
         setTimeout(() => {
           if (getActiveProfileId() === activeProfileId) {
-            updateBrowserViewBounds(activeProfileId, mainWindow, sidebarWidth)
+            updateBrowserViewBounds(activeProfileId, mainWindow)
           }
         }, 100)
       }
@@ -150,6 +145,8 @@ function createWindow(): void {
     }
     rendererView.webContents.invalidate()
   }
+
+  mainWindow.on('closed', destroyAllBrowserViews)
 
   mainWindow.on('restore', refreshViews)
   mainWindow.on('show', refreshViews)
