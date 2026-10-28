@@ -73,10 +73,10 @@ export function Toolbar({ state, security, left, onReload }: ToolbarProps): Reac
       {security !== 'none' && (
         <span
           title={SECURITY_ICONS[security].title}
-          className="-mr-6 z-10 pl-3 pointer-events-none"
+          className="-mr-6 z-10 pl-3 h-7 flex items-center pointer-events-none"
         >
           <span
-            className={`codicon ${SECURITY_ICONS[security].icon} text-sm ${SECURITY_ICONS[security].className}`}
+            className={`codicon ${SECURITY_ICONS[security].icon} text-sm leading-none ${SECURITY_ICONS[security].className}`}
           />
         </span>
       )}
