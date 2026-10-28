@@ -75,20 +75,20 @@ export function Sidebar({
             <button
               type="button"
               onClick={onReloadClick}
-              className="p-1.5 hover:bg-gray-100 rounded transition-colors"
+              className="flex items-center justify-center w-8 h-8 hover:bg-gray-100 rounded transition-colors"
               title="Reload"
             >
-              <span className="codicon codicon-refresh text-lg text-gray-600" />
+              <span className="codicon codicon-refresh text-lg leading-none text-gray-600" />
             </button>
           )}
           <button
             type="button"
             onClick={onToggleCollapse}
-            className="p-1.5 hover:bg-gray-100 rounded transition-colors"
+            className="flex items-center justify-center w-8 h-8 hover:bg-gray-100 rounded transition-colors"
             title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
             <span
-              className={`codicon ${collapsed ? 'codicon-chevron-right' : 'codicon-chevron-left'} text-lg text-gray-600`}
+              className={`codicon ${collapsed ? 'codicon-chevron-right' : 'codicon-chevron-left'} text-lg leading-none text-gray-600`}
             />
           </button>
         </div>
@@ -110,10 +110,10 @@ export function Sidebar({
             <button
               type="button"
               onClick={onInstallUpdate}
-              className="w-full p-2 mb-1 hover:bg-blue-50 rounded transition-colors"
+              className="flex items-center justify-center w-full h-10 mb-1 hover:bg-blue-50 rounded transition-colors"
               title={`Update v${updateVersion} ready. Click to restart and update`}
             >
-              <span className="codicon codicon-arrow-circle-up text-xl text-blue-500" />
+              <span className="codicon codicon-arrow-circle-up text-xl leading-none text-blue-500" />
             </button>
           ) : (
             <div className="mb-2 rounded-md border border-blue-200 bg-blue-50 p-2 text-xs text-blue-700">
@@ -141,19 +141,19 @@ export function Sidebar({
             <button
               type="button"
               onClick={onReloadClick}
-              className="w-full p-2 hover:bg-gray-100 rounded transition-colors"
+              className="flex items-center justify-center w-full h-10 hover:bg-gray-100 rounded transition-colors"
               title="Reload"
             >
-              <span className="codicon codicon-refresh text-xl text-gray-600" />
+              <span className="codicon codicon-refresh text-xl leading-none text-gray-600" />
             </button>
             <button
               type="button"
               onClick={onSettingsClick}
-              className="w-full p-2 hover:bg-gray-100 rounded transition-colors"
+              className="flex items-center justify-center w-full h-10 hover:bg-gray-100 rounded transition-colors"
               title={hasUpdate ? 'Settings (Update ready)' : 'Settings'}
             >
-              <span className="relative inline-block">
-                <span className="codicon codicon-settings-gear text-xl text-gray-600" />
+              <span className="relative flex items-center">
+                <span className="codicon codicon-settings-gear text-xl leading-none text-gray-600" />
                 {hasUpdate && (
                   <span className="absolute -top-1 -right-1 w-2 h-2 bg-blue-500 rounded-full" />
                 )}
@@ -167,8 +167,8 @@ export function Sidebar({
             className="w-full flex items-center gap-2 px-2 py-1.5 hover:bg-gray-100 rounded transition-colors text-sm text-gray-600"
             title="Settings"
           >
-            <span className="relative">
-              <span className="codicon codicon-settings-gear text-lg" />
+            <span className="relative flex items-center">
+              <span className="codicon codicon-settings-gear text-lg leading-none" />
               {hasUpdate && (
                 <span className="absolute -top-1 -right-1 w-2 h-2 bg-blue-500 rounded-full" />
               )}

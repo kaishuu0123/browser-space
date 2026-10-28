@@ -47,7 +47,7 @@ export function ProfileItem({
           />
         ) : (
           <span
-            className={`codicon codicon-${profile.icon || 'circle-large-outline'} !text-2xl`}
+            className={`codicon codicon-${profile.icon || 'circle-large-outline'} !text-2xl leading-none`}
             style={{ color: isCrashed ? '#ef4444' : profile.iconColor }}
           />
         )}
@@ -62,7 +62,9 @@ export function ProfileItem({
           {profile.name}
         </span>
       )}
-      {isCrashed && !collapsed && <span className="codicon codicon-warning text-red-500 ml-auto" />}
+      {isCrashed && !collapsed && (
+        <span className="codicon codicon-warning leading-none text-red-500 ml-auto" />
+      )}
     </button>
   )
 }
