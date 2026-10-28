@@ -1,6 +1,6 @@
 import path, { join } from 'node:path'
 import { is } from '@electron-toolkit/utils'
-import { app, BaseWindow, Menu, shell, WebContentsView } from 'electron'
+import { app, autoUpdater, BaseWindow, Menu, shell, WebContentsView } from 'electron'
 import icon from '../../resources/icon.png?asset'
 import {
   destroyAllBrowserViews,
@@ -71,6 +71,24 @@ app.on('ready', () => {
     Menu.setApplicationMenu(null)
   }
 })
+
+// On macOS closing the window only hides it, so the pages keep running and notifications still
+// arrive; this is set once the app is really quitting (Cmd+Q, update install, shutdown)
+let isQuitting = false
+app.on('before-quit', () => {
+  isQuitting = true
+})
+if (process.platform === 'darwin') {
+  autoUpdater.on('before-quit-for-update', () => {
+    isQuitting = true
+  })
+}
+
+function showMainWindow(mainWindow: BaseWindow): void {
+  if (mainWindow.isMinimized()) mainWindow.restore()
+  mainWindow.show()
+  mainWindow.focus()
+}
 
 function createWindow(): void {
   // Position, size and maximized state are persisted and restored by Electron itself,
@@ -160,6 +178,12 @@ function createWindow(): void {
     rendererView.webContents.invalidate()
   }
 
+  mainWindow.on('close', (event) => {
+    if (process.platform === 'darwin' && !isQuitting) {
+      event.preventDefault()
+      mainWindow.hide()
+    }
+  })
   mainWindow.on('closed', destroyAllBrowserViews)
 
   mainWindow.on('restore', refreshViews)
@@ -188,10 +212,7 @@ if (!gotTheLock) {
 } else {
   app.on('second-instance', () => {
     const mainWindow = global.__mainWindow as BaseWindow | undefined
-    if (mainWindow) {
-      if (mainWindow.isMinimized()) mainWindow.restore()
-      mainWindow.focus()
-    }
+    if (mainWindow) showMainWindow(mainWindow)
   })
 
   app.whenReady().then(() => {
@@ -204,7 +225,12 @@ if (!gotTheLock) {
     initAutoUpdater(() => (global.__rendererView as WebContentsView | undefined)?.webContents)
 
     app.on('activate', () => {
-      if (BaseWindow.getAllWindows().length === 0) createWindow()
+      const mainWindow = global.__mainWindow as BaseWindow | undefined
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        showMainWindow(mainWindow)
+      } else if (BaseWindow.getAllWindows().length === 0) {
+        createWindow()
+      }
     })
   })
 }
