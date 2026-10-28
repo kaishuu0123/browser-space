@@ -9,7 +9,7 @@ const GROUND = 110
 const PLAYER_X = 40
 const PLAYER_SIZE = 22
 const GRAVITY = 0.7
-const JUMP_SPEED = -11.5
+const JUMP_SPEED = -9.2
 const HIGH_SCORE_KEY = 'offline-game-high-score'
 
 interface Obstacle {
