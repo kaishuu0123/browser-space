@@ -7,12 +7,14 @@ import {
   getNavigationState,
   getTabsState,
   hideAllBrowserViews,
+  isOfflineMode,
   leaveCertError,
   newTab,
   proceedCertError,
   recreateBrowserView,
   reloadActiveTab,
   removeBrowserView,
+  setOfflineMode,
   showBrowserView,
   updateBrowserViewBounds,
 } from './browserViewManager'
@@ -178,6 +180,11 @@ export function setupIpcHandlers(): void {
     if (view?.webContents.navigationHistory.canGoForward()) {
       view.webContents.navigationHistory.goForward()
     }
+  })
+
+  ipcMain.handle(IPC_CHANNELS.NAVIGATION_OFFLINE_GET, async () => isOfflineMode())
+  ipcMain.handle(IPC_CHANNELS.NAVIGATION_OFFLINE_SET, async (_, offline: boolean) => {
+    setOfflineMode(offline)
   })
 
   ipcMain.handle(IPC_CHANNELS.NAVIGATION_CERT_LEAVE, async () => {

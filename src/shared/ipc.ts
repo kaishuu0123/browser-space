@@ -50,6 +50,9 @@ export const IPC_CHANNELS = {
   NAVIGATION_FORWARD: 'navigation:forward',
   NAVIGATION_NAVIGATE: 'navigation:navigate',
   NAVIGATION_FOCUS_URL: 'navigation:focusUrl', // main -> renderer (Ctrl/Cmd+L)
+  NAVIGATION_OFFLINE_GET: 'navigation:offlineGet',
+  NAVIGATION_OFFLINE_SET: 'navigation:offlineSet',
+  NAVIGATION_OFFLINE_CHANGED: 'navigation:offlineChanged', // main -> renderer
   NAVIGATION_CERT_LEAVE: 'navigation:certLeave',
   NAVIGATION_CERT_PROCEED: 'navigation:certProceed',
 
@@ -129,6 +132,11 @@ export interface NavigationAPI {
   // ... or trust this host for this profile until the app quits, and load the page anyway
   proceedCertError: () => Promise<void>
   onState: (callback: (state: NavigationState | null) => void) => () => void
+  // Work offline: pages of every profile fail to load as if the network were gone (the real
+  // connection is left alone). Handy for trying the offline screen without unplugging anything.
+  getOffline: () => Promise<boolean>
+  setOffline: (offline: boolean) => Promise<void>
+  onOfflineChanged: (callback: (offline: boolean) => void) => () => void
   // Focus the address bar (keyboard shortcut handled by the main process)
   onFocusUrl: (callback: () => void) => () => void
 }

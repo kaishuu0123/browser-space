@@ -65,6 +65,16 @@ const navigationApi: NavigationAPI = {
       ipcRenderer.removeListener(IPC_CHANNELS.NAVIGATION_STATE, subscription)
     }
   },
+  getOffline: () => ipcRenderer.invoke(IPC_CHANNELS.NAVIGATION_OFFLINE_GET),
+  setOffline: (offline: boolean) =>
+    ipcRenderer.invoke(IPC_CHANNELS.NAVIGATION_OFFLINE_SET, offline),
+  onOfflineChanged: (callback: (offline: boolean) => void) => {
+    const subscription = (_event: unknown, offline: boolean) => callback(offline)
+    ipcRenderer.on(IPC_CHANNELS.NAVIGATION_OFFLINE_CHANGED, subscription)
+    return () => {
+      ipcRenderer.removeListener(IPC_CHANNELS.NAVIGATION_OFFLINE_CHANGED, subscription)
+    }
+  },
   onFocusUrl: (callback: () => void) => {
     const subscription = () => callback()
     ipcRenderer.on(IPC_CHANNELS.NAVIGATION_FOCUS_URL, subscription)

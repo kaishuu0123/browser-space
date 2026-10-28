@@ -136,6 +136,37 @@ const profileTabs = new Map<string, ProfileTabs>()
 // Profiles whose session handlers are already set up
 const initializedSessions = new Set<string>()
 
+// "Work offline": web requests of every profile are refused, as if the network were gone (the
+// real connection is left alone), so the offline screen can be tried at will. Not remembered
+// across restarts.
+let offlineMode = false
+
+export function isOfflineMode(): boolean {
+  return offlineMode
+}
+
+// Chromium reports a request cancelled by the app as ERR_BLOCKED_BY_CLIENT
+const ERR_BLOCKED_BY_CLIENT = -20
+
+export function setOfflineMode(offline: boolean): void {
+  if (offline === offlineMode) return
+  offlineMode = offline
+
+  // Back online: the pages that failed meanwhile load again (the system never went offline, so
+  // the renderer gets no 'online' event for it)
+  if (!offline) {
+    for (const { tabs } of profileTabs.values()) {
+      for (const tab of tabs) {
+        if (tab.loadError && isAlive(tab.view)) tab.view.webContents.reload()
+      }
+    }
+  }
+  ;(global.__rendererView as WebContentsView | undefined)?.webContents.send(
+    IPC_CHANNELS.NAVIGATION_OFFLINE_CHANGED,
+    offline
+  )
+}
+
 let nextTabId = 1
 
 // Get system locale (e.g., 'en-US', 'ja-JP')
@@ -221,6 +252,10 @@ function ensureProfileSession(profileId: string, profile: Profile): Session {
   const profileSession = session.fromPartition(`persist:profile-${profileId}`)
   if (initializedSessions.has(profileId)) return profileSession
   initializedSessions.add(profileId)
+
+  profileSession.webRequest.onBeforeRequest((details, callback) => {
+    callback({ cancel: offlineMode && /^(https?|wss?):/.test(details.url) })
+  })
 
   // Determine language to use (profile language or system default)
   const language = profile.language || getSystemLocale()
@@ -379,6 +414,11 @@ function createTab(
     'did-fail-load',
     (_event, errorCode, errorDescription, validatedURL, isMainFrame) => {
       if (!isMainFrame) return
+      // The "work offline" switch refuses requests; show it the way a lost connection is shown
+      if (errorCode === ERR_BLOCKED_BY_CLIENT && offlineMode) {
+        setLoadError({ url: validatedURL, error: 'ERR_INTERNET_DISCONNECTED', offline: true })
+        return
+      }
       if (isNetworkErrorCode(errorCode)) {
         setLoadError({
           url: validatedURL,
