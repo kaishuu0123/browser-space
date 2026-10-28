@@ -2,6 +2,7 @@ import type React from 'react'
 import { useEffect, useState } from 'react'
 import appIcon from '../../../../resources/icon.png'
 import type { Profile, UpdateState } from '../../../shared/types'
+import { useOfflineMode } from '../hooks/useOfflineMode'
 import { useProfileOperations } from '../hooks/useProfile'
 import { ClearDataDialog } from './ClearDataDialog'
 import { ProfileForm } from './ProfileForm'
@@ -155,6 +156,7 @@ export function SettingsModal({
   const [editingProfile, setEditingProfile] = useState<Profile | null>(null)
   const [clearDataProfile, setClearDataProfile] = useState<Profile | null>(null)
   const [launchOnStartup, setLaunchOnStartup] = useState(false)
+  const offline = useOfflineMode()
   const [tab, setTab] = useState<string>(initialTab.name)
 
   useEffect(() => {
@@ -303,6 +305,21 @@ export function SettingsModal({
                   id="launch-on-startup"
                   checked={launchOnStartup}
                   onCheckedChange={handleLaunchOnStartupChange}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="work-offline">Work offline</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Pretend the network is gone for every profile (your real connection is left
+                    alone). Turns off when the app restarts.
+                  </p>
+                </div>
+                <Switch
+                  id="work-offline"
+                  checked={offline}
+                  onCheckedChange={(checked) => window.navigationApi.setOffline(checked)}
                 />
               </div>
             </TabsContent>

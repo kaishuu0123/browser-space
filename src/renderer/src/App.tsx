@@ -14,7 +14,6 @@ import { Sidebar } from './components/Sidebar'
 import { TabBar } from './components/TabBar'
 import { type PageSecurity, Toolbar } from './components/Toolbar'
 import { useNavigationState } from './hooks/useNavigationState'
-import { useOfflineMode } from './hooks/useOfflineMode'
 import {
   useActiveProfile,
   useProfiles,
@@ -54,7 +53,6 @@ function App(): React.ReactElement {
   const updateState = useUpdateState()
   const navigationState = useNavigationState()
   const tabsState = useTabsState()
-  const offline = useOfflineMode()
   const [dismissedUpdateVersion, setDismissedUpdateVersion] = useState<string | undefined>()
 
   // The main process can switch profiles by itself (a notification click opened a tab)
@@ -193,7 +191,6 @@ function App(): React.ReactElement {
           <Toolbar
             state={navigationState}
             security={pageSecurity}
-            offline={offline}
             left={sidebarWidth}
             onReload={handleReloadClick}
           />

@@ -23,20 +23,12 @@ const SECURITY_ICONS: Record<
 interface ToolbarProps {
   state: NavigationState | null
   security: PageSecurity
-  // "Work offline" is on
-  offline: boolean
   // Width of the sidebar (the toolbar sits to the right of it)
   left: number
   onReload: () => void
 }
 
-export function Toolbar({
-  state,
-  security,
-  offline,
-  left,
-  onReload,
-}: ToolbarProps): React.ReactElement {
+export function Toolbar({ state, security, left, onReload }: ToolbarProps): React.ReactElement {
   const url = state?.url ?? ''
   const [draft, setDraft] = useState(url)
   const [editing, setEditing] = useState(false)
@@ -113,12 +105,6 @@ export function Toolbar({
         }`}
         placeholder="Search or enter address"
       />
-      <ToolbarButton
-        icon="codicon-debug-disconnect"
-        title={offline ? 'Offline mode is on (click to go back online)' : 'Work offline'}
-        active={offline}
-        onClick={() => window.navigationApi.setOffline(!offline)}
-      />
     </div>
   )
 }
@@ -127,8 +113,6 @@ interface ToolbarButtonProps {
   icon: string
   title: string
   disabled?: boolean
-  // Shown as switched on
-  active?: boolean
   onClick: () => void
 }
 
@@ -136,7 +120,6 @@ function ToolbarButton({
   icon,
   title,
   disabled = false,
-  active = false,
   onClick,
 }: ToolbarButtonProps): React.ReactElement {
   return (
@@ -145,11 +128,9 @@ function ToolbarButton({
       title={title}
       disabled={disabled}
       onClick={onClick}
-      className={`p-1.5 rounded transition-colors disabled:opacity-30 disabled:hover:bg-transparent ${
-        active ? 'bg-amber-100 hover:bg-amber-200' : 'hover:bg-gray-100'
-      }`}
+      className="p-1.5 rounded hover:bg-gray-100 transition-colors disabled:opacity-30 disabled:hover:bg-transparent"
     >
-      <span className={`codicon ${icon} text-lg ${active ? 'text-amber-700' : 'text-gray-600'}`} />
+      <span className={`codicon ${icon} text-lg text-gray-600`} />
     </button>
   )
 }
