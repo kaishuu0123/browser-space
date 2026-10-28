@@ -45,6 +45,20 @@ function buildMacMenu(): void {
           { role: 'quit' },
         ],
       },
+      // macOS routes Cmd+A/C/V/X/Z to text fields through the Edit menu, so without it the
+      // address bar and web page inputs ignore them
+      {
+        label: 'Edit',
+        submenu: [
+          { role: 'undo' },
+          { role: 'redo' },
+          { type: 'separator' },
+          { role: 'cut' },
+          { role: 'copy' },
+          { role: 'paste' },
+          { role: 'selectAll' },
+        ],
+      },
     ])
   )
 }
