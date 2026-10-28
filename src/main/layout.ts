@@ -1,15 +1,25 @@
 import type { BaseWindow, Rectangle, WebContentsView } from 'electron'
-import { TAB_BAR_HEIGHT, TOOLBAR_HEIGHT } from '../shared/layout'
-import { getSidebarCollapsed } from './settingsManager'
-
-const SIDEBAR_WIDTH_EXPANDED = 256 // w-64 in Tailwind
-const SIDEBAR_WIDTH_COLLAPSED = 64 // w-16 in Tailwind
+import {
+  clampSidebarWidth,
+  SIDEBAR_WIDTH_COLLAPSED,
+  TAB_BAR_HEIGHT,
+  TOOLBAR_HEIGHT,
+} from '../shared/layout'
+import { getSidebarCollapsed, getSidebarWidth as getStoredSidebarWidth } from './settingsManager'
 
 // Height of the strip above the page content (tab bar + toolbar)
 const CONTENT_TOP_OFFSET = TAB_BAR_HEIGHT + TOOLBAR_HEIGHT
 
+// Expanded width, kept in memory so dragging can move the page views live without writing
+// the settings file on every mouse move
+let expandedWidth = getStoredSidebarWidth()
+
+export function setExpandedSidebarWidth(width: number): void {
+  expandedWidth = clampSidebarWidth(width)
+}
+
 export function getSidebarWidth(): number {
-  return getSidebarCollapsed() ? SIDEBAR_WIDTH_COLLAPSED : SIDEBAR_WIDTH_EXPANDED
+  return getSidebarCollapsed() ? SIDEBAR_WIDTH_COLLAPSED : expandedWidth
 }
 
 // Bounds of the area where page views are shown (right of the sidebar)

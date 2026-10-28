@@ -16,6 +16,7 @@ import {
 } from './browserViewManager'
 import { type ClearDataOptions, clearProfileData } from './dataCleaner'
 import { getCustomIconPath, saveCustomIcon } from './iconManager'
+import { setExpandedSidebarWidth } from './layout'
 import {
   createProfile,
   deleteProfile,
@@ -30,8 +31,10 @@ import {
 import {
   getLaunchOnStartup,
   getSidebarCollapsed,
+  getSidebarWidth,
   setLaunchOnStartup,
   setSidebarCollapsed,
+  setSidebarWidth,
 } from './settingsManager'
 
 function getActiveView(): WebContentsView | undefined {
@@ -231,6 +234,25 @@ export function setupIpcHandlers(): void {
   ipcMain.handle(IPC_CHANNELS.SETTINGS_GET_SIDEBAR_COLLAPSED, async () => {
     return getSidebarCollapsed()
   })
+
+  // Settings: Sidebar width
+  ipcMain.handle(IPC_CHANNELS.SETTINGS_GET_SIDEBAR_WIDTH, async () => {
+    return getSidebarWidth()
+  })
+
+  ipcMain.handle(
+    IPC_CHANNELS.SETTINGS_SET_SIDEBAR_WIDTH,
+    async (_, width: number, persist: boolean) => {
+      setExpandedSidebarWidth(width)
+      if (persist) setSidebarWidth(width)
+
+      const mainWindow = getMainWindow()
+      const activeProfileId = getActiveProfileId()
+      if (mainWindow && activeProfileId) {
+        updateBrowserViewBounds(activeProfileId, mainWindow)
+      }
+    }
+  )
 
   // Settings: Set sidebar collapsed
   ipcMain.handle(IPC_CHANNELS.SETTINGS_SET_SIDEBAR_COLLAPSED, async (_, collapsed: boolean) => {

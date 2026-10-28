@@ -85,6 +85,9 @@ const settingsApi: SettingsAPI = {
   getSidebarCollapsed: () => ipcRenderer.invoke(IPC_CHANNELS.SETTINGS_GET_SIDEBAR_COLLAPSED),
   setSidebarCollapsed: (collapsed: boolean) =>
     ipcRenderer.invoke(IPC_CHANNELS.SETTINGS_SET_SIDEBAR_COLLAPSED, collapsed),
+  getSidebarWidth: () => ipcRenderer.invoke(IPC_CHANNELS.SETTINGS_GET_SIDEBAR_WIDTH),
+  setSidebarWidth: (width: number, persist: boolean) =>
+    ipcRenderer.invoke(IPC_CHANNELS.SETTINGS_SET_SIDEBAR_WIDTH, width, persist),
   notifyModalOpen: () => ipcRenderer.invoke(IPC_CHANNELS.SETTINGS_MODAL_OPEN),
   notifyModalClose: () => ipcRenderer.invoke(IPC_CHANNELS.SETTINGS_MODAL_CLOSE),
   getLaunchOnStartup: () => ipcRenderer.invoke(IPC_CHANNELS.SETTINGS_GET_LAUNCH_ON_STARTUP),

@@ -1,4 +1,5 @@
 import type React from 'react'
+import { SIDEBAR_WIDTH_COLLAPSED } from '../../../shared/layout'
 import type { Profile } from '../../../shared/types'
 import { ProfileList } from './ProfileList'
 
@@ -9,6 +10,12 @@ interface SidebarProps {
   onSettingsClick: () => void
   onReloadClick: () => void
   collapsed: boolean
+  // Width while expanded (px)
+  width: number
+  // Called while dragging; persist is true for the final width on release
+  onResize: (width: number, persist: boolean) => void
+  // Double click on the edge: back to the default width
+  onResetWidth: () => void
   onToggleCollapse: () => void
   hasUpdate?: boolean
   updateVersion?: string
@@ -24,6 +31,9 @@ export function Sidebar({
   onSettingsClick,
   onReloadClick,
   collapsed,
+  width,
+  onResize,
+  onResetWidth,
   onToggleCollapse,
   hasUpdate = false,
   updateVersion,
@@ -31,11 +41,31 @@ export function Sidebar({
   onDismissUpdate,
   crashedProfileIds = new Set(),
 }: SidebarProps): React.ReactElement {
+  const startResize = (e: React.MouseEvent) => {
+    e.preventDefault()
+    const startX = e.clientX
+    const startWidth = width
+    let latest = startWidth
+
+    const onMouseMove = (move: MouseEvent) => {
+      latest = startWidth + (move.clientX - startX)
+      onResize(latest, false)
+    }
+    const onMouseUp = () => {
+      window.removeEventListener('mousemove', onMouseMove)
+      window.removeEventListener('mouseup', onMouseUp)
+      document.body.classList.remove('sidebar-resizing')
+      onResize(latest, true)
+    }
+    document.body.classList.add('sidebar-resizing')
+    window.addEventListener('mousemove', onMouseMove)
+    window.addEventListener('mouseup', onMouseUp)
+  }
+
   return (
     <div
-      className={`h-screen bg-white border-r border-gray-200 flex flex-col transition-all duration-200 ${
-        collapsed ? 'w-16' : 'w-64'
-      }`}
+      className="relative h-screen bg-white border-r border-gray-200 flex flex-col transition-all duration-200"
+      style={{ width: collapsed ? SIDEBAR_WIDTH_COLLAPSED : width }}
     >
       {/* Header */}
       <div className="h-14 border-b border-gray-200 flex items-center justify-between px-4 shrink-0">
@@ -150,6 +180,19 @@ export function Sidebar({
           </button>
         )}
       </div>
+
+      {/* Drag the right edge to resize, double click to reset (mouse only) */}
+      {!collapsed && (
+        <button
+          type="button"
+          tabIndex={-1}
+          aria-label="Resize sidebar"
+          title="Drag to resize, double click to reset"
+          onMouseDown={startResize}
+          onDoubleClick={onResetWidth}
+          className="absolute inset-y-0 right-0 w-1.5 cursor-col-resize hover:bg-blue-400/30 transition-colors"
+        />
+      )}
     </div>
   )
 }

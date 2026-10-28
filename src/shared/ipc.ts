@@ -19,6 +19,8 @@ export const IPC_CHANNELS = {
   // Settings
   SETTINGS_GET_SIDEBAR_COLLAPSED: 'settings:getSidebarCollapsed',
   SETTINGS_SET_SIDEBAR_COLLAPSED: 'settings:setSidebarCollapsed',
+  SETTINGS_GET_SIDEBAR_WIDTH: 'settings:getSidebarWidth',
+  SETTINGS_SET_SIDEBAR_WIDTH: 'settings:setSidebarWidth',
   SETTINGS_MODAL_OPEN: 'settings:modalOpen',
   SETTINGS_MODAL_CLOSE: 'settings:modalClose',
   SETTINGS_GET_LAUNCH_ON_STARTUP: 'settings:getLaunchOnStartup',
@@ -137,6 +139,10 @@ export interface SettingsAPI {
 
   // Set sidebar collapsed state
   setSidebarCollapsed: (collapsed: boolean) => Promise<void>
+
+  // Sidebar width (expanded). Setting it moves the page views; it is saved only when persist is true
+  getSidebarWidth: () => Promise<number>
+  setSidebarWidth: (width: number, persist: boolean) => Promise<void>
 
   // Notify main process that settings modal opened/closed
   notifyModalOpen: () => Promise<void>

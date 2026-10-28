@@ -1,13 +1,23 @@
 import type React from 'react'
 import { useCallback, useEffect, useState } from 'react'
-import { TAB_BAR_HEIGHT, TOOLBAR_HEIGHT } from '../../shared/layout'
+import {
+  SIDEBAR_WIDTH_COLLAPSED,
+  SIDEBAR_WIDTH_DEFAULT,
+  TAB_BAR_HEIGHT,
+  TOOLBAR_HEIGHT,
+} from '../../shared/layout'
 import { CrashedView } from './components/CrashedView'
 import { SettingsModal, type SettingsTab } from './components/SettingsModal'
 import { Sidebar } from './components/Sidebar'
 import { TabBar } from './components/TabBar'
 import { Toolbar } from './components/Toolbar'
 import { useNavigationState } from './hooks/useNavigationState'
-import { useActiveProfile, useProfiles, useSidebarCollapsed } from './hooks/useProfile'
+import {
+  useActiveProfile,
+  useProfiles,
+  useSidebarCollapsed,
+  useSidebarWidth,
+} from './hooks/useProfile'
 import { useTabsState } from './hooks/useTabsState'
 import { useUpdateState } from './hooks/useUpdateState'
 
@@ -15,6 +25,8 @@ function App(): React.ReactElement {
   const { profiles, loading: profilesLoading, refreshProfiles } = useProfiles()
   const { activeProfileId, setActive } = useActiveProfile()
   const { collapsed, setCollapsed } = useSidebarCollapsed()
+  const { width: expandedWidth, setWidth: setSidebarWidth } = useSidebarWidth()
+  const sidebarWidth = collapsed ? SIDEBAR_WIDTH_COLLAPSED : expandedWidth
   const [showSettings, setShowSettings] = useState(false)
   const [settingsTab, setSettingsTab] = useState<{ name: SettingsTab }>({ name: 'general' })
 
@@ -120,6 +132,9 @@ function App(): React.ReactElement {
         onSettingsClick={() => openSettings('general')}
         onReloadClick={handleReloadClick}
         collapsed={collapsed}
+        width={expandedWidth}
+        onResize={setSidebarWidth}
+        onResetWidth={() => setSidebarWidth(SIDEBAR_WIDTH_DEFAULT, true)}
         onToggleCollapse={() => setCollapsed(!collapsed)}
         hasUpdate={updateState.status === 'downloaded'}
         updateVersion={
@@ -134,19 +149,15 @@ function App(): React.ReactElement {
 
       {activeProfileId && !showSettings && (
         <>
-          <TabBar state={tabsState} left={collapsed ? 64 : 256} />
-          <Toolbar
-            state={navigationState}
-            left={collapsed ? 64 : 256}
-            onReload={handleReloadClick}
-          />
+          <TabBar state={tabsState} left={sidebarWidth} />
+          <Toolbar state={navigationState} left={sidebarWidth} onReload={handleReloadClick} />
         </>
       )}
 
       {isActiveCrashed && !showSettings && (
         <div
           className="fixed right-0 bottom-0 transition-all duration-200"
-          style={{ left: collapsed ? 64 : 256, top: TAB_BAR_HEIGHT + TOOLBAR_HEIGHT }}
+          style={{ left: sidebarWidth, top: TAB_BAR_HEIGHT + TOOLBAR_HEIGHT }}
         >
           <CrashedView onReload={handleReloadClick} />
         </div>
