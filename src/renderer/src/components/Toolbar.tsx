@@ -138,9 +138,9 @@ function ToolbarButton({
       title={title}
       disabled={disabled}
       onClick={onClick}
-      className="p-1.5 rounded hover:bg-gray-100 transition-colors disabled:opacity-30 disabled:hover:bg-transparent"
+      className="shrink-0 flex items-center justify-center w-8 h-8 rounded hover:bg-gray-100 transition-colors disabled:opacity-30 disabled:hover:bg-transparent"
     >
-      <span className={`codicon ${icon} text-lg text-gray-600`} />
+      <span className={`codicon ${icon} text-lg leading-none text-gray-600`} />
     </button>
   )
 }
