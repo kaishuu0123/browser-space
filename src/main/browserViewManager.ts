@@ -3,7 +3,6 @@ import { connect } from 'node:tls'
 import {
   app,
   type BaseWindow,
-  dialog,
   type Input,
   type Session,
   session,
@@ -20,6 +19,7 @@ import type {
   Profile,
   TabsState,
 } from '../shared/types'
+import { showCertWindow } from './certWindow'
 import { applyContextMenu } from './contextMenu'
 import { FindbarWindow } from './findbar/FindbarWindow'
 import { getContentViewBounds } from './layout'
@@ -846,10 +846,11 @@ export async function showCertInfo(profileId: string, mainWindow: BaseWindow): P
   }
 
   if (url.protocol !== 'https:') {
-    await dialog.showMessageBox(mainWindow, {
-      type: 'warning',
-      message: 'Connection is not secure',
-      detail: `${url.href}\n\nInformation you send to this site (passwords, card numbers...) can be seen by others.`,
+    await showCertWindow(mainWindow, {
+      tone: 'warning',
+      title: 'Connection is not secure',
+      text: 'Information you send to this site (passwords, card numbers...) can be seen by others.',
+      address: url.href,
     })
     return
   }
@@ -870,21 +871,16 @@ export async function showCertInfo(profileId: string, mainWindow: BaseWindow): P
   }
 
   const invalid = !!tab.certError || !!tab.certBypassed
-  const date = (seconds?: number) => (seconds ? new Date(seconds * 1000).toLocaleString() : '-')
-  await dialog.showMessageBox(mainWindow, {
-    type: invalid ? 'warning' : 'info',
-    message: invalid ? 'Certificate is not valid' : 'Connection is secure',
-    detail: details
-      ? [
-          url.href,
-          '',
-          `Subject: ${details.subject ?? '-'}`,
-          `Issuer: ${details.issuer ?? '-'}`,
-          `Valid from: ${date(details.validFrom)}`,
-          `Valid until: ${date(details.validTo)}`,
-          `Fingerprint: ${details.fingerprint ?? '-'}`,
-        ].join('\n')
-      : `${url.href}\n\nThe certificate of this page could not be read.`,
+  await showCertWindow(mainWindow, {
+    tone: invalid ? 'warning' : 'secure',
+    title: invalid ? 'Certificate is not valid' : 'Connection is secure',
+    text: tab.certBypassed
+      ? 'This page was opened because you chose to proceed despite a certificate error.'
+      : invalid
+        ? 'The certificate of this site could not be verified.'
+        : 'Information you send to this site is encrypted, and its certificate is valid.',
+    address: url.href,
+    details,
   })
 }
 
