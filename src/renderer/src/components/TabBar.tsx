@@ -35,6 +35,9 @@ export function TabBar({ state, left }: TabBarProps): React.ReactElement {
               {tab.loading && !tab.crashed && (
                 <span className="codicon codicon-loading codicon-modifier-spin text-xs shrink-0" />
               )}
+              {!tab.loading && !tab.crashed && tab.favicon && (
+                <img src={tab.favicon} alt="" className="w-4 h-4 shrink-0" />
+              )}
               <span className="truncate text-xs">{tab.title || tab.url || 'New Tab'}</span>
             </button>
             <button

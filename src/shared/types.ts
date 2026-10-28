@@ -57,6 +57,8 @@ export interface TabInfo {
   id: number
   title: string
   url: string
+  // Favicon URL of the page (empty until the page reports one)
+  favicon: string
   loading: boolean
   crashed: boolean
 }

@@ -23,6 +23,7 @@ interface Tab {
   crashed: boolean
   // Tab this one was opened from (new tabs are grouped to the right of their opener)
   openerId?: number
+  favicon?: string
 }
 
 const HIDDEN_BOUNDS = { x: 0, y: 0, width: 0, height: 0 }
@@ -88,12 +89,13 @@ export function getTabsState(profileId: string): TabsState | null {
   return {
     profileId,
     activeTabId: entry.activeTabId,
-    tabs: entry.tabs.map(({ id, view, crashed }) => {
+    tabs: entry.tabs.map(({ id, view, crashed, favicon }) => {
       const alive = isAlive(view)
       return {
         id,
         title: alive ? view.webContents.getTitle() : '',
         url: alive ? view.webContents.getURL() : '',
+        favicon: favicon ?? '',
         loading: alive ? view.webContents.isLoading() : false,
         crashed,
       }
@@ -215,6 +217,17 @@ function createTab(
   view.webContents.on('did-start-loading', syncState)
   view.webContents.on('did-stop-loading', syncState)
   view.webContents.on('page-title-updated', syncState)
+
+  // Favicon for the tab bar. Reset on a new page so a stale icon does not stay on a page
+  // that has none (the page reports its icon again once it loads).
+  const setFavicon = (favicon: string) => {
+    const tab = profileTabs.get(profileId)?.tabs.find((t) => t.id === tabId)
+    if (!tab || tab.favicon === favicon) return
+    tab.favicon = favicon
+    syncState()
+  }
+  view.webContents.on('did-navigate', () => setFavicon(''))
+  view.webContents.on('page-favicon-updated', (_event, favicons) => setFavicon(favicons[0] ?? ''))
 
   // Handle crash / hang: only this tab is marked, the others stay usable
   const markCrashed = () => {
