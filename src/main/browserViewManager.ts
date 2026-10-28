@@ -5,6 +5,7 @@ import {
   type Session,
   session,
   shell,
+  type WebContents,
   WebContentsView,
 } from 'electron'
 import { IPC_CHANNELS } from '../shared/ipc'
@@ -161,16 +162,27 @@ function ensureProfileSession(profileId: string, profile: Profile): Session {
   return profileSession
 }
 
-// Create a tab (WebContentsView) for a profile and load the url (tab-level settings)
-function createTab(profileId: string, profile: Profile, mainWindow: BaseWindow, url: string): Tab {
-  const view = new WebContentsView({
-    webPreferences: {
-      session: ensureProfileSession(profileId, profile),
-      nodeIntegration: false,
-      contextIsolation: true,
-      sandbox: true,
-    },
-  })
+// Create a tab (WebContentsView) for a profile (tab-level settings) and load the url.
+// For window.open() Electron has already created the contents (on the opener's session) and
+// navigates it itself, so it is passed in instead of a url.
+function createTab(
+  profileId: string,
+  profile: Profile,
+  mainWindow: BaseWindow,
+  source: { url: string } | { webContents: WebContents }
+): Tab {
+  const view = new WebContentsView(
+    'webContents' in source
+      ? { webContents: source.webContents }
+      : {
+          webPreferences: {
+            session: ensureProfileSession(profileId, profile),
+            nodeIntegration: false,
+            contextIsolation: true,
+            sandbox: true,
+          },
+        }
+  )
 
   const tabId = nextTabId++
 
@@ -280,15 +292,30 @@ function createTab(profileId: string, profile: Profile, mainWindow: BaseWindow, 
       }
     }
 
-    // target=_blank links and plain window.open(url) open as a new tab of this profile
-    openTab(profileId, profile, mainWindow, details.url, {
-      activate: details.disposition !== 'background-tab',
-      afterTabId: tabId,
-    })
-    return { action: 'deny' }
+    // target=_blank links and plain window.open(url) open as a new tab of this profile.
+    // The tab's contents is handed back so window.open() returns a window instead of null;
+    // pages like Gmail's "Show original" take null for a blocked popup and warn about it.
+    return {
+      action: 'allow',
+      createWindow: (options) => {
+        // Electron passes the contents it created, which its typings do not list
+        const { webContents } = options as { webContents?: WebContents }
+        if (!webContents) throw new Error('window.open() gave no webContents')
+        return openTab(
+          profileId,
+          profile,
+          mainWindow,
+          { webContents },
+          {
+            activate: details.disposition !== 'background-tab',
+            afterTabId: tabId,
+          }
+        ).view.webContents
+      },
+    }
   })
 
-  view.webContents.loadURL(url)
+  if ('url' in source) view.webContents.loadURL(source.url)
 
   return { id: tabId, view, crashed: false }
 }
@@ -304,7 +331,7 @@ function getOrCreateActiveTab(profileId: string, mainWindow: BaseWindow): Tab {
     throw new Error(`Profile not found: ${profileId}`)
   }
 
-  const tab = createTab(profileId, profile, mainWindow, profile.homeUrl)
+  const tab = createTab(profileId, profile, mainWindow, { url: profile.homeUrl })
   profileTabs.set(profileId, { tabs: [tab], activeTabId: tab.id })
   return tab
 }
@@ -353,13 +380,13 @@ function openTab(
   profileId: string,
   profile: Profile,
   mainWindow: BaseWindow,
-  url: string,
+  source: { url: string } | { webContents: WebContents },
   options: { activate: boolean; afterTabId?: number }
-): void {
+): Tab {
   const entry = profileTabs.get(profileId)
-  if (!entry) return
+  if (!entry) throw new Error(`Profile has no tabs: ${profileId}`)
 
-  const tab = createTab(profileId, profile, mainWindow, url)
+  const tab = createTab(profileId, profile, mainWindow, source)
   tab.openerId = options.afterTabId
 
   // Next to the opener, after the tabs it already opened (like browsers); at the end otherwise
@@ -376,6 +403,7 @@ function openTab(
   } else if (getActiveProfileId() === profileId) {
     sendTabsState(profileId)
   }
+  return tab
 }
 
 // Open a new tab with the profile's home URL (from the tab bar)
@@ -384,7 +412,7 @@ export function newTab(profileId: string, mainWindow: BaseWindow): void {
   const entry = profileTabs.get(profileId)
   if (!profile || !entry) return
 
-  openTab(profileId, profile, mainWindow, profile.homeUrl, { activate: true })
+  openTab(profileId, profile, mainWindow, { url: profile.homeUrl }, { activate: true })
 }
 
 export function activateTab(profileId: string, tabId: number, mainWindow: BaseWindow): void {
@@ -405,7 +433,7 @@ export function closeTab(profileId: string, tabId: number, mainWindow: BaseWindo
   if (entry.tabs.length === 0) {
     const profile = getProfileById(profileId)
     if (!profile) return
-    const home = createTab(profileId, profile, mainWindow, profile.homeUrl)
+    const home = createTab(profileId, profile, mainWindow, { url: profile.homeUrl })
     entry.tabs.push(home)
     entry.activeTabId = home.id
   } else if (entry.activeTabId === tabId) {
@@ -551,7 +579,7 @@ export function reloadActiveTab(profileId: string, mainWindow: BaseWindow): void
   }
 
   const url = (!webContents.isDestroyed() && webContents.getURL()) || profile.homeUrl
-  const fresh = createTab(profileId, profile, mainWindow, url)
+  const fresh = createTab(profileId, profile, mainWindow, { url })
   fresh.openerId = tab.openerId
   entry.tabs[entry.tabs.indexOf(tab)] = fresh
   entry.activeTabId = fresh.id
