@@ -53,18 +53,29 @@ export interface NavigationState {
 }
 
 // A tab as shown in the tab bar
-// A page that could not be loaded because of its certificate (expired, self-signed, wrong host...)
-export interface CertErrorInfo {
-  url: string
-  hostname: string
-  // Chromium's error name, e.g. ERR_CERT_AUTHORITY_INVALID
-  error: string
+// What the certificate of a site says about it
+export interface CertDetails {
   subject?: string
   issuer?: string
   // Validity in seconds since the epoch
   validFrom?: number
   validTo?: number
   fingerprint?: string
+}
+
+// Certificate of the page in the active tab, for the panel opened from the address bar's lock
+export interface CertInfo extends CertDetails {
+  hostname: string
+  // 'bypassed': the certificate is invalid and the user chose to proceed anyway
+  status: 'valid' | 'bypassed'
+}
+
+// A page that could not be loaded because of its certificate (expired, self-signed, wrong host...)
+export interface CertErrorInfo extends CertDetails {
+  url: string
+  hostname: string
+  // Chromium's error name, e.g. ERR_CERT_AUTHORITY_INVALID
+  error: string
 }
 
 // A page that could not be reached (offline, DNS failure, connection refused, timeout...)

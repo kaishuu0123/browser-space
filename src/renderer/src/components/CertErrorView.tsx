@@ -1,5 +1,6 @@
 import type React from 'react'
 import type { CertErrorInfo } from '../../../shared/types'
+import { CertDetailsList } from './CertDetailsList'
 import { Button } from './ui/button'
 
 interface CertErrorViewProps {
@@ -17,10 +18,6 @@ const ERROR_REASONS: Record<string, string> = {
   ERR_CERT_REVOKED: 'The certificate has been revoked by its issuer.',
   ERR_CERT_WEAK_SIGNATURE_ALGORITHM: 'The certificate uses a weak signature algorithm.',
   ERR_CERT_WEAK_KEY: 'The certificate uses a weak key.',
-}
-
-function formatDate(seconds?: number): string {
-  return seconds ? new Date(seconds * 1000).toLocaleString() : '-'
 }
 
 export function CertErrorView({
@@ -50,20 +47,9 @@ export function CertErrorView({
 
         <details className="mb-6 text-sm text-gray-600">
           <summary className="cursor-pointer text-gray-500 hover:text-gray-700">Details</summary>
-          <dl className="mt-2 grid grid-cols-[auto,1fr] gap-x-3 gap-y-1 break-all">
-            <dt className="text-gray-400">Address</dt>
-            <dd>{info.url}</dd>
-            <dt className="text-gray-400">Subject</dt>
-            <dd>{info.subject ?? '-'}</dd>
-            <dt className="text-gray-400">Issuer</dt>
-            <dd>{info.issuer ?? '-'}</dd>
-            <dt className="text-gray-400">Valid from</dt>
-            <dd>{formatDate(info.validFrom)}</dd>
-            <dt className="text-gray-400">Valid until</dt>
-            <dd>{formatDate(info.validTo)}</dd>
-            <dt className="text-gray-400">Fingerprint</dt>
-            <dd className="font-mono text-xs">{info.fingerprint ?? '-'}</dd>
-          </dl>
+          <div className="mt-2">
+            <CertDetailsList details={info} address={info.url} />
+          </div>
         </details>
 
         <Button onClick={onLeave} className="w-full mb-3">

@@ -1,3 +1,5 @@
+import { createHash } from 'node:crypto'
+import { connect } from 'node:tls'
 import {
   app,
   type BaseWindow,
@@ -10,7 +12,9 @@ import {
 } from 'electron'
 import { IPC_CHANNELS } from '../shared/ipc'
 import type {
+  CertDetails,
   CertErrorInfo,
+  CertInfo,
   LoadErrorInfo,
   NavigationState,
   Profile,
@@ -35,6 +39,8 @@ interface Tab {
   certError?: CertErrorInfo
   // The page loaded because the user trusted its invalid certificate
   certBypassed?: boolean
+  // A panel of the renderer is open over the page: the view is hidden behind it
+  covered?: boolean
   // Set while the page could not be reached: the view is hidden and the renderer shows an
   // error screen (with a game while offline)
   loadError?: LoadErrorInfo
@@ -42,7 +48,7 @@ interface Tab {
 
 // The tab's view stays hidden while the renderer shows a screen of its own in its place
 function isBlocked(tab: Tab): boolean {
-  return tab.crashed || !!tab.certError || !!tab.loadError
+  return tab.crashed || !!tab.certError || !!tab.loadError || !!tab.covered
 }
 
 // Certificates the user chose to trust despite an error, per profile. Kept in memory only, so
@@ -55,11 +61,10 @@ function trustKey(hostname: string, fingerprint: string): string {
 }
 
 // Certificate of the last failed check per profile and host:port, for the error screen
-type CertDetails = Pick<
-  CertErrorInfo,
-  'subject' | 'issuer' | 'validFrom' | 'validTo' | 'fingerprint'
->
 const certFailures = new Map<string, Map<string, CertDetails>>()
+
+// Certificate of the last successful check per profile and host, for the lock's panel
+const validCerts = new Map<string, Map<string, CertDetails>>()
 
 // Which profile a session belongs to (certificate errors are reported per session)
 const sessionProfileIds = new WeakMap<Session, string>()
@@ -252,6 +257,26 @@ function ensureProfileSession(profileId: string, profile: Profile): Session {
   const profileSession = session.fromPartition(`persist:profile-${profileId}`)
   if (initializedSessions.has(profileId)) return profileSession
   initializedSessions.add(profileId)
+
+  // Remember the certificate of every successful TLS check (the verdict stays Chromium's: -3)
+  profileSession.setCertificateVerifyProc((request, callback) => {
+    if (request.verificationResult === 'net::OK') {
+      const { certificate } = request
+      let certs = validCerts.get(profileId)
+      if (!certs) {
+        certs = new Map()
+        validCerts.set(profileId, certs)
+      }
+      certs.set(request.hostname, {
+        subject: certificate.subjectName,
+        issuer: certificate.issuerName,
+        validFrom: certificate.validStart,
+        validTo: certificate.validExpiry,
+        fingerprint: certificate.fingerprint,
+      })
+    }
+    callback(-3)
+  })
 
   profileSession.webRequest.onBeforeRequest((details, callback) => {
     callback({ cancel: offlineMode && /^(https?|wss?):/.test(details.url) })
@@ -774,6 +799,109 @@ function destroyTab(tab: Tab, mainWindow: BaseWindow): void {
     mainWindow.contentView.removeChildView(tab.view)
   }
   if (alive) tab.view.webContents.close()
+}
+
+// Ask the server for its certificate (the page may have come from the cache, so no check was
+// recorded). Only a certificate this computer trusts is returned, like the ones recorded.
+function fetchCertificate(hostname: string, port: number): Promise<CertDetails | null> {
+  return new Promise((resolve) => {
+    const socket = connect({
+      host: hostname,
+      port,
+      servername: hostname,
+      rejectUnauthorized: false,
+    })
+    const done = (details: CertDetails | null) => {
+      socket.destroy()
+      resolve(details)
+    }
+    socket.setTimeout(5000, () => done(null))
+    socket.once('error', () => done(null))
+    socket.once('secureConnect', () => {
+      const cert = socket.getPeerCertificate()
+      if (!socket.authorized || !cert?.raw) {
+        done(null)
+        return
+      }
+      // Same notations as Electron's certificate objects (name, seconds, sha256/base64)
+      done({
+        subject: [cert.subject?.CN].flat()[0],
+        issuer: [cert.issuer?.CN].flat()[0],
+        validFrom: Math.floor(Date.parse(cert.valid_from) / 1000),
+        validTo: Math.floor(Date.parse(cert.valid_to) / 1000),
+        fingerprint: `sha256/${createHash('sha256').update(cert.raw).digest('base64')}`,
+      })
+    })
+  })
+}
+
+// Certificate of the page in the active tab, for the panel opened from the address bar's lock
+export async function getCertInfo(profileId: string): Promise<CertInfo | null> {
+  const tab = getActiveTab(profileId)
+  if (!tab || !isAlive(tab.view)) return null
+
+  let url: URL
+  try {
+    url = new URL(tab.certError?.url ?? tab.view.webContents.getURL())
+  } catch (_e) {
+    return null
+  }
+  if (url.protocol !== 'https:') return null
+
+  // A page blocked by (or loaded despite) a certificate error: the error check remembered it
+  let details: CertDetails | null | undefined = tab.certError
+    ? tab.certError
+    : tab.certBypassed
+      ? certFailures.get(profileId)?.get(url.host)
+      : validCerts.get(profileId)?.get(url.hostname)
+  if (!details && !tab.certError && !tab.certBypassed) {
+    details = await fetchCertificate(url.hostname, Number(url.port) || 443)
+    if (details) {
+      const certs = validCerts.get(profileId) ?? new Map<string, CertDetails>()
+      certs.set(url.hostname, details)
+      validCerts.set(profileId, certs)
+    }
+  }
+  if (!details) return null
+
+  return {
+    hostname: url.hostname,
+    status: tab.certError || tab.certBypassed ? 'bypassed' : 'valid',
+    subject: details.subject,
+    issuer: details.issuer,
+    validFrom: details.validFrom,
+    validTo: details.validTo,
+    fingerprint: details.fingerprint,
+  }
+}
+
+// A renderer panel is about to open over the page. The page view sits above the renderer, so it
+// is hidden and a snapshot of it is returned to show in its place.
+export async function beginPanel(
+  profileId: string,
+  mainWindow: BaseWindow
+): Promise<string | null> {
+  const tab = getActiveTab(profileId)
+  if (!tab || isBlocked(tab) || !isAlive(tab.view)) return null
+
+  let snapshot: string | null = null
+  try {
+    snapshot = (await tab.view.webContents.capturePage()).toDataURL()
+  } catch (_e) {
+    // Without a snapshot the panel opens over an empty area, which is still usable
+  }
+  tab.covered = true
+  refreshDisplay(profileId, mainWindow)
+  return snapshot
+}
+
+// The panel closed (or the page it was about to cover changed): show the pages again
+export function endPanel(mainWindow: BaseWindow): void {
+  for (const [profileId, { tabs }] of profileTabs) {
+    if (!tabs.some((tab) => tab.covered)) continue
+    for (const tab of tabs) tab.covered = false
+    refreshDisplay(profileId, mainWindow)
+  }
 }
 
 // Certificate error screen, "Back to safety": the previous page, or the home page if there is none

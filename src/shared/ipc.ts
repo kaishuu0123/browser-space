@@ -1,4 +1,4 @@
-import type { NavigationState, Profile, TabsState } from './types'
+import type { CertInfo, NavigationState, Profile, TabsState } from './types'
 
 // IPC channel names
 export const IPC_CHANNELS = {
@@ -53,6 +53,9 @@ export const IPC_CHANNELS = {
   NAVIGATION_OFFLINE_GET: 'navigation:offlineGet',
   NAVIGATION_OFFLINE_SET: 'navigation:offlineSet',
   NAVIGATION_OFFLINE_CHANGED: 'navigation:offlineChanged', // main -> renderer
+  NAVIGATION_CERT_INFO: 'navigation:certInfo',
+  NAVIGATION_PANEL_BEGIN: 'navigation:panelBegin',
+  NAVIGATION_PANEL_END: 'navigation:panelEnd',
   NAVIGATION_CERT_LEAVE: 'navigation:certLeave',
   NAVIGATION_CERT_PROCEED: 'navigation:certProceed',
 
@@ -127,6 +130,13 @@ export interface NavigationAPI {
   goForward: () => Promise<void>
   // Navigate to a URL or search text typed in the address bar
   navigate: (input: string) => Promise<void>
+  // Certificate of the page in the active tab (null for http pages or when none was recorded)
+  getCertInfo: () => Promise<CertInfo | null>
+  // A panel opened over the page: the page is hidden behind it, so the main process gives back
+  // a snapshot of it to show in its place (null when the page is not on screen anyway) ...
+  beginPanel: () => Promise<string | null>
+  // ... and puts the page back when the panel closes
+  endPanel: () => Promise<void>
   // Certificate error screen: go back to safety (previous page or the home page) ...
   leaveCertError: () => Promise<void>
   // ... or trust this host for this profile until the app quits, and load the page anyway

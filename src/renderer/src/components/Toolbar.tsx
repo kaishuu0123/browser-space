@@ -23,12 +23,20 @@ const SECURITY_ICONS: Record<
 interface ToolbarProps {
   state: NavigationState | null
   security: PageSecurity
+  // The lock was clicked: show the certificate of the page
+  onSecurityClick: () => void
   // Width of the sidebar (the toolbar sits to the right of it)
   left: number
   onReload: () => void
 }
 
-export function Toolbar({ state, security, left, onReload }: ToolbarProps): React.ReactElement {
+export function Toolbar({
+  state,
+  security,
+  onSecurityClick,
+  left,
+  onReload,
+}: ToolbarProps): React.ReactElement {
   const url = state?.url ?? ''
   const [draft, setDraft] = useState(url)
   const [editing, setEditing] = useState(false)
@@ -71,14 +79,16 @@ export function Toolbar({ state, security, left, onReload }: ToolbarProps): Reac
       />
       <ToolbarButton icon="codicon-refresh" title="Reload" onClick={onReload} />
       {security !== 'none' && (
-        <span
-          title={SECURITY_ICONS[security].title}
-          className="-mr-6 z-10 pl-3 h-7 flex items-center pointer-events-none"
+        <button
+          type="button"
+          title={`${SECURITY_ICONS[security].title} (click for details)`}
+          onClick={onSecurityClick}
+          className="-mr-8 z-10 ml-1 w-7 h-7 flex items-center justify-center rounded-full hover:bg-gray-200"
         >
           <span
             className={`codicon ${SECURITY_ICONS[security].icon} text-sm leading-none ${SECURITY_ICONS[security].className}`}
           />
-        </span>
+        </button>
       )}
       <input
         ref={inputRef}
@@ -101,7 +111,7 @@ export function Toolbar({ state, security, left, onReload }: ToolbarProps): Reac
           }
         }}
         className={`flex-1 min-w-0 h-7 pr-3 text-sm text-gray-700 bg-gray-100 rounded-full outline-none focus:bg-white focus:ring-2 focus:ring-blue-400 ${
-          security === 'none' ? 'pl-3' : 'pl-8'
+          security === 'none' ? 'pl-3' : 'pl-9'
         }`}
         placeholder="Search or enter address"
       />
