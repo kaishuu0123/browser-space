@@ -53,6 +53,20 @@ export interface NavigationState {
 }
 
 // A tab as shown in the tab bar
+// A page that could not be loaded because of its certificate (expired, self-signed, wrong host...)
+export interface CertErrorInfo {
+  url: string
+  hostname: string
+  // Chromium's error name, e.g. ERR_CERT_AUTHORITY_INVALID
+  error: string
+  subject?: string
+  issuer?: string
+  // Validity in seconds since the epoch
+  validFrom?: number
+  validTo?: number
+  fingerprint?: string
+}
+
 export interface TabInfo {
   id: number
   title: string
@@ -61,6 +75,10 @@ export interface TabInfo {
   favicon: string
   loading: boolean
   crashed: boolean
+  // Set while the page is blocked by a certificate error (its view is hidden)
+  certError?: CertErrorInfo
+  // The page loaded because the user chose to trust its invalid certificate
+  certBypassed?: boolean
 }
 
 // Tabs of the active profile

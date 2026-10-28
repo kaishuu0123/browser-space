@@ -6,11 +6,12 @@ import {
   TAB_BAR_HEIGHT,
   TOOLBAR_HEIGHT,
 } from '../../shared/layout'
+import { CertErrorView } from './components/CertErrorView'
 import { CrashedView } from './components/CrashedView'
 import { SettingsModal, type SettingsTab } from './components/SettingsModal'
 import { Sidebar } from './components/Sidebar'
 import { TabBar } from './components/TabBar'
-import { Toolbar } from './components/Toolbar'
+import { type PageSecurity, Toolbar } from './components/Toolbar'
 import { useNavigationState } from './hooks/useNavigationState'
 import {
   useActiveProfile,
@@ -86,6 +87,23 @@ function App(): React.ReactElement {
     (tab) => tab.id === tabsState.activeTabId && tab.crashed
   )
 
+  // A page blocked by a certificate error is handled the same way: its view is hidden and the
+  // error screen takes its place
+  const activeCertError = tabsState?.tabs.find(
+    (tab) => tab.id === tabsState.activeTabId && tab.certError
+  )?.certError
+
+  const activeTab = tabsState?.tabs.find((tab) => tab.id === tabsState.activeTabId)
+  const pageSecurity: PageSecurity = activeCertError
+    ? 'error'
+    : activeTab?.certBypassed
+      ? 'bypassed'
+      : navigationState?.url.startsWith('https:')
+        ? 'secure'
+        : navigationState?.url.startsWith('http:')
+          ? 'insecure'
+          : 'none'
+
   // The profile no longer has a crashed tab (reloaded or closed): clear its sidebar mark
   useEffect(() => {
     if (!tabsState || tabsState.tabs.some((tab) => tab.crashed)) return
@@ -157,8 +175,26 @@ function App(): React.ReactElement {
       {activeProfileId && !showSettings && (
         <>
           <TabBar state={tabsState} left={sidebarWidth} />
-          <Toolbar state={navigationState} left={sidebarWidth} onReload={handleReloadClick} />
+          <Toolbar
+            state={navigationState}
+            security={pageSecurity}
+            left={sidebarWidth}
+            onReload={handleReloadClick}
+          />
         </>
+      )}
+
+      {activeCertError && !isActiveCrashed && !showSettings && (
+        <div
+          className="fixed right-0 bottom-0 transition-all duration-200"
+          style={{ left: sidebarWidth, top: TAB_BAR_HEIGHT + TOOLBAR_HEIGHT }}
+        >
+          <CertErrorView
+            info={activeCertError}
+            onLeave={() => window.navigationApi.leaveCertError()}
+            onProceed={() => window.navigationApi.proceedCertError()}
+          />
+        </div>
       )}
 
       {isActiveCrashed && !showSettings && (

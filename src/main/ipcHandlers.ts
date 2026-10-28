@@ -7,7 +7,9 @@ import {
   getNavigationState,
   getTabsState,
   hideAllBrowserViews,
+  leaveCertError,
   newTab,
+  proceedCertError,
   recreateBrowserView,
   reloadActiveTab,
   removeBrowserView,
@@ -176,6 +178,16 @@ export function setupIpcHandlers(): void {
     if (view?.webContents.navigationHistory.canGoForward()) {
       view.webContents.navigationHistory.goForward()
     }
+  })
+
+  ipcMain.handle(IPC_CHANNELS.NAVIGATION_CERT_LEAVE, async () => {
+    const activeProfileId = getActiveProfileId()
+    if (activeProfileId) leaveCertError(activeProfileId)
+  })
+
+  ipcMain.handle(IPC_CHANNELS.NAVIGATION_CERT_PROCEED, async () => {
+    const activeProfileId = getActiveProfileId()
+    if (activeProfileId) proceedCertError(activeProfileId)
   })
 
   ipcMain.handle(IPC_CHANNELS.NAVIGATION_NAVIGATE, async (_, input: string) => {

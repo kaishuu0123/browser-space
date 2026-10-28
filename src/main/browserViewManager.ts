@@ -9,7 +9,7 @@ import {
   WebContentsView,
 } from 'electron'
 import { IPC_CHANNELS } from '../shared/ipc'
-import type { NavigationState, Profile, TabsState } from '../shared/types'
+import type { CertErrorInfo, NavigationState, Profile, TabsState } from '../shared/types'
 import { applyContextMenu } from './contextMenu'
 import { FindbarWindow } from './findbar/FindbarWindow'
 import { getContentViewBounds } from './layout'
@@ -24,6 +24,80 @@ interface Tab {
   // Tab this one was opened from (new tabs are grouped to the right of their opener)
   openerId?: number
   favicon?: string
+  // Set while the page is blocked by a certificate error: the view is hidden and the renderer
+  // shows the error screen
+  certError?: CertErrorInfo
+  // The page loaded because the user trusted its invalid certificate
+  certBypassed?: boolean
+}
+
+// Certificates the user chose to trust despite an error, per profile. Kept in memory only, so
+// the exception ends when the app quits. Like Chrome's, it is tied to the host AND the
+// certificate: a different certificate on the same host raises the error again.
+const trustedCerts = new Map<string, Set<string>>()
+
+function trustKey(hostname: string, fingerprint: string): string {
+  return `${hostname}|${fingerprint}`
+}
+
+// Certificate of the last failed check per profile and host:port, for the error screen
+type CertDetails = Pick<
+  CertErrorInfo,
+  'subject' | 'issuer' | 'validFrom' | 'validTo' | 'fingerprint'
+>
+const certFailures = new Map<string, Map<string, CertDetails>>()
+
+// Which profile a session belongs to (certificate errors are reported per session)
+const sessionProfileIds = new WeakMap<Session, string>()
+
+// Certificate errors: a host the user trusted in this profile is let through; for any other the
+// certificate is remembered (for the error screen) and the page is blocked. Chromium asks again
+// on every attempt, so trusting a host takes effect on the next load.
+app.on('certificate-error', (event, webContents, url, _error, certificate, callback) => {
+  event.preventDefault()
+
+  const profileId = webContents ? sessionProfileIds.get(webContents.session) : undefined
+  let hostname = ''
+  let host = ''
+  try {
+    ;({ hostname, host } = new URL(url))
+  } catch (_e) {
+    callback(false)
+    return
+  }
+  if (!profileId) {
+    callback(false)
+    return
+  }
+  if (trustedCerts.get(profileId)?.has(trustKey(hostname, certificate.fingerprint))) {
+    // Remember on the tab that this page is only here by exception (the address bar warns)
+    const tab = profileTabs.get(profileId)?.tabs.find((t) => t.view.webContents === webContents)
+    if (tab && !tab.certBypassed) {
+      tab.certBypassed = true
+      if (getActiveProfileId() === profileId) sendTabsState(profileId)
+    }
+    callback(true)
+    return
+  }
+
+  let failures = certFailures.get(profileId)
+  if (!failures) {
+    failures = new Map()
+    certFailures.set(profileId, failures)
+  }
+  failures.set(host, {
+    subject: certificate.subjectName,
+    issuer: certificate.issuerName,
+    validFrom: certificate.validStart,
+    validTo: certificate.validExpiry,
+    fingerprint: certificate.fingerprint,
+  })
+  callback(false)
+})
+
+// Chromium's certificate errors are -200 to -299 (ERR_CERT_AUTHORITY_INVALID is -202, ...)
+function isCertErrorCode(errorCode: number): boolean {
+  return errorCode <= -200 && errorCode > -300
 }
 
 const HIDDEN_BOUNDS = { x: 0, y: 0, width: 0, height: 0 }
@@ -89,7 +163,7 @@ export function getTabsState(profileId: string): TabsState | null {
   return {
     profileId,
     activeTabId: entry.activeTabId,
-    tabs: entry.tabs.map(({ id, view, crashed, favicon }) => {
+    tabs: entry.tabs.map(({ id, view, crashed, favicon, certError, certBypassed }) => {
       const alive = isAlive(view)
       return {
         id,
@@ -98,6 +172,8 @@ export function getTabsState(profileId: string): TabsState | null {
         favicon: favicon ?? '',
         loading: alive ? view.webContents.isLoading() : false,
         crashed,
+        certError,
+        certBypassed,
       }
     }),
   }
@@ -161,6 +237,8 @@ function ensureProfileSession(profileId: string, profile: Profile): Session {
       callback(false)
     }
   })
+
+  sessionProfileIds.set(profileSession, profileId)
 
   // Set Accept-Language header via webRequest
   profileSession.webRequest.onBeforeSendHeaders((details, callback) => {
@@ -245,6 +323,40 @@ function createTab(
       markCrashed()
     }
   })
+
+  // A page that fails on its certificate is blocked behind an error screen; a new navigation
+  // (back, reload, another URL) lifts it, and fails again if the certificate is still bad
+  const setCertError = (certError: CertErrorInfo | undefined) => {
+    const tab = profileTabs.get(profileId)?.tabs.find((t) => t.id === tabId)
+    if (!tab || (!tab.certError && !certError)) return
+    tab.certError = certError
+    refreshDisplay(profileId, mainWindow)
+  }
+  view.webContents.on('did-start-navigation', (details) => {
+    if (!details.isMainFrame || details.isSameDocument) return
+    const tab = profileTabs.get(profileId)?.tabs.find((t) => t.id === tabId)
+    if (tab) tab.certBypassed = false
+    setCertError(undefined)
+  })
+  view.webContents.on(
+    'did-fail-load',
+    (_event, errorCode, errorDescription, validatedURL, isMainFrame) => {
+      if (!isMainFrame || !isCertErrorCode(errorCode)) return
+      let hostname = ''
+      let host = ''
+      try {
+        ;({ hostname, host } = new URL(validatedURL))
+      } catch (_e) {
+        return
+      }
+      setCertError({
+        url: validatedURL,
+        hostname,
+        error: errorDescription,
+        ...certFailures.get(profileId)?.get(host),
+      })
+    }
+  )
 
   view.webContents.on('unresponsive', () => {
     console.warn(`[Profile:${profileId}] View became unresponsive`)
@@ -384,7 +496,7 @@ function setActiveTab(profileId: string, tabId: number, mainWindow: BaseWindow):
   // The previous tab's view keeps the keyboard focus while hidden, which would swallow
   // shortcuts, so move the focus to the tab that is now shown
   const active = getActiveTab(profileId)
-  if (active && !active.crashed && isProfileDisplayed(profileId)) {
+  if (active && !active.crashed && !active.certError && isProfileDisplayed(profileId)) {
     active.view.webContents.focus()
   }
 }
@@ -485,8 +597,9 @@ export function showBrowserView(profileId: string, mainWindow: BaseWindow): void
     contentView.addChildView(view)
   }
 
-  // A crashed tab stays hidden so the renderer can show its error screen
-  view.setBounds(tab.crashed ? HIDDEN_BOUNDS : getContentViewBounds(mainWindow))
+  // A crashed tab (or one blocked by a certificate error) stays hidden so the renderer can
+  // show its error screen
+  view.setBounds(tab.crashed || tab.certError ? HIDDEN_BOUNDS : getContentViewBounds(mainWindow))
   sendNavigationState(profileId)
   sendTabsState(profileId)
 }
@@ -544,7 +657,7 @@ export function updateBrowserViewBounds(
   if (!activeProfileId) return
 
   const tab = getActiveTab(activeProfileId)
-  if (!tab || tab.crashed) return
+  if (!tab || tab.crashed || tab.certError) return
 
   tab.view.setBounds(getContentViewBounds(mainWindow))
 }
@@ -575,6 +688,35 @@ function destroyTab(tab: Tab, mainWindow: BaseWindow): void {
     mainWindow.contentView.removeChildView(tab.view)
   }
   if (alive) tab.view.webContents.close()
+}
+
+// Certificate error screen, "Back to safety": the previous page, or the home page if there is none
+export function leaveCertError(profileId: string): void {
+  const tab = getActiveTab(profileId)
+  const profile = getProfileById(profileId)
+  if (!tab?.certError || !isAlive(tab.view)) return
+
+  const { webContents } = tab.view
+  if (webContents.navigationHistory.canGoBack()) {
+    webContents.navigationHistory.goBack()
+  } else if (profile) {
+    webContents.loadURL(profile.homeUrl)
+  }
+}
+
+// Certificate error screen, "Proceed": trust this certificate for the host in this profile
+// (until the app quits) and load the page again
+export function proceedCertError(profileId: string): void {
+  const tab = getActiveTab(profileId)
+  if (!tab?.certError || !isAlive(tab.view)) return
+
+  const { hostname, fingerprint, url } = tab.certError
+  if (!fingerprint) return
+
+  const trusted = trustedCerts.get(profileId) ?? new Set<string>()
+  trusted.add(trustKey(hostname, fingerprint))
+  trustedCerts.set(profileId, trusted)
+  tab.view.webContents.loadURL(url)
 }
 
 // Reload the active tab. A crashed tab is replaced by a fresh one at the same position.

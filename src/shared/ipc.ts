@@ -50,6 +50,8 @@ export const IPC_CHANNELS = {
   NAVIGATION_FORWARD: 'navigation:forward',
   NAVIGATION_NAVIGATE: 'navigation:navigate',
   NAVIGATION_FOCUS_URL: 'navigation:focusUrl', // main -> renderer (Ctrl/Cmd+L)
+  NAVIGATION_CERT_LEAVE: 'navigation:certLeave',
+  NAVIGATION_CERT_PROCEED: 'navigation:certProceed',
 
   // Tabs
   TABS_STATE: 'tabs:state', // main -> renderer
@@ -122,6 +124,10 @@ export interface NavigationAPI {
   goForward: () => Promise<void>
   // Navigate to a URL or search text typed in the address bar
   navigate: (input: string) => Promise<void>
+  // Certificate error screen: go back to safety (previous page or the home page) ...
+  leaveCertError: () => Promise<void>
+  // ... or trust this host for this profile until the app quits, and load the page anyway
+  proceedCertError: () => Promise<void>
   onState: (callback: (state: NavigationState | null) => void) => () => void
   // Focus the address bar (keyboard shortcut handled by the main process)
   onFocusUrl: (callback: () => void) => () => void

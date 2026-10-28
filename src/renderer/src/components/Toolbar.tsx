@@ -3,14 +3,32 @@ import { useEffect, useRef, useState } from 'react'
 import { TAB_BAR_HEIGHT, TOOLBAR_HEIGHT } from '../../../shared/layout'
 import type { NavigationState } from '../../../shared/types'
 
+// How much the page can be trusted, shown in front of the address
+export type PageSecurity = 'secure' | 'insecure' | 'bypassed' | 'error' | 'none'
+
+const SECURITY_ICONS: Record<
+  Exclude<PageSecurity, 'none'>,
+  { icon: string; title: string; className: string }
+> = {
+  secure: { icon: 'codicon-lock', title: 'Connection is secure', className: 'text-gray-500' },
+  insecure: { icon: 'codicon-unlock', title: 'Not secure', className: 'text-amber-600' },
+  bypassed: {
+    icon: 'codicon-warning',
+    title: 'Certificate error: loaded because you chose to proceed',
+    className: 'text-red-500',
+  },
+  error: { icon: 'codicon-warning', title: 'Certificate error', className: 'text-red-500' },
+}
+
 interface ToolbarProps {
   state: NavigationState | null
+  security: PageSecurity
   // Width of the sidebar (the toolbar sits to the right of it)
   left: number
   onReload: () => void
 }
 
-export function Toolbar({ state, left, onReload }: ToolbarProps): React.ReactElement {
+export function Toolbar({ state, security, left, onReload }: ToolbarProps): React.ReactElement {
   const url = state?.url ?? ''
   const [draft, setDraft] = useState(url)
   const [editing, setEditing] = useState(false)
@@ -52,6 +70,16 @@ export function Toolbar({ state, left, onReload }: ToolbarProps): React.ReactEle
         onClick={() => window.navigationApi.goForward()}
       />
       <ToolbarButton icon="codicon-refresh" title="Reload" onClick={onReload} />
+      {security !== 'none' && (
+        <span
+          title={SECURITY_ICONS[security].title}
+          className="-mr-6 z-10 pl-3 pointer-events-none"
+        >
+          <span
+            className={`codicon ${SECURITY_ICONS[security].icon} text-sm ${SECURITY_ICONS[security].className}`}
+          />
+        </span>
+      )}
       <input
         ref={inputRef}
         type="text"
@@ -72,7 +100,9 @@ export function Toolbar({ state, left, onReload }: ToolbarProps): React.ReactEle
             e.currentTarget.blur()
           }
         }}
-        className="flex-1 min-w-0 h-7 px-3 text-sm text-gray-700 bg-gray-100 rounded-full outline-none focus:bg-white focus:ring-2 focus:ring-blue-400"
+        className={`flex-1 min-w-0 h-7 pr-3 text-sm text-gray-700 bg-gray-100 rounded-full outline-none focus:bg-white focus:ring-2 focus:ring-blue-400 ${
+          security === 'none' ? 'pl-3' : 'pl-8'
+        }`}
         placeholder="Search or enter address"
       />
     </div>
