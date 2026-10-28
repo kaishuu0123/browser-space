@@ -20,6 +20,14 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
 }
 
+/* The icon font's inline icons sit on the text baseline, which puts them a little off-centre next
+   to text. Buttons that hold only an icon are centred with flex; this covers the icons that are
+   inline with text. (The codicon rule sets the font shorthand, so Tailwind's text-* size and
+   line-height classes do not apply to these icons.) */
+.codicon[class*="codicon-"] {
+  vertical-align: middle;
+}
+
 /* While the sidebar is dragged, its width and everything placed next to it must follow the
    mouse immediately instead of animating */
 body.sidebar-resizing,

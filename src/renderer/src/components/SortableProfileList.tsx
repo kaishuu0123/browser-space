@@ -62,7 +62,7 @@ function SortableProfileItem({
       <button
         {...attributes}
         {...listeners}
-        className="cursor-grab active:cursor-grabbing p-1 hover:bg-gray-200 rounded"
+        className="flex items-center justify-center cursor-grab active:cursor-grabbing p-1 hover:bg-gray-200 rounded"
         title="Drag to reorder"
       >
         <span className="codicon codicon-gripper text-gray-400" />

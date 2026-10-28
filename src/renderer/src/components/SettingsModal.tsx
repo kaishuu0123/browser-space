@@ -37,7 +37,7 @@ function AboutTabContent({ updateState }: { updateState: UpdateState }): React.R
       type="button"
       onClick={() => window.updaterApi.checkForUpdates()}
       title="Check for updates"
-      className="cursor-pointer text-gray-400 hover:text-gray-600"
+      className="inline-flex items-center cursor-pointer text-gray-400 hover:text-gray-600"
     >
       <span aria-hidden="true" className="codicon codicon-refresh" />
     </button>
