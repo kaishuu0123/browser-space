@@ -1,9 +1,6 @@
 import type React from 'react'
+import { formatIsoLocal } from '../../../shared/format'
 import type { CertDetails } from '../../../shared/types'
-
-function formatDate(seconds?: number): string {
-  return seconds ? new Date(seconds * 1000).toLocaleString() : '-'
-}
 
 interface CertDetailsListProps {
   details: CertDetails
@@ -25,9 +22,9 @@ export function CertDetailsList({ details, address }: CertDetailsListProps): Rea
       <dt className="text-gray-400">Issuer</dt>
       <dd>{details.issuer ?? '-'}</dd>
       <dt className="text-gray-400">Valid from</dt>
-      <dd>{formatDate(details.validFrom)}</dd>
+      <dd>{formatIsoLocal(details.validFrom)}</dd>
       <dt className="text-gray-400">Valid until</dt>
-      <dd>{formatDate(details.validTo)}</dd>
+      <dd>{formatIsoLocal(details.validTo)}</dd>
       <dt className="text-gray-400">Fingerprint</dt>
       <dd className="font-mono text-xs">{details.fingerprint ?? '-'}</dd>
     </dl>

@@ -1,4 +1,5 @@
 import { type BaseWindow, BrowserWindow } from 'electron'
+import { formatIsoLocal } from '../shared/format'
 import type { CertDetails } from '../shared/types'
 
 export interface CertWindowContent {
@@ -21,10 +22,6 @@ function escapeHtml(value: string): string {
     .replace(/'/g, '&#39;')
 }
 
-function formatDate(seconds?: number): string {
-  return seconds ? new Date(seconds * 1000).toLocaleString() : '-'
-}
-
 function buildHtml(content: CertWindowContent): string {
   const row = (label: string, value: string, mono = false) =>
     `<tr><th>${label}</th><td${mono ? ' class="mono"' : ''}>${escapeHtml(value)}</td></tr>`
@@ -35,8 +32,8 @@ function buildHtml(content: CertWindowContent): string {
       ? [
           row('Subject', d.subject ?? '-'),
           row('Issuer', d.issuer ?? '-'),
-          row('Valid from', formatDate(d.validFrom)),
-          row('Valid until', formatDate(d.validTo)),
+          row('Valid from', formatIsoLocal(d.validFrom), true),
+          row('Valid until', formatIsoLocal(d.validTo), true),
           row('Fingerprint', d.fingerprint ?? '-', true),
         ]
       : []),
