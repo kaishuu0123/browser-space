@@ -9,7 +9,13 @@ import {
   WebContentsView,
 } from 'electron'
 import { IPC_CHANNELS } from '../shared/ipc'
-import type { CertErrorInfo, NavigationState, Profile, TabsState } from '../shared/types'
+import type {
+  CertErrorInfo,
+  LoadErrorInfo,
+  NavigationState,
+  Profile,
+  TabsState,
+} from '../shared/types'
 import { applyContextMenu } from './contextMenu'
 import { FindbarWindow } from './findbar/FindbarWindow'
 import { getContentViewBounds } from './layout'
@@ -29,6 +35,14 @@ interface Tab {
   certError?: CertErrorInfo
   // The page loaded because the user trusted its invalid certificate
   certBypassed?: boolean
+  // Set while the page could not be reached: the view is hidden and the renderer shows an
+  // error screen (with a game while offline)
+  loadError?: LoadErrorInfo
+}
+
+// The tab's view stays hidden while the renderer shows a screen of its own in its place
+function isBlocked(tab: Tab): boolean {
+  return tab.crashed || !!tab.certError || !!tab.loadError
 }
 
 // Certificates the user chose to trust despite an error, per profile. Kept in memory only, so
@@ -100,6 +114,15 @@ function isCertErrorCode(errorCode: number): boolean {
   return errorCode <= -200 && errorCode > -300
 }
 
+const ERR_INTERNET_DISCONNECTED = -106
+
+// Network errors worth an error screen: -100 to -199 are connection errors (refused, reset, timed
+// out, DNS failure, no internet...), plus a few others. -3 (aborted) is a navigation that was
+// replaced by another one, not a failure.
+function isNetworkErrorCode(errorCode: number): boolean {
+  return (errorCode <= -100 && errorCode > -200) || errorCode === -7 || errorCode === -21
+}
+
 const HIDDEN_BOUNDS = { x: 0, y: 0, width: 0, height: 0 }
 
 interface ProfileTabs {
@@ -163,7 +186,7 @@ export function getTabsState(profileId: string): TabsState | null {
   return {
     profileId,
     activeTabId: entry.activeTabId,
-    tabs: entry.tabs.map(({ id, view, crashed, favicon, certError, certBypassed }) => {
+    tabs: entry.tabs.map(({ id, view, crashed, favicon, certError, certBypassed, loadError }) => {
       const alive = isAlive(view)
       return {
         id,
@@ -174,6 +197,7 @@ export function getTabsState(profileId: string): TabsState | null {
         crashed,
         certError,
         certBypassed,
+        loadError,
       }
     }),
   }
@@ -332,16 +356,38 @@ function createTab(
     tab.certError = certError
     refreshDisplay(profileId, mainWindow)
   }
+  // A page that cannot be reached is blocked behind an error screen as well
+  const setLoadError = (loadError: LoadErrorInfo | undefined) => {
+    const tab = profileTabs.get(profileId)?.tabs.find((t) => t.id === tabId)
+    if (!tab || (!tab.loadError && !loadError)) return
+    tab.loadError = loadError
+    refreshDisplay(profileId, mainWindow)
+
+    // The game on the error screen takes keyboard input, which the hidden page view still holds
+    if (loadError && getActiveTab(profileId)?.id === tabId && isProfileDisplayed(profileId)) {
+      ;(global.__rendererView as WebContentsView | undefined)?.webContents.focus()
+    }
+  }
   view.webContents.on('did-start-navigation', (details) => {
     if (!details.isMainFrame || details.isSameDocument) return
     const tab = profileTabs.get(profileId)?.tabs.find((t) => t.id === tabId)
     if (tab) tab.certBypassed = false
     setCertError(undefined)
+    setLoadError(undefined)
   })
   view.webContents.on(
     'did-fail-load',
     (_event, errorCode, errorDescription, validatedURL, isMainFrame) => {
-      if (!isMainFrame || !isCertErrorCode(errorCode)) return
+      if (!isMainFrame) return
+      if (isNetworkErrorCode(errorCode)) {
+        setLoadError({
+          url: validatedURL,
+          error: errorDescription,
+          offline: errorCode === ERR_INTERNET_DISCONNECTED,
+        })
+        return
+      }
+      if (!isCertErrorCode(errorCode)) return
       let hostname = ''
       let host = ''
       try {
@@ -496,7 +542,7 @@ function setActiveTab(profileId: string, tabId: number, mainWindow: BaseWindow):
   // The previous tab's view keeps the keyboard focus while hidden, which would swallow
   // shortcuts, so move the focus to the tab that is now shown
   const active = getActiveTab(profileId)
-  if (active && !active.crashed && !active.certError && isProfileDisplayed(profileId)) {
+  if (active && !isBlocked(active) && isProfileDisplayed(profileId)) {
     active.view.webContents.focus()
   }
 }
@@ -597,9 +643,9 @@ export function showBrowserView(profileId: string, mainWindow: BaseWindow): void
     contentView.addChildView(view)
   }
 
-  // A crashed tab (or one blocked by a certificate error) stays hidden so the renderer can
+  // A blocked tab (crashed, certificate error, unreachable) stays hidden so the renderer can
   // show its error screen
-  view.setBounds(tab.crashed || tab.certError ? HIDDEN_BOUNDS : getContentViewBounds(mainWindow))
+  view.setBounds(isBlocked(tab) ? HIDDEN_BOUNDS : getContentViewBounds(mainWindow))
   sendNavigationState(profileId)
   sendTabsState(profileId)
 }
@@ -657,7 +703,7 @@ export function updateBrowserViewBounds(
   if (!activeProfileId) return
 
   const tab = getActiveTab(activeProfileId)
-  if (!tab || tab.crashed || tab.certError) return
+  if (!tab || isBlocked(tab)) return
 
   tab.view.setBounds(getContentViewBounds(mainWindow))
 }

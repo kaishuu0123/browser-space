@@ -8,6 +8,7 @@ import {
 } from '../../shared/layout'
 import { CertErrorView } from './components/CertErrorView'
 import { CrashedView } from './components/CrashedView'
+import { LoadErrorView } from './components/LoadErrorView'
 import { SettingsModal, type SettingsTab } from './components/SettingsModal'
 import { Sidebar } from './components/Sidebar'
 import { TabBar } from './components/TabBar'
@@ -89,6 +90,9 @@ function App(): React.ReactElement {
 
   // A page blocked by a certificate error is handled the same way: its view is hidden and the
   // error screen takes its place
+  const activeLoadError = tabsState?.tabs.find(
+    (tab) => tab.id === tabsState.activeTabId && tab.loadError
+  )?.loadError
   const activeCertError = tabsState?.tabs.find(
     (tab) => tab.id === tabsState.activeTabId && tab.certError
   )?.certError
@@ -103,6 +107,15 @@ function App(): React.ReactElement {
         : navigationState?.url.startsWith('http:')
           ? 'insecure'
           : 'none'
+
+  // Back online: load the page that failed for lack of a connection again
+  const retryWhenOnline = activeLoadError?.offline === true
+  useEffect(() => {
+    if (!retryWhenOnline) return
+    const onOnline = () => window.profileApi.reload()
+    window.addEventListener('online', onOnline)
+    return () => window.removeEventListener('online', onOnline)
+  }, [retryWhenOnline])
 
   // The profile no longer has a crashed tab (reloaded or closed): clear its sidebar mark
   useEffect(() => {
@@ -182,6 +195,15 @@ function App(): React.ReactElement {
             onReload={handleReloadClick}
           />
         </>
+      )}
+
+      {activeLoadError && !isActiveCrashed && !showSettings && (
+        <div
+          className="fixed right-0 bottom-0 transition-all duration-200"
+          style={{ left: sidebarWidth, top: TAB_BAR_HEIGHT + TOOLBAR_HEIGHT }}
+        >
+          <LoadErrorView info={activeLoadError} onRetry={handleReloadClick} />
+        </div>
       )}
 
       {activeCertError && !isActiveCrashed && !showSettings && (

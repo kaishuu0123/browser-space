@@ -67,6 +67,15 @@ export interface CertErrorInfo {
   fingerprint?: string
 }
 
+// A page that could not be reached (offline, DNS failure, connection refused, timeout...)
+export interface LoadErrorInfo {
+  url: string
+  // Chromium's error name, e.g. ERR_INTERNET_DISCONNECTED
+  error: string
+  // The computer itself has no network (as opposed to the site being unreachable)
+  offline: boolean
+}
+
 export interface TabInfo {
   id: number
   title: string
@@ -79,6 +88,8 @@ export interface TabInfo {
   certError?: CertErrorInfo
   // The page loaded because the user chose to trust its invalid certificate
   certBypassed?: boolean
+  // Set while the page could not be reached (its view is hidden)
+  loadError?: LoadErrorInfo
 }
 
 // Tabs of the active profile
