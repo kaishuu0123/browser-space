@@ -3,6 +3,7 @@ import { connect } from 'node:tls'
 import {
   app,
   type BaseWindow,
+  dialog,
   type Input,
   type Session,
   session,
@@ -14,7 +15,6 @@ import { IPC_CHANNELS } from '../shared/ipc'
 import type {
   CertDetails,
   CertErrorInfo,
-  CertInfo,
   LoadErrorInfo,
   NavigationState,
   Profile,
@@ -39,8 +39,6 @@ interface Tab {
   certError?: CertErrorInfo
   // The page loaded because the user trusted its invalid certificate
   certBypassed?: boolean
-  // A panel of the renderer is open over the page: the view is hidden behind it
-  covered?: boolean
   // Set while the page could not be reached: the view is hidden and the renderer shows an
   // error screen (with a game while offline)
   loadError?: LoadErrorInfo
@@ -48,7 +46,7 @@ interface Tab {
 
 // The tab's view stays hidden while the renderer shows a screen of its own in its place
 function isBlocked(tab: Tab): boolean {
-  return tab.crashed || !!tab.certError || !!tab.loadError || !!tab.covered
+  return tab.crashed || !!tab.certError || !!tab.loadError
 }
 
 // Certificates the user chose to trust despite an error, per profile. Kept in memory only, so
@@ -835,18 +833,26 @@ function fetchCertificate(hostname: string, port: number): Promise<CertDetails |
   })
 }
 
-// Certificate of the page in the active tab, for the panel opened from the address bar's lock
-export async function getCertInfo(profileId: string): Promise<CertInfo | null> {
+// Show the certificate of the page in the active tab in a native dialog (the address bar's lock)
+export async function showCertInfo(profileId: string, mainWindow: BaseWindow): Promise<void> {
   const tab = getActiveTab(profileId)
-  if (!tab || !isAlive(tab.view)) return null
+  if (!tab || !isAlive(tab.view)) return
 
   let url: URL
   try {
     url = new URL(tab.certError?.url ?? tab.view.webContents.getURL())
   } catch (_e) {
-    return null
+    return
   }
-  if (url.protocol !== 'https:') return null
+
+  if (url.protocol !== 'https:') {
+    await dialog.showMessageBox(mainWindow, {
+      type: 'warning',
+      message: 'Connection is not secure',
+      detail: `${url.href}\n\nInformation you send to this site (passwords, card numbers...) can be seen by others.`,
+    })
+    return
+  }
 
   // A page blocked by (or loaded despite) a certificate error: the error check remembered it
   let details: CertDetails | null | undefined = tab.certError
@@ -862,46 +868,24 @@ export async function getCertInfo(profileId: string): Promise<CertInfo | null> {
       validCerts.set(profileId, certs)
     }
   }
-  if (!details) return null
 
-  return {
-    hostname: url.hostname,
-    status: tab.certError || tab.certBypassed ? 'bypassed' : 'valid',
-    subject: details.subject,
-    issuer: details.issuer,
-    validFrom: details.validFrom,
-    validTo: details.validTo,
-    fingerprint: details.fingerprint,
-  }
-}
-
-// A renderer panel is about to open over the page. The page view sits above the renderer, so it
-// is hidden and a snapshot of it is returned to show in its place.
-export async function beginPanel(
-  profileId: string,
-  mainWindow: BaseWindow
-): Promise<string | null> {
-  const tab = getActiveTab(profileId)
-  if (!tab || isBlocked(tab) || !isAlive(tab.view)) return null
-
-  let snapshot: string | null = null
-  try {
-    snapshot = (await tab.view.webContents.capturePage()).toDataURL()
-  } catch (_e) {
-    // Without a snapshot the panel opens over an empty area, which is still usable
-  }
-  tab.covered = true
-  refreshDisplay(profileId, mainWindow)
-  return snapshot
-}
-
-// The panel closed (or the page it was about to cover changed): show the pages again
-export function endPanel(mainWindow: BaseWindow): void {
-  for (const [profileId, { tabs }] of profileTabs) {
-    if (!tabs.some((tab) => tab.covered)) continue
-    for (const tab of tabs) tab.covered = false
-    refreshDisplay(profileId, mainWindow)
-  }
+  const invalid = !!tab.certError || !!tab.certBypassed
+  const date = (seconds?: number) => (seconds ? new Date(seconds * 1000).toLocaleString() : '-')
+  await dialog.showMessageBox(mainWindow, {
+    type: invalid ? 'warning' : 'info',
+    message: invalid ? 'Certificate is not valid' : 'Connection is secure',
+    detail: details
+      ? [
+          url.href,
+          '',
+          `Subject: ${details.subject ?? '-'}`,
+          `Issuer: ${details.issuer ?? '-'}`,
+          `Valid from: ${date(details.validFrom)}`,
+          `Valid until: ${date(details.validTo)}`,
+          `Fingerprint: ${details.fingerprint ?? '-'}`,
+        ].join('\n')
+      : `${url.href}\n\nThe certificate of this page could not be read.`,
+  })
 }
 
 // Certificate error screen, "Back to safety": the previous page, or the home page if there is none

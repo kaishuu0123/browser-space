@@ -6,9 +6,7 @@ import {
   TAB_BAR_HEIGHT,
   TOOLBAR_HEIGHT,
 } from '../../shared/layout'
-import type { CertInfo } from '../../shared/types'
 import { CertErrorView } from './components/CertErrorView'
-import { CertInfoPanel } from './components/CertInfoPanel'
 import { CrashedView } from './components/CrashedView'
 import { LoadErrorView } from './components/LoadErrorView'
 import { SettingsModal, type SettingsTab } from './components/SettingsModal'
@@ -119,36 +117,6 @@ function App(): React.ReactElement {
     return () => window.removeEventListener('online', onOnline)
   }, [retryWhenOnline])
 
-  // The panel under the address bar's lock: the certificate of the page, over a snapshot of it
-  const [certPanel, setCertPanel] = useState<{
-    info: CertInfo | null
-    snapshot: string | null
-    url: string
-  } | null>(null)
-
-  const closeCertPanel = useCallback(() => {
-    setCertPanel(null)
-    window.navigationApi.endPanel()
-  }, [])
-
-  const openCertPanel = async () => {
-    if (certPanel) {
-      closeCertPanel()
-      return
-    }
-    // The snapshot first: the page is hidden once the panel is open
-    const snapshot = await window.navigationApi.beginPanel()
-    const info = await window.navigationApi.getCertInfo()
-    setCertPanel({ info, snapshot, url: navigationState?.url ?? '' })
-  }
-
-  // Another tab or profile (or the settings) takes over: the panel is about a page that is gone
-  const activeTabKey = `${activeProfileId}:${tabsState?.activeTabId}`
-  // biome-ignore lint/correctness/useExhaustiveDependencies: close only when the active tab changes
-  useEffect(() => {
-    closeCertPanel()
-  }, [activeTabKey, showSettings])
-
   // The profile no longer has a crashed tab (reloaded or closed): clear its sidebar mark
   useEffect(() => {
     if (!tabsState || tabsState.tabs.some((tab) => tab.crashed)) return
@@ -223,22 +191,11 @@ function App(): React.ReactElement {
           <Toolbar
             state={navigationState}
             security={pageSecurity}
-            onSecurityClick={openCertPanel}
+            onSecurityClick={() => window.navigationApi.showCertInfo()}
             left={sidebarWidth}
             onReload={handleReloadClick}
           />
         </>
-      )}
-
-      {certPanel && !showSettings && (
-        <CertInfoPanel
-          security={pageSecurity}
-          info={certPanel.info}
-          url={certPanel.url}
-          snapshot={certPanel.snapshot}
-          left={sidebarWidth}
-          onClose={closeCertPanel}
-        />
       )}
 
       {activeLoadError && !isActiveCrashed && !showSettings && (

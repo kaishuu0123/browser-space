@@ -63,13 +63,6 @@ export interface CertDetails {
   fingerprint?: string
 }
 
-// Certificate of the page in the active tab, for the panel opened from the address bar's lock
-export interface CertInfo extends CertDetails {
-  hostname: string
-  // 'bypassed': the certificate is invalid and the user chose to proceed anyway
-  status: 'valid' | 'bypassed'
-}
-
 // A page that could not be loaded because of its certificate (expired, self-signed, wrong host...)
 export interface CertErrorInfo extends CertDetails {
   url: string

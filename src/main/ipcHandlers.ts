@@ -2,11 +2,8 @@ import { app, type BaseWindow, ipcMain, type WebContentsView } from 'electron'
 import { IPC_CHANNELS } from '../shared/ipc'
 import {
   activateTab,
-  beginPanel,
   closeTab,
-  endPanel,
   getBrowserView,
-  getCertInfo,
   getNavigationState,
   getTabsState,
   hideAllBrowserViews,
@@ -19,6 +16,7 @@ import {
   removeBrowserView,
   setOfflineMode,
   showBrowserView,
+  showCertInfo,
   updateBrowserViewBounds,
 } from './browserViewManager'
 import { type ClearDataOptions, clearProfileData } from './dataCleaner'
@@ -192,18 +190,8 @@ export function setupIpcHandlers(): void {
 
   ipcMain.handle(IPC_CHANNELS.NAVIGATION_CERT_INFO, async () => {
     const activeProfileId = getActiveProfileId()
-    return activeProfileId ? getCertInfo(activeProfileId) : null
-  })
-
-  ipcMain.handle(IPC_CHANNELS.NAVIGATION_PANEL_BEGIN, async () => {
-    const activeProfileId = getActiveProfileId()
     const mainWindow = getMainWindow()
-    return activeProfileId && mainWindow ? beginPanel(activeProfileId, mainWindow) : null
-  })
-
-  ipcMain.handle(IPC_CHANNELS.NAVIGATION_PANEL_END, async () => {
-    const mainWindow = getMainWindow()
-    if (mainWindow) endPanel(mainWindow)
+    if (activeProfileId && mainWindow) await showCertInfo(activeProfileId, mainWindow)
   })
 
   ipcMain.handle(IPC_CHANNELS.NAVIGATION_CERT_LEAVE, async () => {
