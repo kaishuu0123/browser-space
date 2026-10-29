@@ -72,7 +72,7 @@ export function Sidebar({
         className="flex items-center justify-between px-4 shrink-0"
         style={{ height: BAR_HEIGHT }}
       >
-        {!collapsed && <h1 className="text-sm text-gray-600">Profiles</h1>}
+        {!collapsed && <h1 className="font-medium text-gray-600">Profiles</h1>}
         <div className="flex gap-1">
           {!collapsed && (
             <button
@@ -96,6 +96,9 @@ export function Sidebar({
           </button>
         </div>
       </div>
+
+      {/* Divider: inset and light, a hint of a separator rather than a full line */}
+      <div className="mx-4 border-t border-gray-200 shrink-0" />
 
       {/* Profile List */}
       <ProfileList
