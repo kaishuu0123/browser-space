@@ -21,7 +21,7 @@ import type {
 } from '../shared/types'
 import { showCertWindow } from './certWindow'
 import { applyContextMenu } from './contextMenu'
-import { openExternalIfAllowed } from './externalLinks'
+import { isAllowedExternalUrl, openExternalIfAllowed } from './externalLinks'
 import { FindbarWindow } from './findbar/FindbarWindow'
 import { getContentViewBounds, setCurrentChrome } from './layout'
 import { showNotificationPermissionDialog } from './notificationManager'
@@ -555,8 +555,16 @@ function createTab(
     }
   })
 
+  // A plain click on a mail link is a navigation, and Electron does not hand those to the OS
+  // by itself
+  view.webContents.on('will-navigate', (event, url) => {
+    if (!isAllowedExternalUrl(url)) return
+    event.preventDefault()
+    openExternalIfAllowed(url)
+  })
+
   view.webContents.setWindowOpenHandler((details) => {
-    // Anything that is not a web page goes to the OS, but only mail and phone links (see
+    // Anything that is not a web page goes to the OS, but only mail links (see
     // externalLinks.ts); every other scheme is dropped
     if (!isWebUrl(details.url)) {
       openExternalIfAllowed(details.url)
