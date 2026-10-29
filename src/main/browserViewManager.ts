@@ -774,6 +774,10 @@ export function removeBrowserView(profileId: string, mainWindow: BaseWindow): vo
   }
   // Session handlers capture profile settings (e.g. language), so set them up again next time
   initializedSessions.delete(profileId)
+  // Certificates remembered for this profile (including the ones the user chose to trust)
+  trustedCerts.delete(profileId)
+  certFailures.delete(profileId)
+  validCerts.delete(profileId)
 }
 
 // Destroy all WebContentsViews (when the main window is closed).

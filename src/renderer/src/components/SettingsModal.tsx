@@ -224,7 +224,7 @@ export function SettingsModal({
   const handleDeleteClick = async (profile: Profile) => {
     if (
       !confirm(
-        `Are you sure you want to delete "${profile.name}"?\n\nThis will also delete all cookies and session data for this profile.`
+        `Are you sure you want to delete "${profile.name}"?\n\nThis also deletes everything it saved: logins, cookies, cache and site data. This cannot be undone.`
       )
     ) {
       return

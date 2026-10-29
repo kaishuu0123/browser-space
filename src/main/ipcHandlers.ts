@@ -21,7 +21,7 @@ import {
   showCertInfo,
   updateBrowserViewBounds,
 } from './browserViewManager'
-import { type ClearDataOptions, clearProfileData } from './dataCleaner'
+import { type ClearDataOptions, clearAllProfileData, clearProfileData } from './dataCleaner'
 import { getCustomIconPath, saveCustomIcon } from './iconManager'
 import { setExpandedSidebarWidth } from './layout'
 import {
@@ -128,6 +128,14 @@ export function setupIpcHandlers(): void {
       const mainWindow = getMainWindow()
       if (mainWindow) {
         removeBrowserView(id, mainWindow)
+      }
+
+      // Without the profile there is no way left to clear its data, so it goes with it (logins
+      // would otherwise stay on disk). A failure here must not undo the deletion.
+      try {
+        await clearAllProfileData(id)
+      } catch (error) {
+        console.error(`Failed to clear the data of deleted profile ${id}:`, error)
       }
     }
 
