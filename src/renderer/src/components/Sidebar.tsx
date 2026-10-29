@@ -69,7 +69,7 @@ export function Sidebar({
     >
       {/* Header */}
       <div
-        className="border-b border-gray-200 flex items-center justify-between px-4 shrink-0"
+        className="flex items-center justify-between px-4 shrink-0"
         style={{ height: BAR_HEIGHT }}
       >
         {!collapsed && <h1 className="text-sm text-gray-600">Profiles</h1>}
