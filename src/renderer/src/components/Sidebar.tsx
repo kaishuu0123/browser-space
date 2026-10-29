@@ -109,8 +109,11 @@ export function Sidebar({
         crashedProfileIds={crashedProfileIds}
       />
 
+      {/* Divider: inset like the one under the heading */}
+      <div className="mx-4 border-t border-gray-200 shrink-0" />
+
       {/* Bottom buttons */}
-      <div className={`border-t border-gray-200 shrink-0 ${collapsed ? 'p-2' : 'p-3'}`}>
+      <div className={`shrink-0 ${collapsed ? 'p-2' : 'p-3'}`}>
         {updateVersion &&
           (collapsed ? (
             <button
