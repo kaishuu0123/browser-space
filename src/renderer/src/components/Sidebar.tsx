@@ -98,7 +98,7 @@ export function Sidebar({
       </div>
 
       {/* Divider: inset and light, a hint of a separator rather than a full line */}
-      <div className="mx-4 border-t border-gray-200 shrink-0" />
+      <div className="mx-2 border-t border-gray-200 shrink-0" />
 
       {/* Profile List */}
       <ProfileList
@@ -110,7 +110,7 @@ export function Sidebar({
       />
 
       {/* Divider: inset like the one under the heading */}
-      <div className="mx-4 border-t border-gray-200 shrink-0" />
+      <div className="mx-2 border-t border-gray-200 shrink-0" />
 
       {/* Bottom buttons */}
       <div className={`shrink-0 ${collapsed ? 'p-2' : 'p-3'}`}>
