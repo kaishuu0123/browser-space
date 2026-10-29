@@ -1,5 +1,5 @@
 import type React from 'react'
-import { SIDEBAR_WIDTH_COLLAPSED } from '../../../shared/layout'
+import { BAR_HEIGHT, SIDEBAR_WIDTH_COLLAPSED } from '../../../shared/layout'
 import type { Profile } from '../../../shared/types'
 import { ProfileList } from './ProfileList'
 
@@ -68,7 +68,10 @@ export function Sidebar({
       style={{ width: collapsed ? SIDEBAR_WIDTH_COLLAPSED : width }}
     >
       {/* Header */}
-      <div className="h-14 border-b border-gray-200 flex items-center justify-between px-4 shrink-0">
+      <div
+        className="border-b border-gray-200 flex items-center justify-between px-4 shrink-0"
+        style={{ height: BAR_HEIGHT }}
+      >
         {!collapsed && <h1 className="text-lg font-semibold text-gray-800">Profiles</h1>}
         <div className="flex gap-1">
           {!collapsed && (

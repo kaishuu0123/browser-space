@@ -1,8 +1,13 @@
-// Height of the tab bar at the top of the content area (px)
-export const TAB_BAR_HEIGHT = 36
+// One height for the strips along the top: the sidebar header, the tab bar and the toolbar. Equal
+// heights make their bottom borders line up across the sidebar and the content (px). Shared by
+// main (view placement) and renderer (UI).
+export const BAR_HEIGHT = 36
 
-// Height of the toolbar below the tab bar (px). Shared by main (view placement) and renderer (UI)
-export const TOOLBAR_HEIGHT = 40
+// Height of the tab bar at the top of the content area
+export const TAB_BAR_HEIGHT = BAR_HEIGHT
+
+// Height of the toolbar below the tab bar
+export const TOOLBAR_HEIGHT = BAR_HEIGHT
 
 // Which bars are shown above the page. The main process decides (it places the page views) and
 // the renderer follows, so both agree on where the page starts.
