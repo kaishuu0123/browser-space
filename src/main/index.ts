@@ -1,4 +1,5 @@
 import path, { join } from 'node:path'
+import { pathToFileURL } from 'node:url'
 import { is } from '@electron-toolkit/utils'
 import { app, autoUpdater, BaseWindow, Menu, shell, WebContentsView } from 'electron'
 import icon from '../../resources/icon.png?asset'
@@ -9,6 +10,7 @@ import {
   updateBrowserViewBounds,
 } from './browserViewManager'
 import { applyContextMenu } from './contextMenu'
+import { isOwnPageUrl, openExternalIfAllowed } from './externalLinks'
 import { FindbarWindow } from './findbar/FindbarWindow'
 import { setupIpcHandlers } from './ipcHandlers'
 import { layoutRendererView } from './layout'
@@ -190,9 +192,30 @@ function createWindow(): void {
   mainWindow.on('show', refreshViews)
   mainWindow.on('focus', refreshViews)
 
+  // Links in the app's own screens (About, update notes) open in the system browser, web pages
+  // only; mail and phone links go to the system as well
   rendererView.webContents.setWindowOpenHandler((details) => {
-    shell.openExternal(details.url)
+    try {
+      const { protocol } = new URL(details.url)
+      if (protocol === 'https:' || protocol === 'http:') shell.openExternal(details.url)
+      else openExternalIfAllowed(details.url)
+    } catch (_e) {
+      // Not a URL: nothing to open
+    }
     return { action: 'deny' }
+  })
+
+  // This view holds the bridge to the main process, so it never leaves the app's own page
+  // (reloads and the dev server's hot updates stay on it)
+  const ownUrl =
+    is.dev && process.env.ELECTRON_RENDERER_URL
+      ? process.env.ELECTRON_RENDERER_URL
+      : pathToFileURL(join(__dirname, '../renderer/index.html')).href
+  rendererView.webContents.on('will-navigate', (event, url) => {
+    if (!isOwnPageUrl(url, ownUrl)) event.preventDefault()
+  })
+  rendererView.webContents.on('will-redirect', (event, url) => {
+    if (!isOwnPageUrl(url, ownUrl)) event.preventDefault()
   })
 
   if (is.dev && process.env.ELECTRON_RENDERER_URL) {

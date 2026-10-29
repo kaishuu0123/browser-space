@@ -6,7 +6,6 @@ import {
   type Input,
   type Session,
   session,
-  shell,
   type WebContents,
   WebContentsView,
 } from 'electron'
@@ -22,6 +21,7 @@ import type {
 } from '../shared/types'
 import { showCertWindow } from './certWindow'
 import { applyContextMenu } from './contextMenu'
+import { openExternalIfAllowed } from './externalLinks'
 import { FindbarWindow } from './findbar/FindbarWindow'
 import { getContentViewBounds, setCurrentChrome } from './layout'
 import { showNotificationPermissionDialog } from './notificationManager'
@@ -556,9 +556,10 @@ function createTab(
   })
 
   view.webContents.setWindowOpenHandler((details) => {
-    // Anything that is not a web page (mailto: etc.) goes to the OS
+    // Anything that is not a web page goes to the OS, but only mail and phone links (see
+    // externalLinks.ts); every other scheme is dropped
     if (!isWebUrl(details.url)) {
-      shell.openExternal(details.url)
+      openExternalIfAllowed(details.url)
       return { action: 'deny' }
     }
 
