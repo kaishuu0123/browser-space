@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { clampSidebarWidth, SIDEBAR_WIDTH_DEFAULT } from '../../../shared/layout'
 import type { Profile } from '../../../shared/types'
 
 // Hook to get all profiles
@@ -85,6 +86,28 @@ export function useSidebarCollapsed() {
   }, [])
 
   return { collapsed, setCollapsed, loading }
+}
+
+// Hook for the (expanded) sidebar width. setWidth follows a drag live; commit saves it.
+export function useSidebarWidth() {
+  const [width, setWidthState] = useState(SIDEBAR_WIDTH_DEFAULT)
+
+  useEffect(() => {
+    window.settingsApi
+      .getSidebarWidth()
+      .then(setWidthState)
+      .catch((error) => console.error('Failed to fetch sidebar width:', error))
+  }, [])
+
+  const setWidth = useCallback((value: number, persist = false) => {
+    const next = clampSidebarWidth(value)
+    setWidthState(next)
+    window.settingsApi.setSidebarWidth(next, persist).catch((error) => {
+      console.error('Failed to set sidebar width:', error)
+    })
+  }, [])
+
+  return { width, setWidth }
 }
 
 // Hook for profile operations

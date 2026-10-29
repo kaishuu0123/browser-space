@@ -1,14 +1,17 @@
 import { app } from 'electron'
 import Store from 'electron-store'
+import { clampSidebarWidth, SIDEBAR_WIDTH_DEFAULT } from '../shared/layout'
 
 interface Settings {
   sidebarCollapsed: boolean
+  sidebarWidth: number
   launchOnStartup: boolean
 }
 
 const store = new Store<Settings>({
   defaults: {
     sidebarCollapsed: false,
+    sidebarWidth: SIDEBAR_WIDTH_DEFAULT,
     launchOnStartup: false,
   },
   name: 'settings',
@@ -21,6 +24,15 @@ export function getSidebarCollapsed(): boolean {
 
 export function setSidebarCollapsed(collapsed: boolean): void {
   store.set('sidebarCollapsed', collapsed)
+}
+
+// Sidebar width (expanded)
+export function getSidebarWidth(): number {
+  return clampSidebarWidth(store.get('sidebarWidth', SIDEBAR_WIDTH_DEFAULT))
+}
+
+export function setSidebarWidth(width: number): void {
+  store.set('sidebarWidth', clampSidebarWidth(width))
 }
 
 // Launch on startup

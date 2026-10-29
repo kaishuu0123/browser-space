@@ -1,11 +1,13 @@
 import { ElectronAPI } from '@electron-toolkit/preload'
-import { IconAPI, ProfileAPI, SearchAPI, SettingsAPI } from '../shared/ipc'
+import { IconAPI, NavigationAPI, ProfileAPI, SearchAPI, SettingsAPI, TabsAPI } from '../shared/ipc'
 import { UpdateState } from '../shared/types'
 
 declare global {
   interface Window {
     electron: ElectronAPI
     profileApi: ProfileAPI
+    navigationApi: NavigationAPI
+    tabsApi: TabsAPI
     settingsApi: SettingsAPI
     iconApi: IconAPI
     searchApi: SearchAPI

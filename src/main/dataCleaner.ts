@@ -62,3 +62,13 @@ export async function clearProfileData(
     }
   }
 }
+
+// Remove everything a profile stored (used when the profile is deleted, after which the app has
+// no way left to clear it): all site storage, the HTTP cache and saved credentials
+export async function clearAllProfileData(profileId: string): Promise<void> {
+  const profileSession = session.fromPartition(`persist:profile-${profileId}`)
+  await profileSession.clearStorageData()
+  await profileSession.clearCache()
+  await profileSession.clearAuthCache()
+  await profileSession.clearHostResolverCache()
+}

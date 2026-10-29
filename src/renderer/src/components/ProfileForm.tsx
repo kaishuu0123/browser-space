@@ -3,6 +3,7 @@ import { useRef, useState } from 'react'
 import type { Profile } from '../../../shared/types'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
+import { Switch } from './ui/switch'
 
 interface ProfileFormProps {
   profile?: Profile
@@ -490,6 +491,7 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps): 
   const [customIconFilename, setCustomIconFilename] = useState(profile?.customIconPath || '')
   const [customIconPreview, setCustomIconPreview] = useState<string | null>(null)
   const [language, setLanguage] = useState(profile?.language || '')
+  const [minimalMode, setMinimalMode] = useState(profile?.minimalMode ?? false)
   const [notificationMode, setNotificationMode] = useState<'allow-all' | 'ask' | 'deny-all'>(
     profile?.notificationMode || 'ask'
   )
@@ -534,6 +536,7 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps): 
       iconColor,
       customIconPath: iconType === 'custom' ? customIconFilename : undefined,
       language: language || undefined,
+      minimalMode,
       notificationMode,
       notificationPermissions: profile?.notificationPermissions || {},
     })
@@ -591,6 +594,20 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps): 
           ))}
         </select>
         <p className="text-xs text-gray-500 mt-1">Browser language for this profile.</p>
+      </div>
+
+      {/* Minimal mode */}
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <label htmlFor="profile-minimal-mode" className="block text-sm font-medium text-gray-700">
+            Minimal mode
+          </label>
+          <p className="text-xs text-gray-500 mt-1">
+            Hide the address bar so the page gets the full height, like a web app. The tab bar still
+            appears when there is more than one tab; Ctrl/Cmd+L shows the address bar.
+          </p>
+        </div>
+        <Switch id="profile-minimal-mode" checked={minimalMode} onCheckedChange={setMinimalMode} />
       </div>
 
       {/* Notification Settings */}

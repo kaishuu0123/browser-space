@@ -1,4 +1,4 @@
-import type { Profile } from './types'
+import type { NavigationState, Profile, TabsState } from './types'
 
 // IPC channel names
 export const IPC_CHANNELS = {
@@ -19,6 +19,8 @@ export const IPC_CHANNELS = {
   // Settings
   SETTINGS_GET_SIDEBAR_COLLAPSED: 'settings:getSidebarCollapsed',
   SETTINGS_SET_SIDEBAR_COLLAPSED: 'settings:setSidebarCollapsed',
+  SETTINGS_GET_SIDEBAR_WIDTH: 'settings:getSidebarWidth',
+  SETTINGS_SET_SIDEBAR_WIDTH: 'settings:setSidebarWidth',
   SETTINGS_MODAL_OPEN: 'settings:modalOpen',
   SETTINGS_MODAL_CLOSE: 'settings:modalClose',
   SETTINGS_GET_LAUNCH_ON_STARTUP: 'settings:getLaunchOnStartup',
@@ -39,6 +41,29 @@ export const IPC_CHANNELS = {
 
   // View crashed
   PROFILE_VIEW_CRASHED: 'profile:view-crashed',
+  PROFILE_ACTIVATED: 'profile:activated',
+
+  // Navigation (toolbar)
+  NAVIGATION_STATE: 'navigation:state', // main -> renderer
+  NAVIGATION_GET_STATE: 'navigation:getState',
+  NAVIGATION_BACK: 'navigation:back',
+  NAVIGATION_FORWARD: 'navigation:forward',
+  NAVIGATION_NAVIGATE: 'navigation:navigate',
+  NAVIGATION_FOCUS_URL: 'navigation:focusUrl', // main -> renderer (Ctrl/Cmd+L)
+  NAVIGATION_TOOLBAR_RELEASE: 'navigation:toolbarRelease',
+  NAVIGATION_OFFLINE_GET: 'navigation:offlineGet',
+  NAVIGATION_OFFLINE_SET: 'navigation:offlineSet',
+  NAVIGATION_OFFLINE_CHANGED: 'navigation:offlineChanged', // main -> renderer
+  NAVIGATION_CERT_INFO: 'navigation:certInfo',
+  NAVIGATION_CERT_LEAVE: 'navigation:certLeave',
+  NAVIGATION_CERT_PROCEED: 'navigation:certProceed',
+
+  // Tabs
+  TABS_STATE: 'tabs:state', // main -> renderer
+  TABS_GET_STATE: 'tabs:getState',
+  TABS_ACTIVATE: 'tabs:activate',
+  TABS_CLOSE: 'tabs:close',
+  TABS_NEW: 'tabs:new',
 
   // Page search
   SEARCH_IN_PAGE: 'search:inPage',
@@ -92,6 +117,44 @@ export interface ProfileAPI {
 
   // Listen for view crash
   onViewCrashed: (callback: (profileId: string) => void) => () => void
+
+  // The main process switched to another profile (e.g. a notification was clicked)
+  onActivated: (callback: (profileId: string) => void) => () => void
+}
+
+// Navigation API for the toolbar (operates on the active page)
+export interface NavigationAPI {
+  getState: () => Promise<NavigationState | null>
+  goBack: () => Promise<void>
+  goForward: () => Promise<void>
+  // Navigate to a URL or search text typed in the address bar
+  navigate: (input: string) => Promise<void>
+  // The address bar lost the focus (it goes away again in minimal mode)
+  releaseToolbar: () => Promise<void>
+  // Show the certificate of the page in the active tab (the address bar's lock)
+  showCertInfo: () => Promise<void>
+  // Certificate error screen: go back to safety (previous page or the home page) ...
+  leaveCertError: () => Promise<void>
+  // ... or trust this host for this profile until the app quits, and load the page anyway
+  proceedCertError: () => Promise<void>
+  onState: (callback: (state: NavigationState | null) => void) => () => void
+  // Work offline: pages of every profile fail to load as if the network were gone (the real
+  // connection is left alone). Handy for trying the offline screen without unplugging anything.
+  getOffline: () => Promise<boolean>
+  setOffline: (offline: boolean) => Promise<void>
+  onOfflineChanged: (callback: (offline: boolean) => void) => () => void
+  // Focus the address bar (keyboard shortcut handled by the main process)
+  onFocusUrl: (callback: () => void) => () => void
+}
+
+// Tabs API for the tab bar (operates on the active profile)
+export interface TabsAPI {
+  getState: () => Promise<TabsState | null>
+  activate: (tabId: number) => Promise<void>
+  close: (tabId: number) => Promise<void>
+  // Open a new tab with the profile's home URL
+  create: () => Promise<void>
+  onState: (callback: (state: TabsState | null) => void) => () => void
 }
 
 export interface SettingsAPI {
@@ -100,6 +163,10 @@ export interface SettingsAPI {
 
   // Set sidebar collapsed state
   setSidebarCollapsed: (collapsed: boolean) => Promise<void>
+
+  // Sidebar width (expanded). Setting it moves the page views; it is saved only when persist is true
+  getSidebarWidth: () => Promise<number>
+  setSidebarWidth: (width: number, persist: boolean) => Promise<void>
 
   // Notify main process that settings modal opened/closed
   notifyModalOpen: () => Promise<void>

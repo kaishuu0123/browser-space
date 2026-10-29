@@ -1,12 +1,20 @@
 import path, { join } from 'node:path'
+import { pathToFileURL } from 'node:url'
 import { is } from '@electron-toolkit/utils'
-import { app, BaseWindow, Menu, shell, WebContentsView } from 'electron'
+import { app, autoUpdater, BaseWindow, Menu, shell, WebContentsView } from 'electron'
 import icon from '../../resources/icon.png?asset'
-import { repaintBrowserView, updateBrowserViewBounds } from './browserViewManager'
+import {
+  destroyAllBrowserViews,
+  handleBrowserShortcut,
+  repaintBrowserView,
+  updateBrowserViewBounds,
+} from './browserViewManager'
 import { applyContextMenu } from './contextMenu'
+import { isOwnPageUrl, openExternalIfAllowed } from './externalLinks'
 import { FindbarWindow } from './findbar/FindbarWindow'
 import { setupIpcHandlers } from './ipcHandlers'
-import { getActiveProfileId, getSidebarCollapsed } from './profileManager'
+import { layoutRendererView } from './layout'
+import { getActiveProfileId } from './profileManager'
 import { initAutoUpdater } from './updater'
 
 app.setName(app.name)
@@ -39,6 +47,20 @@ function buildMacMenu(): void {
           { role: 'quit' },
         ],
       },
+      // macOS routes Cmd+A/C/V/X/Z to text fields through the Edit menu, so without it the
+      // address bar and web page inputs ignore them
+      {
+        label: 'Edit',
+        submenu: [
+          { role: 'undo' },
+          { role: 'redo' },
+          { type: 'separator' },
+          { role: 'cut' },
+          { role: 'copy' },
+          { role: 'paste' },
+          { role: 'selectAll' },
+        ],
+      },
     ])
   )
 }
@@ -51,6 +73,24 @@ app.on('ready', () => {
     Menu.setApplicationMenu(null)
   }
 })
+
+// On macOS closing the window only hides it, so the pages keep running and notifications still
+// arrive; this is set once the app is really quitting (Cmd+Q, update install, shutdown)
+let isQuitting = false
+app.on('before-quit', () => {
+  isQuitting = true
+})
+if (process.platform === 'darwin') {
+  autoUpdater.on('before-quit-for-update', () => {
+    isQuitting = true
+  })
+}
+
+function showMainWindow(mainWindow: BaseWindow): void {
+  if (mainWindow.isMinimized()) mainWindow.restore()
+  mainWindow.show()
+  mainWindow.focus()
+}
 
 function createWindow(): void {
   // Position, size and maximized state are persisted and restored by Electron itself,
@@ -79,21 +119,17 @@ function createWindow(): void {
 
   mainWindow.contentView.addChildView(rendererView)
 
-  const getSidebarWidth = () => (getSidebarCollapsed() ? 64 : 256)
-
-  const updateRendererBounds = () => {
-    const bounds = mainWindow.getContentBounds()
-    // rendererView covers only the sidebar area
-    rendererView.setBounds({ x: 0, y: 0, width: getSidebarWidth(), height: bounds.height })
-  }
-
   rendererView.webContents.on('did-finish-load', () => {
-    updateRendererBounds()
+    layoutRendererView(mainWindow, rendererView)
     mainWindow.show()
   })
 
   // F12: DevTools (renderer view)
   rendererView.webContents.on('before-input-event', (event, input) => {
+    if (handleBrowserShortcut(input)) {
+      event.preventDefault()
+      return
+    }
     if (input.key === 'F12' && input.type === 'keyDown') {
       event.preventDefault()
       if (rendererView.webContents.isDevToolsOpened()) {
@@ -106,25 +142,18 @@ function createWindow(): void {
 
   const updateLayout = () => {
     const isSettingsModalOpen = global.__isSettingsModalOpen ?? false
-    const bounds = mainWindow.getContentBounds()
-    const sidebarWidth = getSidebarWidth()
 
-    // rendererView のサイズ調整（Settings Modal開いていたら全画面）
-    rendererView.setBounds({
-      x: 0,
-      y: 0,
-      width: isSettingsModalOpen ? bounds.width : sidebarWidth,
-      height: bounds.height,
-    })
+    // rendererView は常に全画面（BrowserView の背面）
+    layoutRendererView(mainWindow, rendererView)
 
     // Settings Modal開いていない場合のみBrowserViewを更新
     if (!isSettingsModalOpen) {
       const activeProfileId = getActiveProfileId()
       if (activeProfileId) {
-        updateBrowserViewBounds(activeProfileId, mainWindow, sidebarWidth)
+        updateBrowserViewBounds(activeProfileId, mainWindow)
         setTimeout(() => {
           if (getActiveProfileId() === activeProfileId) {
-            updateBrowserViewBounds(activeProfileId, mainWindow, sidebarWidth)
+            updateBrowserViewBounds(activeProfileId, mainWindow)
           }
         }, 100)
       }
@@ -151,13 +180,42 @@ function createWindow(): void {
     rendererView.webContents.invalidate()
   }
 
+  mainWindow.on('close', (event) => {
+    if (process.platform === 'darwin' && !isQuitting) {
+      event.preventDefault()
+      mainWindow.hide()
+    }
+  })
+  mainWindow.on('closed', destroyAllBrowserViews)
+
   mainWindow.on('restore', refreshViews)
   mainWindow.on('show', refreshViews)
   mainWindow.on('focus', refreshViews)
 
+  // Links in the app's own screens (About, update notes) open in the system browser, web pages
+  // only; mail links go to the system as well
   rendererView.webContents.setWindowOpenHandler((details) => {
-    shell.openExternal(details.url)
+    try {
+      const { protocol } = new URL(details.url)
+      if (protocol === 'https:' || protocol === 'http:') shell.openExternal(details.url)
+      else openExternalIfAllowed(details.url)
+    } catch (_e) {
+      // Not a URL: nothing to open
+    }
     return { action: 'deny' }
+  })
+
+  // This view holds the bridge to the main process, so it never leaves the app's own page
+  // (reloads and the dev server's hot updates stay on it)
+  const ownUrl =
+    is.dev && process.env.ELECTRON_RENDERER_URL
+      ? process.env.ELECTRON_RENDERER_URL
+      : pathToFileURL(join(__dirname, '../renderer/index.html')).href
+  rendererView.webContents.on('will-navigate', (event, url) => {
+    if (!isOwnPageUrl(url, ownUrl)) event.preventDefault()
+  })
+  rendererView.webContents.on('will-redirect', (event, url) => {
+    if (!isOwnPageUrl(url, ownUrl)) event.preventDefault()
   })
 
   if (is.dev && process.env.ELECTRON_RENDERER_URL) {
@@ -177,10 +235,7 @@ if (!gotTheLock) {
 } else {
   app.on('second-instance', () => {
     const mainWindow = global.__mainWindow as BaseWindow | undefined
-    if (mainWindow) {
-      if (mainWindow.isMinimized()) mainWindow.restore()
-      mainWindow.focus()
-    }
+    if (mainWindow) showMainWindow(mainWindow)
   })
 
   app.whenReady().then(() => {
@@ -193,7 +248,12 @@ if (!gotTheLock) {
     initAutoUpdater(() => (global.__rendererView as WebContentsView | undefined)?.webContents)
 
     app.on('activate', () => {
-      if (BaseWindow.getAllWindows().length === 0) createWindow()
+      const mainWindow = global.__mainWindow as BaseWindow | undefined
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        showMainWindow(mainWindow)
+      } else if (BaseWindow.getAllWindows().length === 0) {
+        createWindow()
+      }
     })
   })
 }

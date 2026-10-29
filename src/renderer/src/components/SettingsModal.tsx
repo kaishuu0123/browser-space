@@ -2,6 +2,7 @@ import type React from 'react'
 import { useEffect, useState } from 'react'
 import appIcon from '../../../../resources/icon.png'
 import type { Profile, UpdateState } from '../../../shared/types'
+import { useOfflineMode } from '../hooks/useOfflineMode'
 import { useProfileOperations } from '../hooks/useProfile'
 import { ClearDataDialog } from './ClearDataDialog'
 import { ProfileForm } from './ProfileForm'
@@ -36,7 +37,7 @@ function AboutTabContent({ updateState }: { updateState: UpdateState }): React.R
       type="button"
       onClick={() => window.updaterApi.checkForUpdates()}
       title="Check for updates"
-      className="cursor-pointer text-gray-400 hover:text-gray-600"
+      className="inline-flex items-center cursor-pointer text-gray-400 hover:text-gray-600"
     >
       <span aria-hidden="true" className="codicon codicon-refresh" />
     </button>
@@ -155,6 +156,7 @@ export function SettingsModal({
   const [editingProfile, setEditingProfile] = useState<Profile | null>(null)
   const [clearDataProfile, setClearDataProfile] = useState<Profile | null>(null)
   const [launchOnStartup, setLaunchOnStartup] = useState(false)
+  const offline = useOfflineMode()
   const [tab, setTab] = useState<string>(initialTab.name)
 
   useEffect(() => {
@@ -222,7 +224,7 @@ export function SettingsModal({
   const handleDeleteClick = async (profile: Profile) => {
     if (
       !confirm(
-        `Are you sure you want to delete "${profile.name}"?\n\nThis will also delete all cookies and session data for this profile.`
+        `Are you sure you want to delete "${profile.name}"?\n\nThis also deletes everything it saved: logins, cookies, cache and site data. This cannot be undone.`
       )
     ) {
       return
@@ -303,6 +305,21 @@ export function SettingsModal({
                   id="launch-on-startup"
                   checked={launchOnStartup}
                   onCheckedChange={handleLaunchOnStartupChange}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="work-offline">Work offline</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Pretend the network is gone for every profile (your real connection is left
+                    alone). Turns off when the app restarts.
+                  </p>
+                </div>
+                <Switch
+                  id="work-offline"
+                  checked={offline}
+                  onCheckedChange={(checked) => window.navigationApi.setOffline(checked)}
                 />
               </div>
             </TabsContent>
