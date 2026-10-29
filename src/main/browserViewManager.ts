@@ -524,8 +524,17 @@ function createTab(
       })
   })
 
-  // Setup context menu
-  applyContextMenu(view)
+  // Setup context menu (new tabs open next to this one, like links with target=_blank)
+  applyContextMenu(view, {
+    openInNewTab: (url, options) =>
+      openTab(
+        profileId,
+        profile,
+        mainWindow,
+        { url },
+        { activate: !options?.background, afterTabId: tabId }
+      ),
+  })
 
   // Setup findbar
   const findbar = FindbarWindow.from(mainWindow, view.webContents)
