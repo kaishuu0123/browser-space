@@ -1,5 +1,5 @@
 import type { MenuItemConstructorOptions, WebContentsView } from 'electron'
-import { app } from 'electron'
+import { app, shell } from 'electron'
 import contextMenuModule from 'electron-context-menu'
 
 // electron-context-menu is ESM; handle both default and module.default
@@ -26,6 +26,16 @@ function getJapaneseLabels(): import('electron-context-menu').Labels {
   }
 }
 
+// Only web pages go to the default browser (other schemes are not for a page to pass on)
+function isWebUrl(url: string): boolean {
+  try {
+    const { protocol } = new URL(url)
+    return protocol === 'http:' || protocol === 'https:'
+  } catch (_e) {
+    return false
+  }
+}
+
 type SaveLinkAs = (options: object) => MenuItemConstructorOptions
 
 // Labels of the items this file adds on top of the library's
@@ -40,6 +50,8 @@ const TEXT = {
     redo: 'Redo',
     pastePlain: 'Paste as plain text',
     openLink: 'Open link in new tab',
+    openLinkExternal: 'Open link in default browser',
+    openPageExternal: 'Open page in default browser',
     openImage: 'Open image in new tab',
     searchSelection: 'Search Google for “{selection}”',
   },
@@ -53,6 +65,8 @@ const TEXT = {
     redo: 'やり直し',
     pastePlain: 'テキストとして貼り付け',
     openLink: 'リンクを新しいタブで開く',
+    openLinkExternal: 'リンクを既定のブラウザで開く',
+    openPageExternal: 'ページを既定のブラウザで開く',
     openImage: '画像を新しいタブで開く',
     searchSelection: 'Google で「{selection}」を検索',
   },
@@ -146,6 +160,11 @@ export function applyContextMenu(view: WebContentsView, page?: PageMenuHandlers)
           visible: onLink,
           click: () => page.openInNewTab(params.linkURL),
         },
+        {
+          label: text.openLinkExternal,
+          visible: onLink && isWebUrl(params.linkURL),
+          click: () => shell.openExternal(params.linkURL),
+        },
         actions.copyLink({}),
         // The library has this action, but its typings leave it out
         (actions as typeof actions & { saveLinkAs: SaveLinkAs }).saveLinkAs({}),
@@ -190,6 +209,11 @@ export function applyContextMenu(view: WebContentsView, page?: PageMenuHandlers)
           label: text.viewSource,
           visible: onPage,
           click: () => page.openInNewTab(`view-source:${contents.getURL()}`),
+        },
+        {
+          label: text.openPageExternal,
+          visible: onPage && isWebUrl(contents.getURL()),
+          click: () => shell.openExternal(contents.getURL()),
         },
         actions.separator(),
         actions.inspect(),
