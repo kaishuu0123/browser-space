@@ -2,8 +2,9 @@ import { shell } from 'electron'
 
 // What a page may hand to the operating system. shell.openExternal() runs whatever the system has
 // registered for a scheme (file:, smb:, ms-msdt:, custom app schemes...), so a page must not be able
-// to pass it an arbitrary URL. Only these are opened, like a mail or phone link.
-const EXTERNAL_SCHEMES = new Set(['mailto:', 'tel:'])
+// to pass it an arbitrary URL. Only mail links are opened; add a scheme here only when a page
+// the app is used for needs it.
+const EXTERNAL_SCHEMES = new Set(['mailto:'])
 
 export function isAllowedExternalUrl(url: string): boolean {
   try {

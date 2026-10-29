@@ -193,7 +193,7 @@ function createWindow(): void {
   mainWindow.on('focus', refreshViews)
 
   // Links in the app's own screens (About, update notes) open in the system browser, web pages
-  // only; mail and phone links go to the system as well
+  // only; mail links go to the system as well
   rendererView.webContents.setWindowOpenHandler((details) => {
     try {
       const { protocol } = new URL(details.url)
