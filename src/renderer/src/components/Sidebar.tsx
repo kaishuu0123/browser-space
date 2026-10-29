@@ -72,7 +72,7 @@ export function Sidebar({
         className="border-b border-gray-200 flex items-center justify-between px-4 shrink-0"
         style={{ height: BAR_HEIGHT }}
       >
-        {!collapsed && <h1 className="text-lg font-semibold text-gray-800">Profiles</h1>}
+        {!collapsed && <h1 className="text-sm text-gray-600">Profiles</h1>}
         <div className="flex gap-1">
           {!collapsed && (
             <button
