@@ -10,6 +10,18 @@ files:
   - "!{.env,.env.*,.npmrc,pnpm-lock.yaml,pnpm-workspace.yaml}"
 asarUnpack:
   - resources/**
+# Electron fuses: switches in the executable that close ways to misuse a signed, installed app.
+# They are applied when the app is packaged, so `pnpm dev` is not affected. Chromium's DevTools
+# (F12, Inspect) is not one of them and keeps working.
+electronFuses:
+  # ELECTRON_RUN_AS_NODE=1 would turn the app into a plain Node.js (the app does not fork)
+  runAsNode: false
+  # NODE_OPTIONS and NODE_EXTRA_CA_CERTS injected into the main process from the environment
+  enableNodeOptionsEnvironmentVariable: false
+  # --inspect / --inspect-brk and SIGUSR1: a debugger on the main process
+  enableNodeCliInspectArguments: false
+  # Load the app only from app.asar, never from a loose app/ folder placed beside it
+  onlyLoadAppFromAsar: true
 win:
   executableName: browser-space
 nsis:
