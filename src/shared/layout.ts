@@ -4,6 +4,21 @@ export const TAB_BAR_HEIGHT = 36
 // Height of the toolbar below the tab bar (px). Shared by main (view placement) and renderer (UI)
 export const TOOLBAR_HEIGHT = 40
 
+// Which bars are shown above the page. The main process decides (it places the page views) and
+// the renderer follows, so both agree on where the page starts.
+export interface ChromeState {
+  tabBar: boolean
+  toolbar: boolean
+}
+
+// What is shown before the main process has said anything
+export const DEFAULT_CHROME: ChromeState = { tabBar: false, toolbar: true }
+
+// Height of the strip above the page content
+export function chromeHeight(chrome: ChromeState): number {
+  return (chrome.tabBar ? TAB_BAR_HEIGHT : 0) + (chrome.toolbar ? TOOLBAR_HEIGHT : 0)
+}
+
 // Sidebar widths (px). The expanded width can be dragged between MIN and MAX.
 export const SIDEBAR_WIDTH_DEFAULT = 256
 export const SIDEBAR_WIDTH_MIN = 180

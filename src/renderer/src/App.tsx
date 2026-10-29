@@ -1,10 +1,11 @@
 import type React from 'react'
 import { useCallback, useEffect, useState } from 'react'
 import {
+  chromeHeight,
+  DEFAULT_CHROME,
   SIDEBAR_WIDTH_COLLAPSED,
   SIDEBAR_WIDTH_DEFAULT,
   TAB_BAR_HEIGHT,
-  TOOLBAR_HEIGHT,
 } from '../../shared/layout'
 import { CertErrorView } from './components/CertErrorView'
 import { CrashedView } from './components/CrashedView'
@@ -53,6 +54,17 @@ function App(): React.ReactElement {
   const updateState = useUpdateState()
   const navigationState = useNavigationState()
   const tabsState = useTabsState()
+
+  // The bars shown above the page (the main process decides, as it places the page below them)
+  const chrome = tabsState?.chrome ?? DEFAULT_CHROME
+  const contentTop = chromeHeight(chrome)
+
+  // Ctrl/Cmd+L: the address bar takes the focus once it is on screen (it may not be yet)
+  const [focusUrlRequested, setFocusUrlRequested] = useState(false)
+  const handleFocusHandled = useCallback(() => setFocusUrlRequested(false), [])
+  useEffect(() => {
+    return window.navigationApi.onFocusUrl(() => setFocusUrlRequested(true))
+  }, [])
   const [dismissedUpdateVersion, setDismissedUpdateVersion] = useState<string | undefined>()
 
   // The main process can switch profiles by itself (a notification click opened a tab)
@@ -187,21 +199,27 @@ function App(): React.ReactElement {
 
       {activeProfileId && !showSettings && (
         <>
-          <TabBar state={tabsState} left={sidebarWidth} />
-          <Toolbar
-            state={navigationState}
-            security={pageSecurity}
-            onSecurityClick={() => window.navigationApi.showCertInfo()}
-            left={sidebarWidth}
-            onReload={handleReloadClick}
-          />
+          {chrome.tabBar && <TabBar state={tabsState} left={sidebarWidth} />}
+          {chrome.toolbar && (
+            <Toolbar
+              state={navigationState}
+              security={pageSecurity}
+              onSecurityClick={() => window.navigationApi.showCertInfo()}
+              left={sidebarWidth}
+              top={chrome.tabBar ? TAB_BAR_HEIGHT : 0}
+              focusRequested={focusUrlRequested}
+              onFocusHandled={handleFocusHandled}
+              showNewTab={!chrome.tabBar}
+              onReload={handleReloadClick}
+            />
+          )}
         </>
       )}
 
       {activeLoadError && !isActiveCrashed && !showSettings && (
         <div
           className="fixed right-0 bottom-0 transition-all duration-200"
-          style={{ left: sidebarWidth, top: TAB_BAR_HEIGHT + TOOLBAR_HEIGHT }}
+          style={{ left: sidebarWidth, top: contentTop }}
         >
           <LoadErrorView info={activeLoadError} onRetry={handleReloadClick} />
         </div>
@@ -210,7 +228,7 @@ function App(): React.ReactElement {
       {activeCertError && !isActiveCrashed && !showSettings && (
         <div
           className="fixed right-0 bottom-0 transition-all duration-200"
-          style={{ left: sidebarWidth, top: TAB_BAR_HEIGHT + TOOLBAR_HEIGHT }}
+          style={{ left: sidebarWidth, top: contentTop }}
         >
           <CertErrorView
             info={activeCertError}
@@ -223,7 +241,7 @@ function App(): React.ReactElement {
       {isActiveCrashed && !showSettings && (
         <div
           className="fixed right-0 bottom-0 transition-all duration-200"
-          style={{ left: sidebarWidth, top: TAB_BAR_HEIGHT + TOOLBAR_HEIGHT }}
+          style={{ left: sidebarWidth, top: contentTop }}
         >
           <CrashedView onReload={handleReloadClick} />
         </div>

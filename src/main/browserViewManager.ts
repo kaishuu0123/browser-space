@@ -11,6 +11,7 @@ import {
   WebContentsView,
 } from 'electron'
 import { IPC_CHANNELS } from '../shared/ipc'
+import type { ChromeState } from '../shared/layout'
 import type {
   CertDetails,
   CertErrorInfo,
@@ -22,7 +23,7 @@ import type {
 import { showCertWindow } from './certWindow'
 import { applyContextMenu } from './contextMenu'
 import { FindbarWindow } from './findbar/FindbarWindow'
-import { getContentViewBounds } from './layout'
+import { getContentViewBounds, setCurrentChrome } from './layout'
 import { showNotificationPermissionDialog } from './notificationManager'
 import { getActiveProfileId, getProfileById, setActiveProfileId } from './profileManager'
 
@@ -213,12 +214,38 @@ function sendNavigationState(profileId: string): void {
 }
 
 // Tabs of a profile as shown in the tab bar (null if the profile has no tabs yet)
+// Profiles in minimal mode whose address bar was asked for (Ctrl/Cmd+L) and is still wanted
+const revealedToolbars = new Set<string>()
+
+// Bars above the page of a profile. The tab bar is shown only while there is more than one tab
+// (new tabs need it to be switched back), and the toolbar unless the profile is in minimal mode
+// (or the page is blocked by an error, where the address is worth seeing, or Ctrl/Cmd+L asked).
+export function computeChrome(profileId: string): ChromeState {
+  const entry = profileTabs.get(profileId)
+  const tabCount = entry?.tabs.length ?? 1
+  const minimal = !!getProfileById(profileId)?.minimalMode
+  const active = getActiveTab(profileId)
+
+  return {
+    tabBar: tabCount > 1,
+    toolbar: !minimal || revealedToolbars.has(profileId) || (!!active && isBlocked(active)),
+  }
+}
+
+// Tell the layout which bars the profile on screen has (the page is placed below them)
+function syncChrome(profileId: string): ChromeState {
+  const chrome = computeChrome(profileId)
+  if (getActiveProfileId() === profileId) setCurrentChrome(chrome)
+  return chrome
+}
+
 export function getTabsState(profileId: string): TabsState | null {
   const entry = profileTabs.get(profileId)
   if (!entry) return null
 
   return {
     profileId,
+    chrome: computeChrome(profileId),
     activeTabId: entry.activeTabId,
     tabs: entry.tabs.map(({ id, view, crashed, favicon, certError, certBypassed, loadError }) => {
       const alive = isAlive(view)
@@ -585,6 +612,7 @@ function refreshDisplay(profileId: string, mainWindow: BaseWindow): void {
   if (isProfileDisplayed(profileId)) {
     showBrowserView(profileId, mainWindow)
   } else if (getActiveProfileId() === profileId) {
+    syncChrome(profileId)
     sendTabsState(profileId)
   }
 }
@@ -708,6 +736,7 @@ export function showBrowserView(profileId: string, mainWindow: BaseWindow): void
 
   // A blocked tab (crashed, certificate error, unreachable) stays hidden so the renderer can
   // show its error screen
+  syncChrome(profileId)
   view.setBounds(isBlocked(tab) ? HIDDEN_BOUNDS : getContentViewBounds(mainWindow))
   sendNavigationState(profileId)
   sendTabsState(profileId)
@@ -731,6 +760,7 @@ export function removeBrowserView(profileId: string, mainWindow: BaseWindow): vo
   if (entry) {
     // Off the list first, so closing the contents does not look like a page closing itself
     profileTabs.delete(profileId)
+    revealedToolbars.delete(profileId)
     for (const tab of entry.tabs) destroyTab(tab, mainWindow)
   }
   // Session handlers capture profile settings (e.g. language), so set them up again next time
@@ -744,6 +774,7 @@ export function destroyAllBrowserViews(): void {
   const all = [...profileTabs.values()].flatMap(({ tabs }) => tabs)
   // Off the list first, so closing the contents does not look like a page closing itself
   profileTabs.clear()
+  revealedToolbars.clear()
   initializedSessions.clear()
   for (const { view } of all) {
     if (!isAlive(view)) continue
@@ -768,6 +799,7 @@ export function updateBrowserViewBounds(
   const tab = getActiveTab(activeProfileId)
   if (!tab || isBlocked(tab)) return
 
+  syncChrome(activeProfileId)
   tab.view.setBounds(getContentViewBounds(mainWindow))
 }
 
@@ -970,12 +1002,18 @@ export function handleBrowserShortcut(input: Input): boolean {
         reloadActiveTab(profileId, mainWindow)
         return true
       case 'l': {
+        // In minimal mode the address bar is hidden: bring it back until it loses the focus
+        if (getProfileById(profileId)?.minimalMode && !revealedToolbars.has(profileId)) {
+          revealedToolbars.add(profileId)
+          refreshDisplay(profileId, mainWindow)
+        }
         const rendererView = global.__rendererView as WebContentsView | undefined
         rendererView?.webContents.focus()
-        // Let the renderer take the focus first, otherwise the input is focused without a caret
+        // Let the renderer take the focus first (and draw the address bar), otherwise the input
+        // is focused without a caret
         setTimeout(() => {
           rendererView?.webContents.send(IPC_CHANNELS.NAVIGATION_FOCUS_URL)
-        }, 50)
+        }, 80)
         return true
       }
       case '[':
@@ -1005,4 +1043,21 @@ export function handleBrowserShortcut(input: Input): boolean {
   }
 
   return false
+}
+
+// The address bar lost the focus: in minimal mode it goes away again and the page gets the focus
+export function releaseToolbar(profileId: string, mainWindow: BaseWindow): void {
+  if (!revealedToolbars.delete(profileId)) return
+
+  refreshDisplay(profileId, mainWindow)
+  const tab = getActiveTab(profileId)
+  if (tab && !isBlocked(tab) && isAlive(tab.view) && isProfileDisplayed(profileId)) {
+    tab.view.webContents.focus()
+  }
+}
+
+// The profile's settings changed (minimal mode): lay the page out again
+export function refreshProfileChrome(profileId: string, mainWindow: BaseWindow): void {
+  if (!profileTabs.has(profileId)) return
+  refreshDisplay(profileId, mainWindow)
 }

@@ -56,6 +56,7 @@ const navigationApi: NavigationAPI = {
   goBack: () => ipcRenderer.invoke(IPC_CHANNELS.NAVIGATION_BACK),
   goForward: () => ipcRenderer.invoke(IPC_CHANNELS.NAVIGATION_FORWARD),
   navigate: (input: string) => ipcRenderer.invoke(IPC_CHANNELS.NAVIGATION_NAVIGATE, input),
+  releaseToolbar: () => ipcRenderer.invoke(IPC_CHANNELS.NAVIGATION_TOOLBAR_RELEASE),
   showCertInfo: () => ipcRenderer.invoke(IPC_CHANNELS.NAVIGATION_CERT_INFO),
   leaveCertError: () => ipcRenderer.invoke(IPC_CHANNELS.NAVIGATION_CERT_LEAVE),
   proceedCertError: () => ipcRenderer.invoke(IPC_CHANNELS.NAVIGATION_CERT_PROCEED),

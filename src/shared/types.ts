@@ -1,3 +1,5 @@
+import type { ChromeState } from './layout'
+
 // Profile type definition
 export interface Profile {
   id: string // Unique ID (UUID)
@@ -12,6 +14,10 @@ export interface Profile {
 
   // Language settings
   language?: string // BCP 47 language tag (e.g., 'en-US', 'ja-JP'). If undefined, use system default
+
+  // Minimal mode: no tab bar and no address bar, so the page gets the whole height. The tab bar
+  // comes back while the profile has more than one tab; Ctrl/Cmd+L shows the address bar.
+  minimalMode?: boolean
 
   // Notification settings
   notificationMode: 'allow-all' | 'ask' | 'deny-all' // Global notification permission mode
@@ -99,6 +105,8 @@ export interface TabInfo {
 // Tabs of the active profile
 export interface TabsState {
   profileId: string
+  // Bars shown above the page (decided by the main process, which places the page)
+  chrome: ChromeState
   activeTabId: number
   tabs: TabInfo[]
 }

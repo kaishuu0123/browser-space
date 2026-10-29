@@ -1,6 +1,6 @@
 import path from 'node:path'
 import { type BaseWindow, BrowserWindow, ipcMain, type WebContents } from 'electron'
-import { TAB_BAR_HEIGHT, TOOLBAR_HEIGHT } from '../../shared/layout'
+import { getContentTop } from '../layout'
 
 // electron-vite のビルド出力構造:
 //   out/main/index.js        ← __dirname = out/main
@@ -95,7 +95,7 @@ export class FindbarWindow {
       return {
         x: wb.x + wb.width - FINDBAR_WIDTH - rightMargin,
         // タブバーとツールバーの下（ページ領域の上端）に置く
-        y: wb.y + titlebarHeight + TAB_BAR_HEIGHT + TOOLBAR_HEIGHT,
+        y: wb.y + titlebarHeight + getContentTop(),
       }
     }
 

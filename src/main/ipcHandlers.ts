@@ -12,6 +12,8 @@ import {
   newTab,
   proceedCertError,
   recreateBrowserView,
+  refreshProfileChrome,
+  releaseToolbar,
   reloadActiveTab,
   removeBrowserView,
   setOfflineMode,
@@ -96,6 +98,12 @@ export function setupIpcHandlers(): void {
   ipcMain.handle(IPC_CHANNELS.PROFILE_UPDATE, async (_, id: string, data) => {
     const oldProfile = getProfileById(id)
     const updated = updateProfile(id, data)
+
+    // Minimal mode changes which bars are shown above the page
+    if (updated && oldProfile && !!oldProfile.minimalMode !== !!updated.minimalMode) {
+      const mainWindow = getMainWindow()
+      if (mainWindow) refreshProfileChrome(id, mainWindow)
+    }
 
     // If language changed and this is the active profile, recreate BrowserView
     if (updated && oldProfile && oldProfile.language !== updated.language) {
@@ -186,6 +194,12 @@ export function setupIpcHandlers(): void {
   ipcMain.handle(IPC_CHANNELS.NAVIGATION_OFFLINE_GET, async () => isOfflineMode())
   ipcMain.handle(IPC_CHANNELS.NAVIGATION_OFFLINE_SET, async (_, offline: boolean) => {
     setOfflineMode(offline)
+  })
+
+  ipcMain.handle(IPC_CHANNELS.NAVIGATION_TOOLBAR_RELEASE, async () => {
+    const activeProfileId = getActiveProfileId()
+    const mainWindow = getMainWindow()
+    if (activeProfileId && mainWindow) releaseToolbar(activeProfileId, mainWindow)
   })
 
   ipcMain.handle(IPC_CHANNELS.NAVIGATION_CERT_INFO, async () => {

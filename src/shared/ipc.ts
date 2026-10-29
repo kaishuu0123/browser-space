@@ -50,6 +50,7 @@ export const IPC_CHANNELS = {
   NAVIGATION_FORWARD: 'navigation:forward',
   NAVIGATION_NAVIGATE: 'navigation:navigate',
   NAVIGATION_FOCUS_URL: 'navigation:focusUrl', // main -> renderer (Ctrl/Cmd+L)
+  NAVIGATION_TOOLBAR_RELEASE: 'navigation:toolbarRelease',
   NAVIGATION_OFFLINE_GET: 'navigation:offlineGet',
   NAVIGATION_OFFLINE_SET: 'navigation:offlineSet',
   NAVIGATION_OFFLINE_CHANGED: 'navigation:offlineChanged', // main -> renderer
@@ -128,6 +129,8 @@ export interface NavigationAPI {
   goForward: () => Promise<void>
   // Navigate to a URL or search text typed in the address bar
   navigate: (input: string) => Promise<void>
+  // The address bar lost the focus (it goes away again in minimal mode)
+  releaseToolbar: () => Promise<void>
   // Show the certificate of the page in the active tab (the address bar's lock)
   showCertInfo: () => Promise<void>
   // Certificate error screen: go back to safety (previous page or the home page) ...

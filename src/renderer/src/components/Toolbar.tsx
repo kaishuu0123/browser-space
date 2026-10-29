@@ -1,6 +1,6 @@
 import type React from 'react'
 import { useEffect, useRef, useState } from 'react'
-import { TAB_BAR_HEIGHT, TOOLBAR_HEIGHT } from '../../../shared/layout'
+import { TOOLBAR_HEIGHT } from '../../../shared/layout'
 import type { NavigationState } from '../../../shared/types'
 
 // How much the page can be trusted, shown in front of the address
@@ -27,6 +27,13 @@ interface ToolbarProps {
   onSecurityClick: () => void
   // Width of the sidebar (the toolbar sits to the right of it)
   left: number
+  // Distance from the top of the window (below the tab bar, when it is shown)
+  top: number
+  // Ctrl/Cmd+L was pressed: take the focus once the address bar is on screen
+  focusRequested: boolean
+  onFocusHandled: () => void
+  // The tab bar is hidden, so the new tab button lives here
+  showNewTab: boolean
   onReload: () => void
 }
 
@@ -35,6 +42,10 @@ export function Toolbar({
   security,
   onSecurityClick,
   left,
+  top,
+  focusRequested,
+  onFocusHandled,
+  showNewTab,
   onReload,
 }: ToolbarProps): React.ReactElement {
   const url = state?.url ?? ''
@@ -42,13 +53,14 @@ export function Toolbar({
   const [editing, setEditing] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
-  // Ctrl/Cmd+L (handled by the main process) focuses the address bar
+  // Ctrl/Cmd+L (handled by the main process) focuses the address bar. In minimal mode the bar is
+  // drawn only now, so the request waits here until the input exists.
   useEffect(() => {
-    return window.navigationApi.onFocusUrl(() => {
-      inputRef.current?.focus()
-      inputRef.current?.select()
-    })
-  }, [])
+    if (!focusRequested || !inputRef.current) return
+    inputRef.current.focus()
+    inputRef.current.select()
+    onFocusHandled()
+  }, [focusRequested, onFocusHandled])
 
   // Follow the page URL unless the user is typing
   useEffect(() => {
@@ -63,7 +75,7 @@ export function Toolbar({
   return (
     <div
       className="fixed right-0 flex items-center gap-1 px-2 bg-white border-b border-gray-200 transition-all duration-200"
-      style={{ left, top: TAB_BAR_HEIGHT, height: TOOLBAR_HEIGHT }}
+      style={{ left, top, height: TOOLBAR_HEIGHT }}
     >
       <ToolbarButton
         icon="codicon-arrow-left"
@@ -100,7 +112,11 @@ export function Toolbar({
           setEditing(true)
           e.currentTarget.select()
         }}
-        onBlur={() => setEditing(false)}
+        onBlur={() => {
+          setEditing(false)
+          // In minimal mode the address bar goes away when it is left
+          window.navigationApi.releaseToolbar()
+        }}
         onKeyDown={(e) => {
           if (e.key === 'Enter') {
             submit()
@@ -115,6 +131,9 @@ export function Toolbar({
         }`}
         placeholder="Search or enter address"
       />
+      {showNewTab && (
+        <ToolbarButton icon="codicon-add" title="New tab" onClick={() => window.tabsApi.create()} />
+      )}
     </div>
   )
 }
