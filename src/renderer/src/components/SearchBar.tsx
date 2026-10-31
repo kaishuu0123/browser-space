@@ -70,7 +70,7 @@ export function SearchBar({ onClose }: SearchBarProps): React.ReactElement {
           onChange={(e) => setSearchText(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Find in page..."
-          className="flex-1 text-xs border border-border rounded-sm px-2 py-1 outline-hidden focus:border-blue-400 min-w-0"
+          className="flex-1 text-xs border border-border rounded-sm px-2 py-1 placeholder:text-muted-foreground outline-hidden focus:border-blue-400 min-w-0"
         />
         <span className="text-xs text-muted-foreground shrink-0 w-10 text-center">
           {searchText && matchInfo.total > 0 ? `${matchInfo.active}/${matchInfo.total}` : ''}

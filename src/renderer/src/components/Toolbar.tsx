@@ -130,7 +130,7 @@ export function Toolbar({
             e.currentTarget.blur()
           }
         }}
-        className={`flex-1 min-w-0 h-7 pr-3 text-sm text-foreground/80 bg-muted rounded-full outline-hidden focus:bg-background focus:ring-2 focus:ring-blue-400 ${
+        className={`flex-1 min-w-0 h-7 pr-3 text-sm text-foreground/80 placeholder:text-muted-foreground bg-muted rounded-full outline-hidden focus:bg-background focus:ring-2 focus:ring-blue-400 ${
           security === 'none' ? 'pl-3' : 'pl-9'
         }`}
         placeholder="Search or enter address"
