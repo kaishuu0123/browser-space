@@ -585,7 +585,7 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps): 
           id="profile-language"
           value={language}
           onChange={(e) => setLanguage(e.target.value)}
-          className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+          className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm ring-offset-white focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
         >
           {LANGUAGES.map((lang) => (
             <option key={lang.value} value={lang.value}>
@@ -739,7 +739,7 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps): 
                   <img
                     src={customIconPreview}
                     alt="Custom icon"
-                    className="w-16 h-16 mx-auto rounded"
+                    className="w-16 h-16 mx-auto rounded-sm"
                   />
                 )}
                 <Button
@@ -787,7 +787,7 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps): 
           <button
             type="button"
             onClick={() => setShowColorPicker(!showColorPicker)}
-            className="w-8 h-8 rounded border-2 border-gray-300 flex items-center justify-center hover:bg-gray-50"
+            className="w-8 h-8 rounded-sm border-2 border-gray-300 flex items-center justify-center hover:bg-gray-50"
           >
             <span className="codicon codicon-paintcan text-sm" />
           </button>

@@ -44,11 +44,11 @@ export function ProfileItem({
           <img
             src={`file://${customIconPath}`}
             alt={profile.name}
-            className="w-5 h-5 rounded object-cover"
+            className="w-5 h-5 rounded-sm object-cover"
           />
         ) : (
           <span
-            className={`codicon codicon-${profile.icon || 'circle-large-outline'} !text-2xl leading-none`}
+            className={`codicon codicon-${profile.icon || 'circle-large-outline'} text-2xl! leading-none`}
             style={{ color: isCrashed ? '#ef4444' : profile.iconColor }}
           />
         )}

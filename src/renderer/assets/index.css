@@ -1,10 +1,34 @@
-/* biome-ignore-all lint/suspicious/noUnknownAtRules: Tailwind CSS v3 directives (@tailwind); Biome has no Tailwind v3 at-rule support (tailwindDirectives only covers v4 syntax) */
-/* Import Codicons first */
+/* Import Codicons first. Kept outside any layer on purpose: its font shorthand then wins over
+   Tailwind's text-* / leading-* utilities, as it did before Tailwind 4 (use ! to override) */
 @import "@vscode/codicons/dist/codicon.css";
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+}
+
+/* Tailwind 4 buttons use the default cursor; keep the pointer cursor from Tailwind 3 */
+@layer base {
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+}
 
 body {
   margin: 0;

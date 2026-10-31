@@ -80,7 +80,7 @@ export function ClearDataDialog({
 
         {profile && (
           <div className="space-y-4">
-            <div className="bg-blue-50 border border-blue-200 rounded p-3">
+            <div className="bg-blue-50 border border-blue-200 rounded-sm p-3">
               <p className="text-sm text-blue-800">
                 <span className="font-medium">Profile:</span> {profile.name}
               </p>
@@ -94,7 +94,7 @@ export function ClearDataDialog({
                   type="checkbox"
                   checked={cookies}
                   onChange={(e) => setCookies(e.target.checked)}
-                  className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                  className="w-4 h-4 text-blue-600 rounded-sm focus:ring-blue-500"
                   disabled={clearing}
                 />
                 <div>
@@ -110,7 +110,7 @@ export function ClearDataDialog({
                   type="checkbox"
                   checked={cache}
                   onChange={(e) => setCache(e.target.checked)}
-                  className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                  className="w-4 h-4 text-blue-600 rounded-sm focus:ring-blue-500"
                   disabled={clearing}
                 />
                 <div>
@@ -124,7 +124,7 @@ export function ClearDataDialog({
                   type="checkbox"
                   checked={appData}
                   onChange={(e) => setAppData(e.target.checked)}
-                  className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                  className="w-4 h-4 text-blue-600 rounded-sm focus:ring-blue-500"
                   disabled={clearing}
                 />
                 <div>
@@ -136,7 +136,7 @@ export function ClearDataDialog({
               </label>
             </div>
 
-            <div className="bg-yellow-50 border border-yellow-200 rounded p-3">
+            <div className="bg-yellow-50 border border-yellow-200 rounded-sm p-3">
               <p className="text-xs text-yellow-800">
                 <span className="font-medium">Warning:</span> This will log you out of websites and
                 may reset site preferences.
