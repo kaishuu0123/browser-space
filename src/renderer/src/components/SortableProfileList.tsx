@@ -160,7 +160,7 @@ export function SortableProfileList({
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
       <SortableContext items={profiles.map((p) => p.id)} strategy={verticalListSortingStrategy}>
-        <div className="space-y-2">
+        <div className="flex flex-col gap-2">
           {profiles.map((profile) => (
             <SortableProfileItem
               key={profile.id}

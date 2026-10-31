@@ -309,9 +309,9 @@ export function SettingsModal({
             </TabsList>
 
             {/* General Tab */}
-            <TabsContent value="general" className="space-y-4 py-4">
+            <TabsContent value="general" className="flex flex-col gap-4 py-4">
               <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
+                <div className="flex flex-col gap-0.5">
                   <Label htmlFor="launch-on-startup">Launch on startup</Label>
                   <p className="text-sm text-muted-foreground">
                     Automatically start Browser Space when you log in
@@ -325,7 +325,7 @@ export function SettingsModal({
               </div>
 
               <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
+                <div className="flex flex-col gap-0.5">
                   <Label htmlFor="work-offline">Work offline</Label>
                   <p className="text-sm text-muted-foreground">
                     Pretend the network is gone for every profile (your real connection is left
@@ -341,7 +341,7 @@ export function SettingsModal({
             </TabsContent>
 
             {/* Manage Profiles Tab */}
-            <TabsContent value="profiles" className="space-y-4">
+            <TabsContent value="profiles" className="flex flex-col gap-4">
               {showForm ? (
                 <ProfileForm
                   profile={editingProfile || undefined}
@@ -349,7 +349,7 @@ export function SettingsModal({
                   onCancel={handleFormCancel}
                 />
               ) : (
-                <div className="space-y-4">
+                <div className="flex flex-col gap-4">
                   {/* Create Button */}
                   <Button onClick={handleCreateClick} className="w-full">
                     <span className="codicon codicon-add mr-2" />

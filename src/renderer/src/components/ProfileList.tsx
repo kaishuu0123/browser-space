@@ -38,7 +38,9 @@ export function ProfileList({
   return (
     // Expanded, the rows sit inside the sidebar's padding (rounded, not edge to edge); collapsed,
     // the narrow column keeps them full width
-    <div className={`flex-1 overflow-y-auto ${collapsed ? '' : 'px-2 py-1 space-y-0.5'}`}>
+    <div
+      className={`flex-1 overflow-y-auto ${collapsed ? '' : 'grid content-start gap-0.5 px-2 py-1'}`}
+    >
       {profiles.map((profile) => (
         <ProfileItem
           key={profile.id}

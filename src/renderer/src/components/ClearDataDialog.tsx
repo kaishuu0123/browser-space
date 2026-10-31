@@ -79,14 +79,14 @@ export function ClearDataDialog({
         </DialogHeader>
 
         {profile && (
-          <div className="space-y-4">
+          <div className="flex flex-col gap-4">
             <div className="bg-blue-50 border border-blue-200 rounded-sm p-3">
               <p className="text-sm text-blue-800">
                 <span className="font-medium">Profile:</span> {profile.name}
               </p>
             </div>
 
-            <div className="space-y-3">
+            <div className="flex flex-col gap-3">
               <p className="text-sm text-foreground/80">Select data types to clear:</p>
 
               <label className="flex items-center gap-3 cursor-pointer">

@@ -545,7 +545,7 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps): 
   const iconList = showAllIcons ? ALL_ICONS : PRESET_ICONS
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       {/* Profile Name */}
       <div>
         <label htmlFor="profile-name" className="block text-sm font-medium text-foreground/80 mb-1">
@@ -622,7 +622,7 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps): 
       {/* Notification Settings */}
       <div>
         <span className="block text-sm font-medium text-foreground/80 mb-2">Notifications</span>
-        <div className="space-y-2">
+        <div className="flex flex-col gap-2">
           <label className="flex items-center gap-2 cursor-pointer">
             <input
               type="radio"
@@ -745,7 +745,7 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps): 
               className="hidden"
             />
             {customIconPreview || customIconFilename ? (
-              <div className="space-y-2">
+              <div className="flex flex-col gap-2">
                 {customIconPreview && (
                   <img
                     src={customIconPreview}
@@ -785,7 +785,7 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps): 
       {/* Color Picker */}
       <div>
         <span className="block text-sm font-medium text-foreground/80 mb-2">Color</span>
-        <div className="flex gap-2 items-center mb-2">
+        <div className="flex gap-2 items-center">
           {PRESET_COLORS.map((color) => (
             <button
               key={color}
