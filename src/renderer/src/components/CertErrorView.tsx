@@ -29,24 +29,26 @@ export function CertErrorView({
 
   return (
     // m-auto (not justify-center) keeps the top reachable when the card is taller than the window
-    <div className="flex bg-gray-50 h-full w-full overflow-auto">
-      <div className="m-auto max-w-lg p-6 bg-white rounded-lg shadow-xs border border-gray-100">
+    <div className="flex bg-muted h-full w-full overflow-auto">
+      <div className="m-auto max-w-lg p-6 bg-background rounded-lg shadow-xs border border-border">
         <div className="text-center mb-4">
           <span className="codicon codicon-warning text-6xl text-red-500" />
         </div>
-        <h2 className="text-xl font-semibold text-gray-800 mb-2 text-center">
+        <h2 className="text-xl font-semibold text-foreground mb-2 text-center">
           Your connection is not private
         </h2>
-        <p className="text-gray-600 mb-2">
+        <p className="text-foreground/80 mb-2">
           Someone may be trying to impersonate <strong>{info.hostname}</strong>, or its certificate
           is misconfigured. Information you send to this site could be seen by others.
         </p>
-        <p className="text-sm text-gray-500 mb-6">
+        <p className="text-sm text-muted-foreground mb-6">
           {reason} <span className="font-mono">({info.error})</span>
         </p>
 
-        <details className="mb-6 text-sm text-gray-600">
-          <summary className="cursor-pointer text-gray-500 hover:text-gray-700">Details</summary>
+        <details className="mb-6 text-sm text-foreground/80">
+          <summary className="cursor-pointer text-muted-foreground hover:text-foreground/80">
+            Details
+          </summary>
           <div className="mt-2">
             <CertDetailsList details={info} address={info.url} />
           </div>
@@ -58,7 +60,7 @@ export function CertErrorView({
         <Button variant="ghost" onClick={onProceed} className="w-full text-red-600">
           Proceed to {info.hostname} (unsafe)
         </Button>
-        <p className="text-xs text-gray-400 mt-2 text-center">
+        <p className="text-xs text-muted-foreground mt-2 text-center">
           This only applies to this profile, until the app is closed.
         </p>
       </div>

@@ -10,7 +10,11 @@ const SECURITY_ICONS: Record<
   Exclude<PageSecurity, 'none'>,
   { icon: string; title: string; className: string }
 > = {
-  secure: { icon: 'codicon-lock', title: 'Connection is secure', className: 'text-gray-500' },
+  secure: {
+    icon: 'codicon-lock',
+    title: 'Connection is secure',
+    className: 'text-muted-foreground',
+  },
   insecure: { icon: 'codicon-unlock', title: 'Not secure', className: 'text-amber-600' },
   bypassed: {
     icon: 'codicon-warning',
@@ -74,7 +78,7 @@ export function Toolbar({
 
   return (
     <div
-      className="fixed right-0 flex items-center gap-1 px-2 bg-white border-b border-gray-200 transition-all duration-200"
+      className="fixed right-0 flex items-center gap-1 px-2 bg-background border-b border-border transition-all duration-200"
       style={{ left, top, height: TOOLBAR_HEIGHT }}
     >
       <ToolbarButton
@@ -95,7 +99,7 @@ export function Toolbar({
           type="button"
           title={`${SECURITY_ICONS[security].title} (click for details)`}
           onClick={onSecurityClick}
-          className="-mr-8 z-10 ml-1 w-7 h-7 flex items-center justify-center rounded-full hover:bg-gray-200"
+          className="-mr-8 z-10 ml-1 w-7 h-7 flex items-center justify-center rounded-full hover:bg-accent"
         >
           <span
             className={`codicon ${SECURITY_ICONS[security].icon} text-sm leading-none ${SECURITY_ICONS[security].className}`}
@@ -126,7 +130,7 @@ export function Toolbar({
             e.currentTarget.blur()
           }
         }}
-        className={`flex-1 min-w-0 h-7 pr-3 text-sm text-gray-700 bg-gray-100 rounded-full outline-hidden focus:bg-white focus:ring-2 focus:ring-blue-400 ${
+        className={`flex-1 min-w-0 h-7 pr-3 text-sm text-foreground/80 bg-muted rounded-full outline-hidden focus:bg-background focus:ring-2 focus:ring-blue-400 ${
           security === 'none' ? 'pl-3' : 'pl-9'
         }`}
         placeholder="Search or enter address"
@@ -157,9 +161,9 @@ function ToolbarButton({
       title={title}
       disabled={disabled}
       onClick={onClick}
-      className="shrink-0 flex items-center justify-center w-8 h-8 rounded-sm hover:bg-gray-100 transition-colors disabled:opacity-30 disabled:hover:bg-transparent"
+      className="shrink-0 flex items-center justify-center w-8 h-8 rounded-sm hover:bg-accent transition-colors disabled:opacity-30 disabled:hover:bg-transparent"
     >
-      <span className={`codicon ${icon} text-lg leading-none text-gray-600`} />
+      <span className={`codicon ${icon} text-lg leading-none text-foreground/80`} />
     </button>
   )
 }

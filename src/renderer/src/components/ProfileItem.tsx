@@ -31,7 +31,7 @@ export function ProfileItem({
       onClick={onClick}
       className={`
         w-full flex items-center ${collapsed ? 'justify-center px-2' : 'gap-3 px-3 rounded-md'} py-2.5
-        hover:bg-gray-100 transition-colors
+        hover:bg-accent transition-colors
         ${collapsed ? (isActive ? 'bg-blue-50 border-l-2 border-blue-500' : 'border-l-2 border-transparent') : ''}
         ${!collapsed && isActive ? 'bg-blue-50 hover:bg-blue-50' : ''}
         ${isCrashed ? 'text-red-500' : ''}
@@ -59,7 +59,9 @@ export function ProfileItem({
 
       {/* Profile Name (hidden when collapsed) */}
       {!collapsed && (
-        <span className={`font-medium truncate ${isCrashed ? 'text-red-600' : 'text-gray-700'}`}>
+        <span
+          className={`font-medium truncate ${isCrashed ? 'text-red-600' : 'text-foreground/80'}`}
+        >
           {profile.name}
         </span>
       )}

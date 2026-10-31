@@ -10,22 +10,22 @@ interface CertDetailsListProps {
 
 export function CertDetailsList({ details, address }: CertDetailsListProps): React.ReactElement {
   return (
-    <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 break-all text-sm text-gray-600">
+    <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 break-all text-sm text-foreground/80">
       {address && (
         <>
-          <dt className="text-gray-400">Address</dt>
+          <dt className="text-muted-foreground">Address</dt>
           <dd>{address}</dd>
         </>
       )}
-      <dt className="text-gray-400">Subject</dt>
+      <dt className="text-muted-foreground">Subject</dt>
       <dd>{details.subject ?? '-'}</dd>
-      <dt className="text-gray-400">Issuer</dt>
+      <dt className="text-muted-foreground">Issuer</dt>
       <dd>{details.issuer ?? '-'}</dd>
-      <dt className="text-gray-400">Valid from</dt>
+      <dt className="text-muted-foreground">Valid from</dt>
       <dd>{formatIsoLocal(details.validFrom)}</dd>
-      <dt className="text-gray-400">Valid until</dt>
+      <dt className="text-muted-foreground">Valid until</dt>
       <dd>{formatIsoLocal(details.validTo)}</dd>
-      <dt className="text-gray-400">Fingerprint</dt>
+      <dt className="text-muted-foreground">Fingerprint</dt>
       <dd className="font-mono text-xs">{details.fingerprint ?? '-'}</dd>
     </dl>
   )

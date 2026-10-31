@@ -61,7 +61,7 @@ export function SearchBar({ onClose }: SearchBarProps): React.ReactElement {
   }
 
   return (
-    <div className="border-t border-gray-200 px-2 py-2 bg-white">
+    <div className="border-t border-border px-2 py-2 bg-background">
       <div className="flex items-center gap-1">
         <input
           ref={inputRef}
@@ -70,9 +70,9 @@ export function SearchBar({ onClose }: SearchBarProps): React.ReactElement {
           onChange={(e) => setSearchText(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Find in page..."
-          className="flex-1 text-xs border border-gray-300 rounded-sm px-2 py-1 outline-hidden focus:border-blue-400 min-w-0"
+          className="flex-1 text-xs border border-border rounded-sm px-2 py-1 outline-hidden focus:border-blue-400 min-w-0"
         />
-        <span className="text-xs text-gray-400 shrink-0 w-10 text-center">
+        <span className="text-xs text-muted-foreground shrink-0 w-10 text-center">
           {searchText && matchInfo.total > 0 ? `${matchInfo.active}/${matchInfo.total}` : ''}
         </span>
       </div>
@@ -82,7 +82,7 @@ export function SearchBar({ onClose }: SearchBarProps): React.ReactElement {
             type="button"
             onClick={handlePrev}
             disabled={matchInfo.total === 0}
-            className="p-0.5 rounded-sm hover:bg-gray-100 disabled:opacity-30"
+            className="p-0.5 rounded-sm hover:bg-accent disabled:opacity-30"
             title="Previous (Shift+Enter)"
           >
             <span className="codicon codicon-chevron-up text-xs" />
@@ -91,7 +91,7 @@ export function SearchBar({ onClose }: SearchBarProps): React.ReactElement {
             type="button"
             onClick={handleNext}
             disabled={matchInfo.total === 0}
-            className="p-0.5 rounded-sm hover:bg-gray-100 disabled:opacity-30"
+            className="p-0.5 rounded-sm hover:bg-accent disabled:opacity-30"
             title="Next (Enter)"
           >
             <span className="codicon codicon-chevron-down text-xs" />
@@ -100,7 +100,7 @@ export function SearchBar({ onClose }: SearchBarProps): React.ReactElement {
         <button
           type="button"
           onClick={handleClose}
-          className="p-0.5 rounded-sm hover:bg-gray-100 text-gray-500"
+          className="p-0.5 rounded-sm hover:bg-accent text-muted-foreground"
           title="Close (Esc)"
         >
           <span className="codicon codicon-close text-xs" />

@@ -87,7 +87,7 @@ export function ClearDataDialog({
             </div>
 
             <div className="space-y-3">
-              <p className="text-sm text-gray-600">Select data types to clear:</p>
+              <p className="text-sm text-foreground/80">Select data types to clear:</p>
 
               <label className="flex items-center gap-3 cursor-pointer">
                 <input
@@ -99,7 +99,7 @@ export function ClearDataDialog({
                 />
                 <div>
                   <p className="font-medium text-sm">Cookies and other site data</p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-muted-foreground">
                     Sign-in states, preferences, shopping carts
                   </p>
                 </div>
@@ -115,7 +115,9 @@ export function ClearDataDialog({
                 />
                 <div>
                   <p className="font-medium text-sm">Cached images and files</p>
-                  <p className="text-xs text-gray-500">Helps sites load faster on repeat visits</p>
+                  <p className="text-xs text-muted-foreground">
+                    Helps sites load faster on repeat visits
+                  </p>
                 </div>
               </label>
 
@@ -129,7 +131,7 @@ export function ClearDataDialog({
                 />
                 <div>
                   <p className="font-medium text-sm">Hosted app data</p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-muted-foreground">
                     LocalStorage, IndexedDB, WebSQL, Service Workers
                   </p>
                 </div>

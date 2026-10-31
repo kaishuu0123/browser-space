@@ -64,7 +64,7 @@ export function Sidebar({
 
   return (
     <div
-      className="relative h-screen bg-white border-r border-gray-200 flex flex-col transition-all duration-200"
+      className="relative h-screen bg-background border-r border-border flex flex-col transition-all duration-200"
       style={{ width: collapsed ? SIDEBAR_WIDTH_COLLAPSED : width }}
     >
       {/* Header */}
@@ -72,33 +72,33 @@ export function Sidebar({
         className="flex items-center justify-between px-4 shrink-0"
         style={{ height: BAR_HEIGHT }}
       >
-        {!collapsed && <h1 className="font-medium text-gray-600">Profiles</h1>}
+        {!collapsed && <h1 className="font-medium text-foreground/80">Profiles</h1>}
         <div className="flex gap-1">
           {!collapsed && (
             <button
               type="button"
               onClick={onReloadClick}
-              className="flex items-center justify-center w-8 h-8 hover:bg-gray-100 rounded-sm transition-colors"
+              className="flex items-center justify-center w-8 h-8 hover:bg-accent rounded-sm transition-colors"
               title="Reload"
             >
-              <span className="codicon codicon-refresh text-lg leading-none text-gray-600" />
+              <span className="codicon codicon-refresh text-lg leading-none text-foreground/80" />
             </button>
           )}
           <button
             type="button"
             onClick={onToggleCollapse}
-            className="flex items-center justify-center w-8 h-8 hover:bg-gray-100 rounded-sm transition-colors"
+            className="flex items-center justify-center w-8 h-8 hover:bg-accent rounded-sm transition-colors"
             title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
             <span
-              className={`codicon ${collapsed ? 'codicon-chevron-right' : 'codicon-chevron-left'} text-lg leading-none text-gray-600`}
+              className={`codicon ${collapsed ? 'codicon-chevron-right' : 'codicon-chevron-left'} text-lg leading-none text-foreground/80`}
             />
           </button>
         </div>
       </div>
 
       {/* Divider: inset and light, a hint of a separator rather than a full line */}
-      <div className="mx-2 border-t border-gray-200 shrink-0" />
+      <div className="mx-2 border-t border-border shrink-0" />
 
       {/* Profile List */}
       <ProfileList
@@ -110,7 +110,7 @@ export function Sidebar({
       />
 
       {/* Divider: inset like the one under the heading */}
-      <div className="mx-2 border-t border-gray-200 shrink-0" />
+      <div className="mx-2 border-t border-border shrink-0" />
 
       {/* Bottom buttons */}
       <div className={`shrink-0 ${collapsed ? 'p-2' : 'p-3'}`}>
@@ -150,19 +150,19 @@ export function Sidebar({
             <button
               type="button"
               onClick={onReloadClick}
-              className="flex items-center justify-center w-full h-10 hover:bg-gray-100 rounded-sm transition-colors"
+              className="flex items-center justify-center w-full h-10 hover:bg-accent rounded-sm transition-colors"
               title="Reload"
             >
-              <span className="codicon codicon-refresh text-xl leading-none text-gray-600" />
+              <span className="codicon codicon-refresh text-xl leading-none text-foreground/80" />
             </button>
             <button
               type="button"
               onClick={onSettingsClick}
-              className="flex items-center justify-center w-full h-10 hover:bg-gray-100 rounded-sm transition-colors"
+              className="flex items-center justify-center w-full h-10 hover:bg-accent rounded-sm transition-colors"
               title={hasUpdate ? 'Settings (Update ready)' : 'Settings'}
             >
               <span className="relative flex items-center">
-                <span className="codicon codicon-settings-gear text-xl leading-none text-gray-600" />
+                <span className="codicon codicon-settings-gear text-xl leading-none text-foreground/80" />
                 {hasUpdate && (
                   <span className="absolute -top-1 -right-1 w-2 h-2 bg-blue-500 rounded-full" />
                 )}
@@ -173,7 +173,7 @@ export function Sidebar({
           <button
             type="button"
             onClick={onSettingsClick}
-            className="w-full flex items-center gap-2 px-2 py-1.5 hover:bg-gray-100 rounded-sm transition-colors text-sm text-gray-600"
+            className="w-full flex items-center gap-2 px-2 py-1.5 hover:bg-accent rounded-sm transition-colors text-sm text-foreground/80"
             title="Settings"
           >
             <span className="relative flex items-center">
