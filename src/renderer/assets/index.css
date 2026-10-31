@@ -1,5 +1,6 @@
-/* Import Codicons first */
-@import "@vscode/codicons/dist/codicon.css" layer(base);
+/* Import Codicons first. Kept outside any layer on purpose: its font shorthand then wins over
+   Tailwind's text-* / leading-* utilities, as it did before Tailwind 4 (use ! to override) */
+@import "@vscode/codicons/dist/codicon.css";
 
 @import "tailwindcss";
 
@@ -18,6 +19,14 @@
   ::backdrop,
   ::file-selector-button {
     border-color: var(--color-gray-200, currentcolor);
+  }
+}
+
+/* Tailwind 4 buttons use the default cursor; keep the pointer cursor from Tailwind 3 */
+@layer base {
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
   }
 }
 
