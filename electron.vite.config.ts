@@ -1,5 +1,6 @@
 import fs from 'node:fs'
 import path, { resolve } from 'node:path'
+import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { defineConfig, externalizeDepsPlugin } from 'electron-vite'
 import type { Plugin } from 'vite'
@@ -50,7 +51,7 @@ export default defineConfig({
         '@shared': resolve('src/shared'),
       },
     },
-    plugins: [react()],
+    plugins: [react(), tailwindcss()],
     build: {
       assetsInlineLimit: 0,
       rollupOptions: {
