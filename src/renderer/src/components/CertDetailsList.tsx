@@ -10,7 +10,7 @@ interface CertDetailsListProps {
 
 export function CertDetailsList({ details, address }: CertDetailsListProps): React.ReactElement {
   return (
-    <dl className="grid grid-cols-[auto,1fr] gap-x-3 gap-y-1 break-all text-sm text-gray-600">
+    <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 break-all text-sm text-gray-600">
       {address && (
         <>
           <dt className="text-gray-400">Address</dt>

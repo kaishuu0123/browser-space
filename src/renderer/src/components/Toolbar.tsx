@@ -126,7 +126,7 @@ export function Toolbar({
             e.currentTarget.blur()
           }
         }}
-        className={`flex-1 min-w-0 h-7 pr-3 text-sm text-gray-700 bg-gray-100 rounded-full outline-none focus:bg-white focus:ring-2 focus:ring-blue-400 ${
+        className={`flex-1 min-w-0 h-7 pr-3 text-sm text-gray-700 bg-gray-100 rounded-full outline-hidden focus:bg-white focus:ring-2 focus:ring-blue-400 ${
           security === 'none' ? 'pl-3' : 'pl-9'
         }`}
         placeholder="Search or enter address"
@@ -157,7 +157,7 @@ function ToolbarButton({
       title={title}
       disabled={disabled}
       onClick={onClick}
-      className="shrink-0 flex items-center justify-center w-8 h-8 rounded hover:bg-gray-100 transition-colors disabled:opacity-30 disabled:hover:bg-transparent"
+      className="shrink-0 flex items-center justify-center w-8 h-8 rounded-sm hover:bg-gray-100 transition-colors disabled:opacity-30 disabled:hover:bg-transparent"
     >
       <span className={`codicon ${icon} text-lg leading-none text-gray-600`} />
     </button>

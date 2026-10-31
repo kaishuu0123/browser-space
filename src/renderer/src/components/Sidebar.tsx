@@ -78,7 +78,7 @@ export function Sidebar({
             <button
               type="button"
               onClick={onReloadClick}
-              className="flex items-center justify-center w-8 h-8 hover:bg-gray-100 rounded transition-colors"
+              className="flex items-center justify-center w-8 h-8 hover:bg-gray-100 rounded-sm transition-colors"
               title="Reload"
             >
               <span className="codicon codicon-refresh text-lg leading-none text-gray-600" />
@@ -87,7 +87,7 @@ export function Sidebar({
           <button
             type="button"
             onClick={onToggleCollapse}
-            className="flex items-center justify-center w-8 h-8 hover:bg-gray-100 rounded transition-colors"
+            className="flex items-center justify-center w-8 h-8 hover:bg-gray-100 rounded-sm transition-colors"
             title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
             <span
@@ -119,7 +119,7 @@ export function Sidebar({
             <button
               type="button"
               onClick={onInstallUpdate}
-              className="flex items-center justify-center w-full h-10 mb-1 hover:bg-blue-50 rounded transition-colors"
+              className="flex items-center justify-center w-full h-10 mb-1 hover:bg-blue-50 rounded-sm transition-colors"
               title={`Update v${updateVersion} ready. Click to restart and update`}
             >
               <span className="codicon codicon-arrow-circle-up text-xl leading-none text-blue-500" />
@@ -131,14 +131,14 @@ export function Sidebar({
                 <button
                   type="button"
                   onClick={onInstallUpdate}
-                  className="rounded bg-blue-500 px-2 py-1 text-white hover:bg-blue-600 transition-colors"
+                  className="rounded-sm bg-blue-500 px-2 py-1 text-white hover:bg-blue-600 transition-colors"
                 >
                   Restart and update
                 </button>
                 <button
                   type="button"
                   onClick={onDismissUpdate}
-                  className="rounded px-2 py-1 hover:bg-blue-100 transition-colors"
+                  className="rounded-sm px-2 py-1 hover:bg-blue-100 transition-colors"
                 >
                   Later
                 </button>
@@ -150,7 +150,7 @@ export function Sidebar({
             <button
               type="button"
               onClick={onReloadClick}
-              className="flex items-center justify-center w-full h-10 hover:bg-gray-100 rounded transition-colors"
+              className="flex items-center justify-center w-full h-10 hover:bg-gray-100 rounded-sm transition-colors"
               title="Reload"
             >
               <span className="codicon codicon-refresh text-xl leading-none text-gray-600" />
@@ -158,7 +158,7 @@ export function Sidebar({
             <button
               type="button"
               onClick={onSettingsClick}
-              className="flex items-center justify-center w-full h-10 hover:bg-gray-100 rounded transition-colors"
+              className="flex items-center justify-center w-full h-10 hover:bg-gray-100 rounded-sm transition-colors"
               title={hasUpdate ? 'Settings (Update ready)' : 'Settings'}
             >
               <span className="relative flex items-center">
@@ -173,7 +173,7 @@ export function Sidebar({
           <button
             type="button"
             onClick={onSettingsClick}
-            className="w-full flex items-center gap-2 px-2 py-1.5 hover:bg-gray-100 rounded transition-colors text-sm text-gray-600"
+            className="w-full flex items-center gap-2 px-2 py-1.5 hover:bg-gray-100 rounded-sm transition-colors text-sm text-gray-600"
             title="Settings"
           >
             <span className="relative flex items-center">

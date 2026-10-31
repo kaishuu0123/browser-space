@@ -265,7 +265,7 @@ function App(): React.ReactElement {
             <span className="codicon codicon-close mr-1" />
             Close
           </Button>
-          <div className="m-auto bg-white rounded-lg border border-gray-100 shadow-sm overflow-hidden">
+          <div className="m-auto bg-white rounded-lg border border-gray-100 shadow-xs overflow-hidden">
             <OfflineGame />
           </div>
         </div>

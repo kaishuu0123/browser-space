@@ -55,7 +55,7 @@ export function LoadErrorView({ info, onRetry }: LoadErrorViewProps): React.Reac
           </p>
         )}
 
-        <div className="bg-white rounded-lg border border-gray-100 shadow-sm inline-block max-w-full overflow-hidden">
+        <div className="bg-white rounded-lg border border-gray-100 shadow-xs inline-block max-w-full overflow-hidden">
           <OfflineGame />
         </div>
       </div>

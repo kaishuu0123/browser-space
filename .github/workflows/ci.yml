@@ -6,19 +6,23 @@ on:
   pull_request:
     branches: [main]
 
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   check:
-    name: Lint and Typecheck
+    name: Lint, Typecheck and Build
     runs-on: ubuntu-latest
     steps:
       - name: Check out Git repository
         uses: actions/checkout@v7
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v6
 
       - name: Install Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: 24
           cache: "pnpm"
@@ -31,3 +35,6 @@ jobs:
 
       - name: Typecheck
         run: pnpm typecheck
+
+      - name: Build
+        run: pnpm exec electron-vite build

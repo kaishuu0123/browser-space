@@ -62,7 +62,7 @@ function SortableProfileItem({
       <button
         {...attributes}
         {...listeners}
-        className="flex items-center justify-center cursor-grab active:cursor-grabbing p-1 hover:bg-gray-200 rounded"
+        className="flex items-center justify-center cursor-grab active:cursor-grabbing p-1 hover:bg-gray-200 rounded-sm"
         title="Drag to reorder"
       >
         <span className="codicon codicon-gripper text-gray-400" />
@@ -73,11 +73,11 @@ function SortableProfileItem({
         <img
           src={`file://${customIconPath}`}
           alt={profile.name}
-          className="w-8 h-8 rounded object-cover flex-shrink-0"
+          className="w-8 h-8 rounded-sm object-cover shrink-0"
         />
       ) : (
         <span
-          className={`codicon codicon-${profile.icon || 'circle-large-outline'} !text-2xl flex-shrink-0`}
+          className={`codicon codicon-${profile.icon || 'circle-large-outline'} text-2xl! shrink-0`}
           style={{ color: profile.iconColor }}
         />
       )}

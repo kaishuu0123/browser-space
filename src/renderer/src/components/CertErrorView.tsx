@@ -30,7 +30,7 @@ export function CertErrorView({
   return (
     // m-auto (not justify-center) keeps the top reachable when the card is taller than the window
     <div className="flex bg-gray-50 h-full w-full overflow-auto">
-      <div className="m-auto max-w-lg p-6 bg-white rounded-lg shadow-sm border border-gray-100">
+      <div className="m-auto max-w-lg p-6 bg-white rounded-lg shadow-xs border border-gray-100">
         <div className="text-center mb-4">
           <span className="codicon codicon-warning text-6xl text-red-500" />
         </div>
