@@ -13,7 +13,13 @@ import { Label } from './ui/label'
 import { Switch } from './ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs'
 
-function AboutTabContent({ updateState }: { updateState: UpdateState }): React.ReactElement {
+function AboutTabContent({
+  updateState,
+  onPlayGame,
+}: {
+  updateState: UpdateState
+  onPlayGame: () => void
+}): React.ReactElement {
   const [version] = useState(() => window.updaterApi.getAppVersion())
   const [copied, setCopied] = useState(false)
 
@@ -127,6 +133,14 @@ function AboutTabContent({ updateState }: { updateState: UpdateState }): React.R
         <p className="text-sm text-gray-500 mt-1">Version {version}</p>
       </div>
       <div className="mt-2">{renderUpdateStatus()}</div>
+      <button
+        type="button"
+        onClick={onPlayGame}
+        className="mt-4 inline-flex items-center gap-1.5 text-xs text-gray-400 hover:text-gray-600"
+      >
+        <span className="codicon codicon-game" />
+        Play game
+      </button>
     </div>
   )
 }
@@ -137,6 +151,7 @@ interface SettingsModalProps {
   open: boolean
   onClose: () => void
   onProfilesChange: () => void
+  onPlayGame: () => void
   updateState: UpdateState
   // 開いたときに選択するタブ。同じタブを再指定できるよう、毎回新しいオブジェクトを渡す
   initialTab: { name: SettingsTab }
@@ -146,6 +161,7 @@ export function SettingsModal({
   open,
   onClose,
   onProfilesChange,
+  onPlayGame,
   updateState,
   initialTab,
 }: SettingsModalProps): React.ReactElement {
@@ -355,7 +371,7 @@ export function SettingsModal({
 
             {/* About Tab */}
             <TabsContent value="about">
-              <AboutTabContent updateState={updateState} />
+              <AboutTabContent updateState={updateState} onPlayGame={onPlayGame} />
             </TabsContent>
           </Tabs>
         </DialogContent>

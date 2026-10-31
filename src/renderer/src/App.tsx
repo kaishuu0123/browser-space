@@ -10,10 +10,12 @@ import {
 import { CertErrorView } from './components/CertErrorView'
 import { CrashedView } from './components/CrashedView'
 import { LoadErrorView } from './components/LoadErrorView'
+import { OfflineGame } from './components/OfflineGame'
 import { SettingsModal, type SettingsTab } from './components/SettingsModal'
 import { Sidebar } from './components/Sidebar'
 import { TabBar } from './components/TabBar'
 import { type PageSecurity, Toolbar } from './components/Toolbar'
+import { Button } from './components/ui/button'
 import { useNavigationState } from './hooks/useNavigationState'
 import {
   useActiveProfile,
@@ -31,6 +33,7 @@ function App(): React.ReactElement {
   const { width: expandedWidth, setWidth: setSidebarWidth } = useSidebarWidth()
   const sidebarWidth = collapsed ? SIDEBAR_WIDTH_COLLAPSED : expandedWidth
   const [showSettings, setShowSettings] = useState(false)
+  const [showGame, setShowGame] = useState(false)
   const [settingsTab, setSettingsTab] = useState<{ name: SettingsTab }>({ name: 'general' })
 
   const openSettings = useCallback((name: SettingsTab) => {
@@ -142,16 +145,17 @@ function App(): React.ReactElement {
 
   // Hide profileView and expand rendererView when settings open
   useEffect(() => {
-    if (showSettings) {
+    if (showSettings || showGame) {
       window.settingsApi.notifyModalOpen()
       if (activeProfileId) window.profileApi.switch(null)
     } else {
       window.settingsApi.notifyModalClose()
       if (activeProfileId) window.profileApi.switch(activeProfileId)
     }
-  }, [showSettings, activeProfileId])
+  }, [showSettings, showGame, activeProfileId])
 
   const handleProfileClick = (profileId: string) => {
+    setShowGame(false)
     window.profileApi.switch(profileId)
     setActive(profileId)
   }
@@ -197,7 +201,7 @@ function App(): React.ReactElement {
         crashedProfileIds={crashedProfileIds}
       />
 
-      {activeProfileId && !showSettings && (
+      {activeProfileId && !showSettings && !showGame && (
         <>
           {chrome.tabBar && <TabBar state={tabsState} left={sidebarWidth} />}
           {chrome.toolbar && (
@@ -216,7 +220,7 @@ function App(): React.ReactElement {
         </>
       )}
 
-      {activeLoadError && !isActiveCrashed && !showSettings && (
+      {activeLoadError && !isActiveCrashed && !showSettings && !showGame && (
         <div
           className="fixed right-0 bottom-0 transition-all duration-200"
           style={{ left: sidebarWidth, top: contentTop }}
@@ -225,7 +229,7 @@ function App(): React.ReactElement {
         </div>
       )}
 
-      {activeCertError && !isActiveCrashed && !showSettings && (
+      {activeCertError && !isActiveCrashed && !showSettings && !showGame && (
         <div
           className="fixed right-0 bottom-0 transition-all duration-200"
           style={{ left: sidebarWidth, top: contentTop }}
@@ -238,7 +242,7 @@ function App(): React.ReactElement {
         </div>
       )}
 
-      {isActiveCrashed && !showSettings && (
+      {isActiveCrashed && !showSettings && !showGame && (
         <div
           className="fixed right-0 bottom-0 transition-all duration-200"
           style={{ left: sidebarWidth, top: contentTop }}
@@ -247,9 +251,33 @@ function App(): React.ReactElement {
         </div>
       )}
 
+      {showGame && !showSettings && (
+        <div
+          className="fixed right-0 bottom-0 top-0 flex bg-gray-50 transition-all duration-200"
+          style={{ left: sidebarWidth }}
+        >
+          <Button
+            variant="ghost"
+            size="sm"
+            className="absolute top-3 right-3"
+            onClick={() => setShowGame(false)}
+          >
+            <span className="codicon codicon-close mr-1" />
+            Close
+          </Button>
+          <div className="m-auto bg-white rounded-lg border border-gray-100 shadow-sm overflow-hidden">
+            <OfflineGame />
+          </div>
+        </div>
+      )}
+
       <SettingsModal
         open={showSettings}
         onClose={() => setShowSettings(false)}
+        onPlayGame={() => {
+          setShowSettings(false)
+          setShowGame(true)
+        }}
         onProfilesChange={refreshProfiles}
         updateState={updateState}
         initialTab={settingsTab}
