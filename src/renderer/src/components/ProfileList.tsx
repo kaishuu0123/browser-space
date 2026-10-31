@@ -20,7 +20,7 @@ export function ProfileList({
   if (profiles.length === 0) {
     return (
       <div className="flex-1 flex items-center justify-center p-4">
-        <p className="text-sm text-gray-500 text-center">
+        <p className="text-sm text-muted-foreground text-center">
           {collapsed ? (
             <span className="codicon codicon-inbox text-2xl" />
           ) : (

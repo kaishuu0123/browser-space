@@ -43,7 +43,7 @@ function AboutTabContent({
       type="button"
       onClick={() => window.updaterApi.checkForUpdates()}
       title="Check for updates"
-      className="inline-flex items-center cursor-pointer text-gray-400 hover:text-gray-600"
+      className="inline-flex items-center cursor-pointer text-muted-foreground hover:text-foreground/80"
     >
       <span aria-hidden="true" className="codicon codicon-refresh" />
     </button>
@@ -54,7 +54,7 @@ function AboutTabContent({
       case 'idle':
       case 'checking':
         return (
-          <div className="flex items-center gap-2 text-sm text-gray-500">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <svg
               aria-hidden="true"
               className="animate-spin h-4 w-4"
@@ -102,7 +102,7 @@ function AboutTabContent({
         )
       case 'error':
         if (updateState.error === 'dev') {
-          return <p className="text-sm text-gray-400">— Not available in development</p>
+          return <p className="text-sm text-muted-foreground">— Not available in development</p>
         }
         return (
           <div className="flex items-center gap-2">
@@ -110,7 +110,7 @@ function AboutTabContent({
               type="button"
               onClick={copyError}
               title={`${updateState.error}\n\nClick to copy error details`}
-              className="inline-flex cursor-pointer items-center gap-1.5 text-sm text-gray-400 hover:text-gray-600"
+              className="inline-flex cursor-pointer items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground/80"
             >
               <span>✗ Failed to check for updates</span>
               <span
@@ -130,13 +130,13 @@ function AboutTabContent({
       <img src={appIcon} className="w-20 h-20 rounded-2xl" alt="Browser Space" />
       <div className="text-center">
         <h2 className="text-xl font-semibold">Browser Space</h2>
-        <p className="text-sm text-gray-500 mt-1">Version {version}</p>
+        <p className="text-sm text-muted-foreground mt-1">Version {version}</p>
       </div>
       <div className="mt-2">{renderUpdateStatus()}</div>
       <button
         type="button"
         onClick={onPlayGame}
-        className="mt-4 inline-flex items-center gap-1.5 text-xs text-gray-400 hover:text-gray-600"
+        className="mt-4 inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground/80"
       >
         <span className="codicon codicon-game" />
         Play game

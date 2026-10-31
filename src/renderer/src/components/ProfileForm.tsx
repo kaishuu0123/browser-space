@@ -548,7 +548,7 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps): 
     <form onSubmit={handleSubmit} className="space-y-4">
       {/* Profile Name */}
       <div>
-        <label htmlFor="profile-name" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="profile-name" className="block text-sm font-medium text-foreground/80 mb-1">
           Profile Name <span className="text-red-500">*</span>
         </label>
         <Input
@@ -563,7 +563,10 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps): 
 
       {/* Home URL */}
       <div>
-        <label htmlFor="profile-home-url" className="block text-sm font-medium text-gray-700 mb-1">
+        <label
+          htmlFor="profile-home-url"
+          className="block text-sm font-medium text-foreground/80 mb-1"
+        >
           Home URL <span className="text-red-500">*</span>
         </label>
         <Input
@@ -578,14 +581,17 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps): 
 
       {/* Language */}
       <div>
-        <label htmlFor="profile-language" className="block text-sm font-medium text-gray-700 mb-1">
+        <label
+          htmlFor="profile-language"
+          className="block text-sm font-medium text-foreground/80 mb-1"
+        >
           Language
         </label>
         <select
           id="profile-language"
           value={language}
           onChange={(e) => setLanguage(e.target.value)}
-          className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm ring-offset-white focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+          className="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-white focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
         >
           {LANGUAGES.map((lang) => (
             <option key={lang.value} value={lang.value}>
@@ -593,16 +599,19 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps): 
             </option>
           ))}
         </select>
-        <p className="text-xs text-gray-500 mt-1">Browser language for this profile.</p>
+        <p className="text-xs text-muted-foreground mt-1">Browser language for this profile.</p>
       </div>
 
       {/* Minimal mode */}
       <div className="flex items-center justify-between gap-4">
         <div>
-          <label htmlFor="profile-minimal-mode" className="block text-sm font-medium text-gray-700">
+          <label
+            htmlFor="profile-minimal-mode"
+            className="block text-sm font-medium text-foreground/80"
+          >
             Minimal mode
           </label>
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-xs text-muted-foreground mt-1">
             Hide the address bar so the page gets the full height, like a web app. The tab bar still
             appears when there is more than one tab; Ctrl/Cmd+L shows the address bar.
           </p>
@@ -612,7 +621,7 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps): 
 
       {/* Notification Settings */}
       <div>
-        <span className="block text-sm font-medium text-gray-700 mb-2">Notifications</span>
+        <span className="block text-sm font-medium text-foreground/80 mb-2">Notifications</span>
         <div className="space-y-2">
           <label className="flex items-center gap-2 cursor-pointer">
             <input
@@ -627,7 +636,7 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps): 
             />
             <div>
               <p className="text-sm font-medium">Allow all</p>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-muted-foreground">
                 Automatically allow notifications from all websites
               </p>
             </div>
@@ -647,7 +656,7 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps): 
               <p className="text-sm font-medium">
                 Ask when a site wants to show notifications (recommended)
               </p>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-muted-foreground">
                 You'll see a dialog when websites request permission
               </p>
             </div>
@@ -665,7 +674,9 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps): 
             />
             <div>
               <p className="text-sm font-medium">Block all</p>
-              <p className="text-xs text-gray-500">Never allow notifications from any website</p>
+              <p className="text-xs text-muted-foreground">
+                Never allow notifications from any website
+              </p>
             </div>
           </label>
         </div>
@@ -673,7 +684,7 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps): 
 
       {/* Icon Type Selection */}
       <div>
-        <span className="block text-sm font-medium text-gray-700 mb-2">Icon Type</span>
+        <span className="block text-sm font-medium text-foreground/80 mb-2">Icon Type</span>
         <div className="flex gap-2 mb-3">
           <Button
             type="button"
@@ -704,7 +715,7 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps): 
                   className={`w-12 h-12 flex items-center justify-center rounded border-2 transition-colors ${
                     icon === iconName
                       ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-200 hover:border-gray-300'
+                      : 'border-border hover:border-border'
                   }`}
                   title={iconName}
                 >
@@ -725,7 +736,7 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps): 
             </Button>
           </>
         ) : (
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+          <div className="border-2 border-dashed border-border rounded-lg p-6 text-center">
             <input
               ref={fileInputRef}
               type="file"
@@ -753,7 +764,7 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps): 
               </div>
             ) : (
               <div>
-                <span className="codicon codicon-cloud-upload text-4xl text-gray-400 block mb-2" />
+                <span className="codicon codicon-cloud-upload text-4xl text-muted-foreground block mb-2" />
                 <Button
                   type="button"
                   variant="outline"
@@ -762,7 +773,9 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps): 
                 >
                   Upload Icon
                 </Button>
-                <p className="text-xs text-gray-500 mt-2">PNG, JPG (Recommended: 64x64px)</p>
+                <p className="text-xs text-muted-foreground mt-2">
+                  PNG, JPG (Recommended: 64x64px)
+                </p>
               </div>
             )}
           </div>
@@ -771,7 +784,7 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps): 
 
       {/* Color Picker */}
       <div>
-        <span className="block text-sm font-medium text-gray-700 mb-2">Color</span>
+        <span className="block text-sm font-medium text-foreground/80 mb-2">Color</span>
         <div className="flex gap-2 items-center mb-2">
           {PRESET_COLORS.map((color) => (
             <button
@@ -779,7 +792,7 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps): 
               type="button"
               onClick={() => setIconColor(color)}
               className={`w-8 h-8 rounded-full border-2 transition-all ${
-                iconColor === color ? 'border-gray-900 scale-110' : 'border-gray-200'
+                iconColor === color ? 'border-foreground scale-110' : 'border-border'
               }`}
               style={{ backgroundColor: color }}
             />
@@ -787,7 +800,7 @@ export function ProfileForm({ profile, onSubmit, onCancel }: ProfileFormProps): 
           <button
             type="button"
             onClick={() => setShowColorPicker(!showColorPicker)}
-            className="w-8 h-8 rounded-sm border-2 border-gray-300 flex items-center justify-center hover:bg-gray-50"
+            className="w-8 h-8 rounded-sm border-2 border-border flex items-center justify-center hover:bg-accent"
           >
             <span className="codicon codicon-paintcan text-sm" />
           </button>

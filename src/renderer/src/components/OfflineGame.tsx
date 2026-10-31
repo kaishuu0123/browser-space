@@ -175,7 +175,7 @@ export function OfflineGame(): React.ReactElement {
       height={HEIGHT}
       onMouseDown={jump}
       aria-label="Offline game: press Space or click to jump"
-      className="max-w-full cursor-pointer select-none border-b border-gray-200"
+      className="max-w-full cursor-pointer select-none border-b border-border"
     />
   )
 }

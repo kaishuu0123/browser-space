@@ -168,10 +168,10 @@ function App(): React.ReactElement {
 
   if (profilesLoading) {
     return (
-      <div className="flex h-screen bg-gray-100 items-center justify-center">
+      <div className="flex h-screen bg-muted items-center justify-center">
         <div className="text-center">
           <span className="codicon codicon-loading codicon-modifier-spin text-4xl text-blue-500 mb-4 block" />
-          <p className="text-gray-600">Loading...</p>
+          <p className="text-foreground/80">Loading...</p>
         </div>
       </div>
     )
@@ -253,7 +253,7 @@ function App(): React.ReactElement {
 
       {showGame && !showSettings && (
         <div
-          className="fixed right-0 bottom-0 top-0 flex bg-gray-50 transition-all duration-200"
+          className="fixed right-0 bottom-0 top-0 flex bg-muted transition-all duration-200"
           style={{ left: sidebarWidth }}
         >
           <Button
@@ -265,7 +265,7 @@ function App(): React.ReactElement {
             <span className="codicon codicon-close mr-1" />
             Close
           </Button>
-          <div className="m-auto bg-white rounded-lg border border-gray-100 shadow-xs overflow-hidden">
+          <div className="m-auto bg-background rounded-lg border border-border shadow-xs overflow-hidden">
             <OfflineGame />
           </div>
         </div>

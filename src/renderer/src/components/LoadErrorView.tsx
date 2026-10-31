@@ -33,29 +33,29 @@ export function LoadErrorView({ info, onRetry }: LoadErrorViewProps): React.Reac
 
   return (
     // m-auto (not justify-center) keeps the top reachable when the card is taller than the window
-    <div className="flex bg-gray-50 h-full w-full overflow-auto">
+    <div className="flex bg-muted h-full w-full overflow-auto">
       <div className="m-auto max-w-lg w-full p-6 text-center">
         <div className="mb-4">
           <span
-            className={`codicon ${info.offline ? 'codicon-debug-disconnect' : 'codicon-error'} text-5xl text-gray-400`}
+            className={`codicon ${info.offline ? 'codicon-debug-disconnect' : 'codicon-error'} text-5xl text-muted-foreground`}
           />
         </div>
-        <h2 className="text-xl font-semibold text-gray-800 mb-2">
+        <h2 className="text-xl font-semibold text-foreground mb-2">
           {info.offline ? "You're offline" : `Can't reach ${hostOf(info.url)}`}
         </h2>
-        <p className="text-gray-600 mb-1">{reason}</p>
-        <p className="text-xs text-gray-400 font-mono mb-6">{info.error}</p>
+        <p className="text-foreground/80 mb-1">{reason}</p>
+        <p className="text-xs text-muted-foreground font-mono mb-6">{info.error}</p>
 
         <Button onClick={onRetry} className="mb-6">
           Try again
         </Button>
         {info.offline && (
-          <p className="text-xs text-gray-400 mb-4">
+          <p className="text-xs text-muted-foreground mb-4">
             The page loads again by itself when the connection is back.
           </p>
         )}
 
-        <div className="bg-white rounded-lg border border-gray-100 shadow-xs inline-block max-w-full overflow-hidden">
+        <div className="bg-background rounded-lg border border-border shadow-xs inline-block max-w-full overflow-hidden">
           <OfflineGame />
         </div>
       </div>

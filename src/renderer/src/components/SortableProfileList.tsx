@@ -56,16 +56,16 @@ function SortableProfileItem({
     <div
       ref={setNodeRef}
       style={style}
-      className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50"
+      className="flex items-center gap-3 p-3 border border-border rounded-lg hover:bg-accent"
     >
       {/* Drag Handle */}
       <button
         {...attributes}
         {...listeners}
-        className="flex items-center justify-center cursor-grab active:cursor-grabbing p-1 hover:bg-gray-200 rounded-sm"
+        className="flex items-center justify-center cursor-grab active:cursor-grabbing p-1 hover:bg-accent rounded-sm"
         title="Drag to reorder"
       >
-        <span className="codicon codicon-gripper text-gray-400" />
+        <span className="codicon codicon-gripper text-muted-foreground" />
       </button>
 
       {/* Icon */}
@@ -84,8 +84,8 @@ function SortableProfileItem({
 
       {/* Info */}
       <div className="flex-1 min-w-0">
-        <p className="font-medium text-gray-900">{profile.name}</p>
-        <p className="text-sm text-gray-500 truncate">{profile.homeUrl}</p>
+        <p className="font-medium text-foreground">{profile.name}</p>
+        <p className="text-sm text-muted-foreground truncate">{profile.homeUrl}</p>
       </div>
 
       {/* Actions */}
@@ -150,7 +150,7 @@ export function SortableProfileList({
 
   if (profiles.length === 0) {
     return (
-      <div className="text-center py-8 text-gray-500">
+      <div className="text-center py-8 text-muted-foreground">
         <p>No profiles yet.</p>
         <p className="text-sm mt-2">Click the button above to create your first profile.</p>
       </div>
